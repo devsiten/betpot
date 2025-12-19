@@ -1,0 +1,46 @@
+name = "betpot-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-19"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "development"
+TICKET_PRICE = "10"
+PLATFORM_FEE = "0.01"
+MAX_EVENTS_PER_DAY = "3"
+# External Sports APIs
+THE_ODDS_API_KEY = "6d00ed1802e5f3151bd864e886dcfb05"
+API_SPORTS_KEY = "a28c7ec1d8573b0dc0b4d7908960b3e5"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "betpot-db"
+database_id = "a9cdb106-90ba-4f21-a9e8-d9b9eeca65cf"
+
+# KV Namespace for caching (optional - create with: wrangler kv:namespace create CACHE)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-id-here"
+
+# Durable Objects for real-time
+[[durable_objects.bindings]]
+name = "EVENTS_DO"
+class_name = "EventsDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["EventsDurableObject"]
+
+# Rate limiting
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1"
+simple = { limit = 100, period = 60 }
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
