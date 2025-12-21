@@ -11,6 +11,7 @@ import {
   Wallet,
   ChevronLeft,
   Trophy,
+  BookOpen,
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
@@ -175,6 +176,7 @@ export function MainLayout() {
     { to: '/', label: 'Home', icon: Home },
     { to: '/jackpot', label: 'Jackpot', icon: Trophy },
     { to: '/events', label: 'Markets', icon: Calendar },
+    { to: '/testnet-guide', label: 'Testnet Guide', icon: BookOpen },
     // Only show user Dashboard if connected AND authenticated AND not admin
     ...(connected && isAuthenticated && !isAdmin() ? [
       { to: '/dashboard', label: 'Dashboard', icon: Ticket },
