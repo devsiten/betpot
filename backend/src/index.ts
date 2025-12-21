@@ -36,7 +36,7 @@ app.use('*', cors({
     /\.pages\.dev$/,  // Allow all Cloudflare Pages preview URLs
   ],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Wallet-Address'],
   credentials: true,
 }));
 

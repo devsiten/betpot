@@ -7,48 +7,56 @@ import { AppContext } from '../types';
 
 export const auth: MiddlewareHandler<AppContext> = async (c, next) => {
   const authHeader = c.req.header('Authorization');
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new HTTPException(401, { message: 'No token provided' });
+  const walletAddress = c.req.header('X-Wallet-Address');
+
+  // Try JWT auth first
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+
+    try {
+      const secret = new TextEncoder().encode(c.env.JWT_SECRET);
+      const { payload } = await jose.jwtVerify(token, secret);
+
+      const db = c.get('db');
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, payload.userId as string),
+        columns: {
+          id: true,
+          email: true,
+          walletAddress: true,
+          role: true,
+        },
+      });
+
+      if (user) {
+        c.set('user', user);
+        await next();
+        return;
+      }
+    } catch (error) {
+      // JWT failed, continue to try wallet auth
+    }
   }
 
-  const token = authHeader.split(' ')[1];
-  
-  try {
-    const secret = new TextEncoder().encode(c.env.JWT_SECRET);
-    const { payload } = await jose.jwtVerify(token, secret);
-    
-    const db = c.get('db');
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, payload.userId as string),
-      columns: {
-        id: true,
-        email: true,
-        walletAddress: true,
-        role: true,
-      },
-    });
-
-    if (!user) {
-      throw new HTTPException(401, { message: 'User not found' });
-    }
-
-    c.set('user', user);
+  // Try wallet-based auth
+  if (walletAddress) {
+    // Create a virtual user based on wallet address
+    c.set('user', {
+      id: walletAddress,
+      email: `${walletAddress.slice(0, 8)}@wallet`,
+      walletAddress: walletAddress,
+      role: 'user',
+    } as any);
     await next();
-  } catch (error) {
-    if (error instanceof jose.errors.JWTExpired) {
-      throw new HTTPException(401, { message: 'Token expired' });
-    }
-    if (error instanceof jose.errors.JWTInvalid) {
-      throw new HTTPException(401, { message: 'Invalid token' });
-    }
-    throw error;
+    return;
   }
+
+  throw new HTTPException(401, { message: 'Authentication required' });
 };
 
 export const optionalAuth: MiddlewareHandler<AppContext> = async (c, next) => {
   const authHeader = c.req.header('Authorization');
-  
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     await next();
     return;
@@ -58,7 +66,7 @@ export const optionalAuth: MiddlewareHandler<AppContext> = async (c, next) => {
     const token = authHeader.split(' ')[1];
     const secret = new TextEncoder().encode(c.env.JWT_SECRET);
     const { payload } = await jose.jwtVerify(token, secret);
-    
+
     const db = c.get('db');
     const user = await db.query.users.findFirst({
       where: eq(users.id, payload.userId as string),
@@ -76,23 +84,46 @@ export const optionalAuth: MiddlewareHandler<AppContext> = async (c, next) => {
   } catch {
     // Invalid token, continue without auth
   }
-  
+
   await next();
 };
 
 export const requireAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
   const user = c.get('user');
-  
+
+  // If no JWT user, check for wallet address in header
   if (!user) {
+    const walletAddress = c.req.header('X-Wallet-Address');
+    if (walletAddress) {
+      // Check if wallet is in admin list
+      const adminWallets = [
+        '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
+      ];
+      if (adminWallets.includes(walletAddress)) {
+        // Set a minimal user object for wallet-based admin
+        c.set('user', {
+          id: walletAddress,
+          email: 'wallet@admin',
+          walletAddress: walletAddress,
+          role: 'admin',
+        } as any);
+        await next();
+        return;
+      }
+    }
     throw new HTTPException(401, { message: 'Authentication required' });
   }
 
-  if (user.role !== 'admin' && user.role !== 'superadmin') {
-    // Fallback to email check
-    const adminEmails = (c.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
-    if (!adminEmails.includes(user.email)) {
-      throw new HTTPException(403, { message: 'Admin access required' });
+  if (user.role !== 'admin') {
+    // Fallback to wallet address check
+    const adminWallets = [
+      '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
+    ];
+    if (user.walletAddress && adminWallets.includes(user.walletAddress)) {
+      await next();
+      return;
     }
+    throw new HTTPException(403, { message: 'Admin access required' });
   }
 
   await next();
@@ -100,7 +131,7 @@ export const requireAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
 
 export const requireSuperAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
   const user = c.get('user');
-  
+
   if (!user) {
     throw new HTTPException(401, { message: 'Authentication required' });
   }
@@ -112,15 +143,15 @@ export const requireSuperAdmin: MiddlewareHandler<AppContext> = async (c, next) 
   await next();
 };
 
-// Generate JWT token
+// Generate JWT token with 2-hour expiration
 export async function generateToken(userId: string, secret: string): Promise<string> {
   const secretKey = new TextEncoder().encode(secret);
-  
+
   const token = await new jose.SignJWT({ userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime('2h')  // 2-hour session expiration
     .sign(secretKey);
-    
+
   return token;
 }

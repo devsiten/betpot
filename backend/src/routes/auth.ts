@@ -3,11 +3,26 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import nacl from 'tweetnacl';
+import bs58 from 'bs58';
 import { users } from '../db/schema';
 import { generateToken, auth } from '../middleware/auth';
 import { AppContext } from '../types';
 
 const authRoutes = new Hono<AppContext>();
+
+// Verify Solana wallet signature (Ed25519)
+function verifySolanaSignature(message: string, signature: string, publicKey: string): boolean {
+  try {
+    const messageBytes = new TextEncoder().encode(message);
+    const signatureBytes = bs58.decode(signature);
+    const publicKeyBytes = bs58.decode(publicKey);
+    return nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+  } catch (error) {
+    console.error('Signature verification error:', error);
+    return false;
+  }
+}
 
 // Simple password hashing for edge (in production use Argon2 via WASM)
 async function hashPassword(password: string): Promise<string> {
@@ -161,9 +176,13 @@ const connectWalletSchema = z.object({
 authRoutes.post('/connect-wallet', auth, zValidator('json', connectWalletSchema), async (c) => {
   const db = c.get('db');
   const user = c.get('user')!;
-  const { walletAddress } = c.req.valid('json');
+  const { walletAddress, signature, message } = c.req.valid('json');
 
-  // TODO: Verify signature with Solana/Web3
+  // Verify Solana signature
+  const isValidSignature = verifySolanaSignature(message, signature, walletAddress);
+  if (!isValidSignature) {
+    return c.json({ success: false, error: 'Invalid signature' }, 401);
+  }
 
   await db.update(users)
     .set({ walletAddress, updatedAt: new Date() })
@@ -181,9 +200,25 @@ const walletLoginSchema = z.object({
 
 authRoutes.post('/wallet-login', zValidator('json', walletLoginSchema), async (c) => {
   const db = c.get('db');
-  const { walletAddress } = c.req.valid('json');
+  const { walletAddress, signature, message } = c.req.valid('json');
 
-  // TODO: Verify signature
+  // Verify Solana signature
+  const isValidSignature = verifySolanaSignature(message, signature, walletAddress);
+  if (!isValidSignature) {
+    return c.json({ success: false, error: 'Invalid signature' }, 401);
+  }
+
+  // Optional: Validate message format (must contain recent timestamp to prevent replay)
+  // Message format: "Sign this message to login to BETPOT: {timestamp}"
+  const timestampMatch = message.match(/BETPOT: (\d+)/);
+  if (timestampMatch) {
+    const messageTimestamp = parseInt(timestampMatch[1], 10);
+    const now = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
+    if (Math.abs(now - messageTimestamp) > fiveMinutes) {
+      return c.json({ success: false, error: 'Message expired, please sign again' }, 401);
+    }
+  }
 
   let user = await db.query.users.findFirst({
     where: eq(users.walletAddress, walletAddress),
