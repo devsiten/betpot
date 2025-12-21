@@ -13,23 +13,91 @@ import {
   Trophy,
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import clsx from 'clsx';
 import bs58 from 'bs58';
 import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 
-// Custom Connect Button - White Style
+// Custom Connect Button - Only Phantom and Solflare
 function ConnectButton() {
-  const { setVisible } = useWalletModal();
+  const [showModal, setShowModal] = useState(false);
+  const { wallets, select, connecting } = useWallet();
+
+  // Filter to only Phantom and Solflare
+  const supportedWallets = wallets.filter(
+    w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
+  );
+
+  const handleConnect = async (walletName: string) => {
+    try {
+      select(walletName as any);
+      setShowModal(false);
+    } catch (error) {
+      console.error('Connect error:', error);
+      toast.error('Failed to connect wallet');
+    }
+  };
+
   return (
-    <button
-      onClick={() => setVisible(true)}
-      className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all"
-    >
-      <Wallet className="w-4 h-4" />
-      Connect Wallet
-    </button>
+    <>
+      <button
+        onClick={() => setShowModal(true)}
+        disabled={connecting}
+        className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50"
+      >
+        <Wallet className="w-4 h-4" />
+        {connecting ? 'Connecting...' : 'Connect Wallet'}
+      </button>
+
+      {/* Custom Wallet Modal - Only Phantom and Solflare */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#1a2332] rounded-2xl p-6 w-full max-w-sm mx-4 border border-white/10">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-white">Connect Wallet</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-gray-400"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {supportedWallets.length === 0 ? (
+                <p className="text-gray-400 text-center py-4">
+                  Please install Phantom or Solflare wallet
+                </p>
+              ) : (
+                supportedWallets.map((wallet) => (
+                  <button
+                    key={wallet.adapter.name}
+                    onClick={() => handleConnect(wallet.adapter.name)}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+                  >
+                    <img
+                      src={wallet.adapter.icon}
+                      alt={wallet.adapter.name}
+                      className="w-10 h-10 rounded-lg"
+                    />
+                    <div className="flex-1 text-left">
+                      <p className="text-white font-medium">{wallet.adapter.name}</p>
+                      <p className="text-gray-400 text-sm">
+                        {wallet.readyState === 'Installed' ? 'Detected' : 'Not installed'}
+                      </p>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <p className="text-gray-500 text-xs text-center mt-4">
+              Only Phantom and Solflare are supported
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -117,10 +185,10 @@ export function MainLayout() {
 
   return (
     <div className="min-h-screen bg-[#1a2332] flex">
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - Transparent to show homepage background */}
       <aside
         className={clsx(
-          'hidden md:flex flex-col fixed inset-y-0 left-0 z-50 bg-[#151d2b] border-r border-white/10 transition-all duration-300',
+          'hidden md:flex flex-col fixed inset-y-0 left-0 z-50 bg-transparent border-r border-white/10 transition-all duration-300',
           sidebarOpen ? 'w-64' : 'w-20'
         )}
       >
