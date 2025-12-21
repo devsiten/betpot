@@ -107,12 +107,12 @@ export function MainLayout() {
     { to: '/', label: 'Home', icon: Home },
     { to: '/jackpot', label: 'Jackpot', icon: Trophy },
     { to: '/events', label: 'Markets', icon: Calendar },
-    // Only show user Dashboard if connected AND not admin
-    ...(connected && !isAdmin() ? [
+    // Only show user Dashboard if connected AND authenticated AND not admin
+    ...(connected && isAuthenticated && !isAdmin() ? [
       { to: '/dashboard', label: 'Dashboard', icon: Ticket },
     ] : []),
-    // Admin Dashboard for admins only
-    ...(isAdmin() ? [{ to: '/admin', label: 'Admin Dashboard', icon: Settings }] : []),
+    // Admin Dashboard for admins only (still requires isAuthenticated)
+    ...(isAuthenticated && isAdmin() ? [{ to: '/admin', label: 'Admin Dashboard', icon: Settings }] : []),
   ];
 
   return (
