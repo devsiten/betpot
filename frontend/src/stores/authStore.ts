@@ -204,6 +204,24 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => {
+        console.log('Zustand auth store hydrating...');
+        return (state, error) => {
+          if (error) {
+            console.error('Zustand hydration failed:', error);
+          } else {
+            console.log('Zustand hydrated with:', {
+              hasUser: !!state?.user,
+              isAuthenticated: state?.isAuthenticated,
+              hasToken: !!state?.token
+            });
+            // After hydration, set isLoading to false
+            if (state) {
+              state.isLoading = false;
+            }
+          }
+        };
+      },
     }
   )
 );
