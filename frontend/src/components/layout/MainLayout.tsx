@@ -279,7 +279,7 @@ export function MainLayout() {
                 <ul className="space-y-1 text-sm text-white">
                   <li><NavLink to="/jackpot" className="hover:text-teal-400 transition-colors">🔥 Jackpot</NavLink></li>
                   <li><NavLink to="/events" className="hover:text-teal-400 transition-colors">All Markets</NavLink></li>
-                  {connected && <li><NavLink to="/dashboard" className="hover:text-teal-400 transition-colors">My Bets</NavLink></li>}
+                  {connected && isAuthenticated && !isAdmin() && <li><NavLink to="/dashboard" className="hover:text-teal-400 transition-colors">My Bets</NavLink></li>}
                 </ul>
               </div>
 
@@ -304,31 +304,19 @@ export function MainLayout() {
         {/* User section - Connected Wallet */}
         {connected && publicKey && (
           <div className="p-4 border-t border-cyan-900/30 bg-[#071220]">
-            <div className="space-y-3">
-              <div className={clsx(
-                'flex items-center gap-3 p-3 bg-cyan-900/30 rounded-xl border border-cyan-500/20',
-                !sidebarOpen && 'justify-center'
-              )}>
-                <div className="relative">
-                  <div className="absolute inset-0 bg-green-500 blur-sm opacity-50 rounded-full"></div>
-                  <Wallet className="relative w-4 h-4 text-green-400 flex-shrink-0" />
-                </div>
-                {sidebarOpen && (
-                  <span className="text-sm text-white font-mono truncate tracking-tight font-bold">
-                    {formatAddress(publicKey.toBase58())}
-                  </span>
-                )}
+            <div className={clsx(
+              'flex items-center gap-3 p-3 bg-cyan-900/30 rounded-xl border border-cyan-500/20',
+              !sidebarOpen && 'justify-center'
+            )}>
+              <div className="relative">
+                <div className="absolute inset-0 bg-green-500 blur-sm opacity-50 rounded-full"></div>
+                <Wallet className="relative w-4 h-4 text-green-400 flex-shrink-0" />
               </div>
-              <button
-                onClick={handleDisconnect}
-                className={clsx(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-transparent hover:border-red-500/30 w-full transition-all',
-                  !sidebarOpen && 'justify-center px-0'
-                )}
-              >
-                <LogOut className="w-4 h-4 flex-shrink-0" />
-                {sidebarOpen && <span>Disconnect</span>}
-              </button>
+              {sidebarOpen && (
+                <span className="text-sm text-white font-mono truncate tracking-tight font-bold">
+                  {formatAddress(publicKey.toBase58())}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -420,20 +408,17 @@ export function MainLayout() {
               <ConnectButton />
             </div>
           ) : !isAuthenticated ? (
-            /* Wallet connected but not signed in - show Sign In button */
-            <div className="mt-4 mr-4 flex items-center gap-3">
-              <span className="text-gray-400 text-sm">
-                {formatAddress(publicKey!.toBase58())}
-              </span>
-              <button
-                onClick={handleSignIn}
-                disabled={isSigningIn}
-                className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Wallet className="w-4 h-4" />
-                {isSigningIn ? 'Signing...' : 'Sign In'}
-              </button>
-            </div>
+            /* Wallet connected but not signed in - click to sign in */
+            <button
+              onClick={handleSignIn}
+              disabled={isSigningIn}
+              className="mt-4 mr-4 flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-all disabled:opacity-50"
+            >
+              <Wallet className="w-4 h-4" />
+              <span className="font-mono">{formatAddress(publicKey!.toBase58())}</span>
+              <span className="text-white/80">•</span>
+              <span>{isSigningIn ? 'Signing...' : 'Sign In'}</span>
+            </button>
           ) : (
             <div className="mt-4 mr-4">
               {/* Authenticated - show dashboard button based on role */}
