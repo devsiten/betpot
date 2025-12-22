@@ -1,11 +1,26 @@
 // Cloudflare Pages Function to proxy API requests
 // This helps avoid ad blocker blocking of the API domain
 
-export const onRequest: PagesFunction = async (context) => {
+interface Env { }
+
+export const onRequest: PagesFunction<Env> = async (context) => {
     const { request, params } = context;
 
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+        return new Response(null, {
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Wallet-Address',
+                'Access-Control-Max-Age': '86400',
+            },
+        });
+    }
+
     // Get the path from the URL
-    const path = (params.path as string[]).join('/');
+    const pathArray = params.path as string[];
+    const path = pathArray ? pathArray.join('/') : '';
 
     // Backend API URL
     const backendUrl = 'https://betpot-api.devsiten.workers.dev/api';
@@ -14,19 +29,39 @@ export const onRequest: PagesFunction = async (context) => {
     const url = new URL(request.url);
     const targetUrl = `${backendUrl}/${path}${url.search}`;
 
-    // Clone the request with the new URL
-    const proxyRequest = new Request(targetUrl, {
+    // Clone headers and remove problematic ones
+    const headers = new Headers(request.headers);
+    headers.delete('host');
+
+    // Create the proxy request
+    const init: RequestInit = {
         method: request.method,
-        headers: request.headers,
-        body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
-    });
+        headers: headers,
+    };
 
-    // Forward the request to the backend
-    const response = await fetch(proxyRequest);
+    // Add body for methods that support it
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+        init.body = request.body;
+    }
 
-    // Return the response with CORS headers
-    const modifiedResponse = new Response(response.body, response);
-    modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
+    try {
+        // Forward the request to the backend
+        const response = await fetch(targetUrl, init);
 
-    return modifiedResponse;
+        // Clone response and add CORS headers
+        const responseHeaders = new Headers(response.headers);
+        responseHeaders.set('Access-Control-Allow-Origin', '*');
+
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders,
+        });
+    } catch (error) {
+        console.error('Proxy error:', error);
+        return new Response(JSON.stringify({ success: false, error: 'Proxy error' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
 };

@@ -12,9 +12,8 @@ import type {
   Pagination,
 } from '@/types';
 
-// Use /api path which is proxied through Cloudflare Pages Functions
-// This avoids ad blockers blocking cross-origin requests to betpot-api.devsiten.workers.dev
-const API_URL = '/api';
+// Direct backend URL - user needs to disable ad blocker if it blocks this domain
+const API_URL = 'https://betpot-api.devsiten.workers.dev/api';
 
 class ApiService {
   private client: AxiosInstance;
