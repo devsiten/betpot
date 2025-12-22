@@ -32,30 +32,72 @@ export function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden mb-12">
+      <section className="relative overflow-hidden mb-8">
         <div className="relative max-w-7xl mx-auto">
-          <div className="text-left mb-12">
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4">
-              <span className="text-white">Bet on What</span>
-              <br />
-              <span className="gradient-text">You Believe In</span>
-            </h1>
-            <p className="text-lg text-gray-400 max-w-xl mb-3">
-              The decentralized jackpot platform. Browse live markets below, discuss events with the community, and place your bets on featured jackpots.
-            </p>
-            <p className="text-sm text-gray-500 max-w-xl">
-              <span className="text-teal-400 font-medium">How it works:</span> Events from the Markets feed are selected for Jackpot betting. Pick your outcome in the Jackpot section, buy tickets, and win a share of the prize pool if you're right.
-            </p>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+            {/* Left - Hero Text */}
+            <div className="flex-1 text-left">
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4">
+                <span className="text-white">Bet on What</span>
+                <br />
+                <span className="gradient-text">You Believe In</span>
+              </h1>
+              <p className="text-lg text-gray-400 max-w-xl mb-6">
+                The decentralized jackpot platform. Browse live markets, discuss events with the community, and place your bets on featured jackpots.
+              </p>
 
-            <div className="mt-8 flex items-center gap-4">
-              <Link to="/jackpot" className="btn btn-primary">
-                <Trophy className="w-4 h-4" />
-                Jackpot
-              </Link>
-              <Link to="/events" className="btn btn-secondary">
-                Browse Markets
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link to="/jackpot" className="btn btn-primary">
+                  <Trophy className="w-4 h-4" />
+                  Jackpot
+                </Link>
+                <Link to="/events" className="btn btn-secondary">
+                  Browse Markets
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Right - How It Works Visual */}
+            <div className="flex-1 max-w-md">
+              <div className="bg-gradient-to-br from-[#1e293b]/80 to-[#0f172a]/80 rounded-2xl p-5 border border-white/10 backdrop-blur-sm">
+                <h3 className="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4">How It Works</h3>
+
+                <div className="space-y-4">
+                  {/* Step 1 */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 flex items-center justify-center flex-shrink-0 border border-cyan-500/30">
+                      <span className="text-cyan-400 font-bold text-lg">1</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold text-sm">Browse Markets</h4>
+                      <p className="text-gray-400 text-xs mt-0.5">Explore trending events. These feed into our Jackpot picks.</p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-600/10 flex items-center justify-center flex-shrink-0 border border-yellow-500/30">
+                      <span className="text-yellow-400 font-bold text-lg">2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold text-sm">Place Your Bet</h4>
+                      <p className="text-gray-400 text-xs mt-0.5">Go to Jackpot, pick your outcome, and buy tickets.</p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-600/10 flex items-center justify-center flex-shrink-0 border border-green-500/30">
+                      <span className="text-green-400 font-bold text-lg">3</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold text-sm">Collect Winnings</h4>
+                      <p className="text-gray-400 text-xs mt-0.5">If you win, claim your share from the prize pool!</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
