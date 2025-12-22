@@ -159,14 +159,26 @@ export function MainLayout() {
     }
   };
 
-  // Clear auth state when wallet disconnects
+  // Track if wallet was ever connected in this session
+  const [wasConnected, setWasConnected] = useState(false);
+
+  // Update wasConnected when wallet connects
   useEffect(() => {
-    if (!connected && isAuthenticated) {
+    if (connected) {
+      setWasConnected(true);
+    }
+  }, [connected]);
+
+  // Only logout when wallet DISCONNECTS (was connected, now isn't)
+  // This prevents logout on initial page load when wallet hasn't connected yet
+  useEffect(() => {
+    if (wasConnected && !connected && isAuthenticated) {
+      console.log('Wallet disconnected, logging out');
       logout();
       localStorage.removeItem('betpot_wallet');
       localStorage.removeItem('betpot_token');
     }
-  }, [connected, isAuthenticated, logout]);
+  }, [connected, wasConnected, isAuthenticated, logout]);
 
   const handleDisconnect = () => {
     localStorage.removeItem('betpot_wallet');
