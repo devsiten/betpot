@@ -901,12 +901,7 @@ admin.post('/events/:id/jackpot', async (c) => {
     return c.json({ success: false, error: 'Only open/upcoming events can be jackpot' }, 400);
   }
 
-  // Remove jackpot from all other events
-  await db.update(events)
-    .set({ isJackpot: false, updatedAt: new Date() })
-    .where(eq(events.isJackpot, true));
-
-  // Set this event as jackpot
+  // Set this event as jackpot (multiple jackpots allowed)
   await db.update(events)
     .set({ isJackpot: true, updatedAt: new Date() })
     .where(eq(events.id, id));
@@ -987,12 +982,7 @@ admin.post('/events/from-external', zValidator('json', createFromExternalSchema)
   const lockTime = new Date(eventTime.getTime() - 5 * 60 * 1000); // 5 min before event
   const startTime = now < lockTime ? now : new Date(now.getTime() + 60 * 1000);
 
-  // If setting as jackpot, remove from others first
-  if (data.isJackpot) {
-    await db.update(events)
-      .set({ isJackpot: false, updatedAt: now })
-      .where(eq(events.isJackpot, true));
-  }
+  // Multiple jackpots are now allowed - no need to clear others
 
   const eventId = nanoid();
   const ticketPrice = data.ticketPrice || parseFloat(c.env.TICKET_PRICE || '10');
