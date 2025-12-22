@@ -241,39 +241,9 @@ export function MainLayout() {
             </NavLink>
           ))}
 
-          {/* How It Works */}
+          {/* Footer - at bottom */}
           {sidebarOpen && (
-            <div className="mt-6 pt-6 border-t border-white/10">
-              <h3 className="text-gray-400 text-xs font-medium px-4 mb-4">How It Works</h3>
-              <div className="space-y-3">
-                <div className="flex gap-3 px-4">
-                  <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 text-xs text-teal-400 font-bold">1</div>
-                  <div>
-                    <p className="text-white text-sm font-medium">Place Your Bet</p>
-                    <p className="text-gray-500 text-xs">Pick a match & choose winner</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 px-4">
-                  <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 text-xs text-teal-400 font-bold">2</div>
-                  <div>
-                    <p className="text-white text-sm font-medium">Wait for Result</p>
-                    <p className="text-gray-500 text-xs">Match ends, winner is decided</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 px-4">
-                  <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 text-xs text-green-400 font-bold">3</div>
-                  <div>
-                    <p className="text-white text-sm font-medium">Collect Winnings</p>
-                    <p className="text-gray-500 text-xs">If you win, claim your money</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Footer */}
-          {sidebarOpen && (
-            <div className="mt-6 pt-6 border-t border-white/10 px-4">
+            <div className="mt-auto pt-6 border-t border-white/10 px-4">
               <p className="text-xs text-cyan-400/60 font-mono uppercase font-bold">
                 © {new Date().getFullYear()} BETPOT PROTOCOL
               </p>
@@ -281,26 +251,6 @@ export function MainLayout() {
             </div>
           )}
         </nav>
-
-        {/* User section - Connected Wallet */}
-        {connected && publicKey && (
-          <div className="p-4 border-t border-cyan-900/30 bg-[#071220]">
-            <div className={clsx(
-              'flex items-center gap-3 p-3 bg-cyan-900/30 rounded-xl border border-cyan-500/20',
-              !sidebarOpen && 'justify-center'
-            )}>
-              <div className="relative">
-                <div className="absolute inset-0 bg-green-500 blur-sm opacity-50 rounded-full"></div>
-                <Wallet className="relative w-4 h-4 text-green-400 flex-shrink-0" />
-              </div>
-              {sidebarOpen && (
-                <span className="text-sm text-white font-mono truncate tracking-tight font-bold">
-                  {formatAddress(publicKey.toBase58())}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
       </aside>
 
       {/* Mobile Header */}
@@ -389,40 +339,29 @@ export function MainLayout() {
               <ConnectButton />
             </div>
           ) : !isAuthenticated ? (
-            /* Wallet connected but not signed in - show address + sign in */
-            <div className="mt-4 mr-4 flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
-                <Wallet className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-gray-300 font-mono">{formatAddress(publicKey!.toBase58())}</span>
-              </div>
-              <button
-                onClick={handleSignIn}
-                disabled={isSigningIn}
-                className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all disabled:opacity-50"
-              >
-                {isSigningIn ? 'Signing...' : 'Sign In'}
-              </button>
-            </div>
+            /* Wallet connected but not signed in - just show Sign In */
+            <button
+              onClick={handleSignIn}
+              disabled={isSigningIn}
+              className="mt-4 mr-4 flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50"
+            >
+              {isSigningIn ? 'Signing...' : 'Sign In'}
+            </button>
           ) : (
-            <div className="mt-4 mr-4 flex items-center gap-3">
-              {/* Show wallet address even when authenticated */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
-                <Wallet className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-gray-300 font-mono">{formatAddress(publicKey!.toBase58())}</span>
-              </div>
-              {/* Authenticated - show dashboard button based on role */}
+            /* Authenticated - just show Dashboard button */
+            <div className="mt-4 mr-4">
               {isAdmin() ? (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-4 py-2 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all"
                 >
                   <Settings className="w-4 h-4" />
-                  Admin
+                  Admin Dashboard
                 </NavLink>
               ) : (
                 <NavLink
                   to="/dashboard"
-                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-4 py-2 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all"
                 >
                   <Ticket className="w-4 h-4" />
                   Dashboard
