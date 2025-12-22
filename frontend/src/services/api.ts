@@ -12,8 +12,9 @@ import type {
   Pagination,
 } from '@/types';
 
-// Use production API URL, fallback to /api for local dev with Vite proxy
-const API_URL = import.meta.env.VITE_API_URL || 'https://betpot-api.devsiten.workers.dev/api';
+// Use /api path which is proxied through Cloudflare Pages Functions
+// This avoids ad blockers blocking cross-origin requests to betpot-api.devsiten.workers.dev
+const API_URL = '/api';
 
 class ApiService {
   private client: AxiosInstance;
