@@ -14,10 +14,13 @@ const authRoutes = new Hono<AppContext>();
 // Verify Solana wallet signature (Ed25519)
 function verifySolanaSignature(message: string, signature: string, publicKey: string): boolean {
   try {
+    console.log('Verifying signature for:', { message: message.substring(0, 50), publicKey: publicKey.substring(0, 10) });
     const messageBytes = new TextEncoder().encode(message);
     const signatureBytes = bs58.decode(signature);
     const publicKeyBytes = bs58.decode(publicKey);
-    return nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+    const result = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+    console.log('Signature verification result:', result);
+    return result;
   } catch (error) {
     console.error('Signature verification error:', error);
     return false;
@@ -199,76 +202,84 @@ const walletLoginSchema = z.object({
 });
 
 authRoutes.post('/wallet-login', zValidator('json', walletLoginSchema), async (c) => {
-  const db = c.get('db');
-  const { walletAddress, signature, message } = c.req.valid('json');
+  try {
+    const db = c.get('db');
+    const { walletAddress, signature, message } = c.req.valid('json');
 
-  // Verify Solana signature
-  const isValidSignature = verifySolanaSignature(message, signature, walletAddress);
-  if (!isValidSignature) {
-    return c.json({ success: false, error: 'Invalid signature' }, 401);
-  }
+    console.log('Wallet login attempt:', { walletAddress: walletAddress.substring(0, 10) + '...' });
 
-  // Optional: Validate message format (must contain recent timestamp to prevent replay)
-  // Message format: "Sign this message to login to BETPOT: {timestamp}"
-  const timestampMatch = message.match(/BETPOT: (\d+)/);
-  if (timestampMatch) {
-    const messageTimestamp = parseInt(timestampMatch[1], 10);
-    const now = Date.now();
-    const fiveMinutes = 5 * 60 * 1000;
-    if (Math.abs(now - messageTimestamp) > fiveMinutes) {
-      return c.json({ success: false, error: 'Message expired, please sign again' }, 401);
+    // Verify Solana signature
+    const isValidSignature = verifySolanaSignature(message, signature, walletAddress);
+    if (!isValidSignature) {
+      return c.json({ success: false, error: 'Invalid signature' }, 401);
     }
-  }
 
-  let user = await db.query.users.findFirst({
-    where: eq(users.walletAddress, walletAddress),
-  });
+    // Optional: Validate message format (must contain recent timestamp to prevent replay)
+    // Message format: "Sign this message to login to BETPOT: {timestamp}"
+    const timestampMatch = message.match(/BETPOT: (\d+)/);
+    if (timestampMatch) {
+      const messageTimestamp = parseInt(timestampMatch[1], 10);
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+      if (Math.abs(now - messageTimestamp) > fiveMinutes) {
+        return c.json({ success: false, error: 'Message expired, please sign again' }, 401);
+      }
+    }
 
-  if (!user) {
-    // Auto-create user for wallet login
-    const userId = nanoid();
-    const now = new Date();
-
-    await db.insert(users).values({
-      id: userId,
-      email: `${walletAddress.slice(0, 8)}@wallet.betpot`,
-      passwordHash: await hashPassword(nanoid()),
-      walletAddress,
-      preferredChain: 'SOL',
-      role: 'user',
-      createdAt: now,
-      updatedAt: now,
-      lastLogin: now,
+    let user = await db.query.users.findFirst({
+      where: eq(users.walletAddress, walletAddress),
     });
 
-    user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-  }
+    if (!user) {
+      // Auto-create user for wallet login
+      const userId = nanoid();
+      const now = new Date();
 
-  if (!user) {
-    return c.json({ success: false, error: 'Failed to create user' }, 500);
-  }
+      await db.insert(users).values({
+        id: userId,
+        email: `${walletAddress.slice(0, 8)}@wallet.betpot`,
+        passwordHash: await hashPassword(nanoid()),
+        walletAddress,
+        preferredChain: 'SOL',
+        role: 'user',
+        createdAt: now,
+        updatedAt: now,
+        lastLogin: now,
+      });
 
-  await db.update(users)
-    .set({ lastLogin: new Date() })
-    .where(eq(users.id, user.id));
+      user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
+    }
 
-  const token = await generateToken(user.id, c.env.JWT_SECRET);
+    if (!user) {
+      return c.json({ success: false, error: 'Failed to create user' }, 500);
+    }
 
-  return c.json({
-    success: true,
-    data: {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        walletAddress: user.walletAddress,
-        preferredChain: user.preferredChain,
-        role: user.role,
+    await db.update(users)
+      .set({ lastLogin: new Date() })
+      .where(eq(users.id, user.id));
+
+    const token = await generateToken(user.id, c.env.JWT_SECRET);
+
+    return c.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          walletAddress: user.walletAddress,
+          preferredChain: user.preferredChain,
+          role: user.role,
+        },
       },
-    },
-  });
+    });
+  } catch (error: unknown) {
+    console.error('Wallet login error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ success: false, error: `Login failed: ${errorMessage}` }, 500);
+  }
 });
 
 export default authRoutes;
