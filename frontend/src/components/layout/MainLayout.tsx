@@ -22,7 +22,7 @@ import toast from 'react-hot-toast';
 // Custom Connect Button - Only Phantom and Solflare
 function ConnectButton() {
   const [showModal, setShowModal] = useState(false);
-  const { wallets, select, connecting } = useWallet();
+  const { wallets, select, connect, connecting, wallet } = useWallet();
 
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
@@ -38,6 +38,15 @@ function ConnectButton() {
       toast.error('Failed to connect wallet');
     }
   };
+
+  // After wallet is selected, trigger connect
+  useEffect(() => {
+    if (wallet && !connecting) {
+      connect().catch((err) => {
+        console.error('Auto-connect failed:', err);
+      });
+    }
+  }, [wallet, connect, connecting]);
 
   return (
     <>
