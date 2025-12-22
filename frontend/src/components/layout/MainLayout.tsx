@@ -389,32 +389,40 @@ export function MainLayout() {
               <ConnectButton />
             </div>
           ) : !isAuthenticated ? (
-            /* Wallet connected but not signed in - click to sign in */
-            <button
-              onClick={handleSignIn}
-              disabled={isSigningIn}
-              className="mt-4 mr-4 flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-all disabled:opacity-50"
-            >
-              <Wallet className="w-4 h-4" />
-              <span className="font-mono">{formatAddress(publicKey!.toBase58())}</span>
-              <span className="text-white/80">•</span>
-              <span>{isSigningIn ? 'Signing...' : 'Sign In'}</span>
-            </button>
+            /* Wallet connected but not signed in - show address + sign in */
+            <div className="mt-4 mr-4 flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
+                <Wallet className="w-4 h-4 text-green-400" />
+                <span className="text-sm text-gray-300 font-mono">{formatAddress(publicKey!.toBase58())}</span>
+              </div>
+              <button
+                onClick={handleSignIn}
+                disabled={isSigningIn}
+                className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+              >
+                {isSigningIn ? 'Signing...' : 'Sign In'}
+              </button>
+            </div>
           ) : (
-            <div className="mt-4 mr-4">
+            <div className="mt-4 mr-4 flex items-center gap-3">
+              {/* Show wallet address even when authenticated */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
+                <Wallet className="w-4 h-4 text-green-400" />
+                <span className="text-sm text-gray-300 font-mono">{formatAddress(publicKey!.toBase58())}</span>
+              </div>
               {/* Authenticated - show dashboard button based on role */}
               {isAdmin() ? (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-4 py-2 rounded-lg transition-all"
                 >
                   <Settings className="w-4 h-4" />
-                  Admin Dashboard
+                  Admin
                 </NavLink>
               ) : (
                 <NavLink
                   to="/dashboard"
-                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#1a2332] font-semibold text-sm px-4 py-2 rounded-lg transition-all"
                 >
                   <Ticket className="w-4 h-4" />
                   Dashboard
