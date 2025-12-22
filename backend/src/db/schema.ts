@@ -133,6 +133,18 @@ export const platformSettings = sqliteTable('platform_settings', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+// Event Chat Messages - auto-deleted when event ends
+export const eventMessages = sqliteTable('event_messages', {
+  id: text('id').primaryKey(),
+  eventId: text('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  walletAddress: text('wallet_address').notNull(),
+  message: text('message').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  eventIdx: index('messages_event_idx').on(table.eventId),
+  createdIdx: index('messages_created_idx').on(table.createdAt),
+}));
+
 // ============================================================================
 // RELATIONS
 // ============================================================================

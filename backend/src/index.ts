@@ -13,6 +13,7 @@ import eventsRoutes from './routes/events';
 import ticketsRoutes from './routes/tickets';
 import adminRoutes from './routes/admin';
 import { sportsApi } from './routes/sports';
+import { chatRoutes } from './routes/chat';
 
 const app = new Hono<AppContext>();
 
@@ -78,6 +79,7 @@ app.route('/api/events', eventsRoutes);
 app.route('/api/tickets', ticketsRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/sports', sportsApi);
+app.route('/api/chat', chatRoutes);
 
 // ============================================================================
 // ERROR HANDLING

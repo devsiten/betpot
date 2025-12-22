@@ -17,6 +17,7 @@ import { EventDetailPage } from '@/pages/EventDetailPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { JackpotPage } from '@/pages/JackpotPage';
 import { TestnetGuidePage } from '@/pages/TestnetGuidePage';
+import { EventChatPage } from '@/pages/EventChatPage';
 
 // Admin pages
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
@@ -114,6 +115,7 @@ function AppContent() {
         <Route path="/events/:id" element={<EventDetailPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/testnet-guide" element={<TestnetGuidePage />} />
+        <Route path="/events/:eventId/chat" element={<EventChatPage />} />
       </Route>
 
       {/* Admin routes */}

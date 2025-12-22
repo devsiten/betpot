@@ -169,14 +169,12 @@ export function EventsPage() {
   );
 
   // Render Polymarket event card (Yes/No style with expiration)
+  // Now links to internal chat room instead of external Polymarket
   const renderPolymarketCard = (event: any) => {
     const opts = getPolymarketOptions(event);
-    const polymarketUrl = event.rawData?.slug
-      ? `https://polymarket.com/event/${event.rawData.slug}`
-      : `https://polymarket.com`;
 
     return (
-      <a key={event.id} href={polymarketUrl} target="_blank" rel="noopener noreferrer" className="card card-hover p-0 overflow-hidden block cursor-pointer">
+      <Link key={event.id} to={`/events/${event.id}/chat`} className="card card-hover p-0 overflow-hidden block cursor-pointer">
         {/* Event Image */}
         {event.image && (
           <div className="h-32 bg-gradient-to-br from-cyan-900/30 to-purple-900/30 relative overflow-hidden">
@@ -281,7 +279,7 @@ export function EventsPage() {
             </div>
           )}
         </div>
-      </a>
+      </Link>
     );
   };
 
