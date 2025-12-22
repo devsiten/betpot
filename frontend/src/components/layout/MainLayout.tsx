@@ -271,32 +271,13 @@ export function MainLayout() {
             </div>
           )}
 
-          {/* Quick Links */}
+          {/* Footer */}
           {sidebarOpen && (
-            <div className="mt-6 pt-6 border-t border-white/10 space-y-4 px-4">
-              <div>
-                <h4 className="text-xs font-medium text-gray-400 mb-2">Quick Links</h4>
-                <ul className="space-y-1 text-sm text-white">
-                  <li><NavLink to="/jackpot" className="hover:text-teal-400 transition-colors">🔥 Jackpot</NavLink></li>
-                  <li><NavLink to="/events" className="hover:text-teal-400 transition-colors">All Markets</NavLink></li>
-                  {connected && isAuthenticated && !isAdmin() && <li><NavLink to="/dashboard" className="hover:text-teal-400 transition-colors">My Bets</NavLink></li>}
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-2">Docs</h4>
-                <ul className="space-y-1 text-sm text-white">
-                  <li><a href="#" className="hover:text-cyan-400 transition-colors">Whitepaper</a></li>
-                  <li><a href="#" className="hover:text-cyan-400 transition-colors">Audits</a></li>
-                </ul>
-              </div>
-
-              <div className="pt-4 border-t border-cyan-900/30">
-                <p className="text-xs text-cyan-400/60 font-mono uppercase font-bold">
-                  © {new Date().getFullYear()} BETPOT PROTOCOL
-                </p>
-                <p className="text-xs text-yellow-400/60 font-mono mt-1">🔗 DEVNET</p>
-              </div>
+            <div className="mt-6 pt-6 border-t border-white/10 px-4">
+              <p className="text-xs text-cyan-400/60 font-mono uppercase font-bold">
+                © {new Date().getFullYear()} BETPOT PROTOCOL
+              </p>
+              <p className="text-xs text-yellow-400/60 font-mono mt-1">🔗 DEVNET</p>
             </div>
           )}
         </nav>

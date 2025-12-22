@@ -40,9 +40,11 @@ export function HomePage() {
               <br />
               <span className="gradient-text">You Believe In</span>
             </h1>
-            <p className="text-lg text-gray-400 max-w-xl">
-              Simple predictions, real rewards.
-              Bet on sports matches and events with Solana.
+            <p className="text-lg text-gray-400 max-w-xl mb-3">
+              The decentralized jackpot platform. Browse live markets below, discuss events with the community, and place your bets on featured jackpots.
+            </p>
+            <p className="text-sm text-gray-500 max-w-xl">
+              <span className="text-teal-400 font-medium">How it works:</span> Events from the Markets feed are selected for Jackpot betting. Pick your outcome in the Jackpot section, buy tickets, and win a share of the prize pool if you're right.
             </p>
 
             <div className="mt-8 flex items-center gap-4">
@@ -192,17 +194,10 @@ export function HomePage() {
               </div>
             ) : (
               liveMarkets.map((event: any) => {
-                // Get the Polymarket URL from the slug
-                const polymarketUrl = event.rawData?.slug
-                  ? `https://polymarket.com/event/${event.rawData.slug}`
-                  : `https://polymarket.com`;
-
                 return (
-                  <a
+                  <Link
                     key={event.id}
-                    href={polymarketUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    to={`/events/${event.id}/chat`}
                     className="card card-hover p-0 group overflow-hidden block cursor-pointer"
                   >
                     {/* Event Image */}
@@ -286,7 +281,7 @@ export function HomePage() {
                         })()}
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 );
               })
             )}
