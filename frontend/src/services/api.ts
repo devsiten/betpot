@@ -125,7 +125,8 @@ class ApiService {
   }
 
   async getJackpot() {
-    const { data } = await this.client.get<ApiResponse<Event & { ticketCount: number; totalPool: number } | null>>('/events/featured/jackpot');
+    // Using "active" endpoint name to avoid ad blocker keyword filters on "jackpot"
+    const { data } = await this.client.get<ApiResponse<Event & { ticketCount: number; totalPool: number } | null>>('/events/featured/active');
     return data;
   }
 

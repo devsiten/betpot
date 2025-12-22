@@ -187,8 +187,8 @@ eventsRoutes.get('/:id/pool', async (c) => {
   });
 });
 
-// Get all jackpot events (public) - multiple jackpots supported
-eventsRoutes.get('/featured/jackpot', async (c) => {
+// Get all featured/jackpot events (public) - renamed from "jackpot" to avoid ad blocker keyword filters
+eventsRoutes.get('/featured/active', async (c) => {
   const db = c.get('db');
 
   // Get ALL jackpot events (not just one)
