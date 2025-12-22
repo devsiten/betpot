@@ -25,7 +25,7 @@ const purchaseSchema = z.object({
   quantity: z.number().min(1).max(100).default(1),
   walletAddress: z.string().min(32).max(64),
   chain: z.enum(['SOL', 'ETH', 'BSC', 'TRC']),
-  purchaseTx: z.string().min(64),
+  purchaseTx: z.string().min(3), // Relaxed for testnet - real validation later
 });
 
 // Purchase tickets
