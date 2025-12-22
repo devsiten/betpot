@@ -996,7 +996,7 @@ admin.post('/events/from-external', zValidator('json', createFromExternalSchema)
     startTime,
     lockTime,
     eventTime,
-    status: now >= startTime ? 'open' : 'upcoming',
+    status: 'open', // Always open for betting when created from admin
     isJackpot: data.isJackpot || false,
     externalId: data.externalId,
     externalSource: data.externalSource,
