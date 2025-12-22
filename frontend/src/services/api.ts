@@ -311,6 +311,22 @@ class ApiService {
     return data;
   }
 
+  async createJackpotFromExternal(params: {
+    externalId: string;
+    externalSource: string;
+    title: string;
+    description: string;
+    category: string;
+    options: Array<{ label: string; ticketLimit: number; percentage?: number }>;
+    eventTime: string;
+    ticketPrice: number;
+    isJackpot: boolean;
+    externalData: unknown;
+  }) {
+    const { data } = await this.client.post<ApiResponse<Event>>('/admin/events/from-external', params);
+    return data;
+  }
+
   async getAdminBets(filters?: BetFilters) {
     const { data } = await this.client.get<ApiResponse<Ticket[]> & { pagination: Pagination }>('/admin/bets', {
       params: filters,

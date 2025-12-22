@@ -78,36 +78,22 @@ export function AdminMarkets() {
     const createJackpotMutation = useMutation({
         mutationFn: async (event: ExternalEvent) => {
             // Create event from external data with jackpot flag
-            const response = await fetch('/api/admin/events/from-external', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('betpot_token')}`,
-                },
-                body: JSON.stringify({
-                    externalId: event.id,
-                    externalSource: event.source,
-                    title: event.title,
-                    description: event.description || `${event.homeTeam || ''} vs ${event.awayTeam || ''}`.trim() || event.title,
-                    category: event.category || 'sports',
-                    options: event.options.map(opt => ({
-                        label: opt.label,
-                        ticketLimit: parseInt(ticketLimit),
-                        percentage: opt.percentage,
-                    })),
-                    eventTime: event.startTime,
-                    ticketPrice: parseFloat(ticketPrice),
-                    isJackpot: true,
-                    externalData: event,
-                }),
+            return api.createJackpotFromExternal({
+                externalId: event.id,
+                externalSource: event.source,
+                title: event.title,
+                description: event.description || `${event.homeTeam || ''} vs ${event.awayTeam || ''}`.trim() || event.title,
+                category: event.category || 'sports',
+                options: event.options.map(opt => ({
+                    label: opt.label,
+                    ticketLimit: parseInt(ticketLimit),
+                    percentage: opt.percentage,
+                })),
+                eventTime: event.startTime,
+                ticketPrice: parseFloat(ticketPrice),
+                isJackpot: true,
+                externalData: event,
             });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Failed to create jackpot');
-            }
-
-            return response.json();
         },
         onSuccess: () => {
             toast.success('Jackpot created successfully!');

@@ -176,10 +176,7 @@ export function MainLayout() {
     navigate('/');
   };
 
-  // Format wallet address for display
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`;
-  };
+
 
   const navItems = [
     { to: '/', label: 'Home', icon: Home },
