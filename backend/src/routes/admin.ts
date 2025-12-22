@@ -951,7 +951,7 @@ admin.delete('/events/:id/jackpot', async (c) => {
 // Create event from external API data
 const createFromExternalSchema = z.object({
   externalId: z.string(),
-  externalSource: z.enum(['odds-api', 'api-sports']),
+  externalSource: z.enum(['odds-api', 'api-sports', 'polymarket']),
   title: z.string().min(1).max(200),
   description: z.string().optional(),
   category: z.enum(['sports', 'finance', 'crypto', 'politics', 'entertainment']),
