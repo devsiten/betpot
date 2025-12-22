@@ -8,6 +8,7 @@ ENVIRONMENT = "development"
 TICKET_PRICE = "10"
 PLATFORM_FEE = "0.01"
 MAX_EVENTS_PER_DAY = "3"
+JWT_SECRET = "betpot-super-secret-jwt-key-change-in-production-2024"
 # External Sports APIs
 THE_ODDS_API_KEY = "6d00ed1802e5f3151bd864e886dcfb05"
 API_SPORTS_KEY = "a28c7ec1d8573b0dc0b4d7908960b3e5"

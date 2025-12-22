@@ -11,13 +11,51 @@ import { AppContext } from '../types';
 
 const authRoutes = new Hono<AppContext>();
 
+// Base58 alphabet for Solana
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+// Decode base58 string to Uint8Array (Cloudflare Workers compatible)
+function decodeBase58(input: string): Uint8Array {
+  const bytes: number[] = [];
+  for (const char of input) {
+    const value = BASE58_ALPHABET.indexOf(char);
+    if (value === -1) {
+      throw new Error(`Invalid base58 character: ${char}`);
+    }
+    let carry = value;
+    for (let j = 0; j < bytes.length; j++) {
+      carry += bytes[j] * 58;
+      bytes[j] = carry & 0xff;
+      carry >>= 8;
+    }
+    while (carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+  // Handle leading zeros
+  for (const char of input) {
+    if (char === '1') {
+      bytes.push(0);
+    } else {
+      break;
+    }
+  }
+  return new Uint8Array(bytes.reverse());
+}
+
 // Verify Solana wallet signature (Ed25519)
 function verifySolanaSignature(message: string, signature: string, publicKey: string): boolean {
   try {
-    console.log('Verifying signature for:', { message: message.substring(0, 50), publicKey: publicKey.substring(0, 10) });
+    console.log('Verifying signature for:', {
+      messageLen: message.length,
+      sigLen: signature.length,
+      pubKeyLen: publicKey.length
+    });
     const messageBytes = new TextEncoder().encode(message);
-    const signatureBytes = bs58.decode(signature);
-    const publicKeyBytes = bs58.decode(publicKey);
+    const signatureBytes = decodeBase58(signature);
+    const publicKeyBytes = decodeBase58(publicKey);
+    console.log('Decoded bytes:', { sigLen: signatureBytes.length, pubKeyLen: publicKeyBytes.length });
     const result = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
     console.log('Signature verification result:', result);
     return result;
@@ -201,15 +239,28 @@ const walletLoginSchema = z.object({
   message: z.string(),
 });
 
-authRoutes.post('/wallet-login', zValidator('json', walletLoginSchema), async (c) => {
+authRoutes.post('/wallet-login', async (c) => {
   try {
+    const body = await c.req.json();
+    console.log('Wallet login request received:', {
+      hasWalletAddress: !!body.walletAddress,
+      hasSignature: !!body.signature,
+      hasMessage: !!body.message
+    });
+
+    const { walletAddress, signature, message } = body;
+
+    if (!walletAddress || !signature || !message) {
+      return c.json({ success: false, error: 'Missing required fields' }, 400);
+    }
+
     const db = c.get('db');
-    const { walletAddress, signature, message } = c.req.valid('json');
 
     console.log('Wallet login attempt:', { walletAddress: walletAddress.substring(0, 10) + '...' });
 
     // Verify Solana signature
     const isValidSignature = verifySolanaSignature(message, signature, walletAddress);
+    console.log('Signature valid:', isValidSignature);
     if (!isValidSignature) {
       return c.json({ success: false, error: 'Invalid signature' }, 401);
     }
