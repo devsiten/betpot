@@ -187,35 +187,46 @@ eventsRoutes.get('/:id/pool', async (c) => {
   });
 });
 
-// Get current jackpot event (public)
+// Get all jackpot events (public) - multiple jackpots supported
 eventsRoutes.get('/featured/jackpot', async (c) => {
   const db = c.get('db');
 
-  const jackpot = await db.query.events.findFirst({
+  // Get ALL jackpot events (not just one)
+  const jackpots = await db.query.events.findMany({
     where: and(
       eq(events.isJackpot, true),
       or(eq(events.status, 'open'), eq(events.status, 'upcoming'))
     ),
     with: { options: true },
+    orderBy: [asc(events.eventTime)],
   });
 
-  if (!jackpot) {
-    return c.json({ success: true, data: null });
+  if (jackpots.length === 0) {
+    return c.json({ success: true, data: null, jackpots: [] });
   }
 
-  const ticketCount = await db.select({ count: count() })
-    .from(tickets)
-    .where(eq(tickets.eventId, jackpot.id));
+  // Get ticket counts and pools for all jackpots
+  const jackpotsWithCounts = await Promise.all(
+    jackpots.map(async (jackpot) => {
+      const ticketCount = await db.select({ count: count() })
+        .from(tickets)
+        .where(eq(tickets.eventId, jackpot.id));
 
-  const totalPool = jackpot.options.reduce((sum, opt) => sum + (opt.poolAmount || 0), 0);
+      const totalPool = jackpot.options.reduce((sum, opt) => sum + (opt.poolAmount || 0), 0);
 
+      return {
+        ...jackpot,
+        ticketCount: ticketCount[0]?.count || 0,
+        totalPool,
+      };
+    })
+  );
+
+  // Return first as "data" for backward compatibility, plus all jackpots
   return c.json({
     success: true,
-    data: {
-      ...jackpot,
-      ticketCount: ticketCount[0]?.count || 0,
-      totalPool,
-    },
+    data: jackpotsWithCounts[0], // First jackpot for backward compatibility
+    jackpots: jackpotsWithCounts, // All jackpots
   });
 });
 
