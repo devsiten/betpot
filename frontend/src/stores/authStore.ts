@@ -169,15 +169,25 @@ export const useAuthStore = create<AuthStore>()(
               lastActivity: Date.now(),
             });
           }
-        } catch {
-          localStorage.removeItem('betpot_token');
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-            isLoading: false,
-            lastActivity: null,
-          });
+        } catch (error: any) {
+          // Only logout if it's a 401 (unauthorized) - token is invalid
+          // For other errors (network, 500, etc.), keep the session alive
+          const status = error?.response?.status;
+          if (status === 401) {
+            console.log('Token invalid, logging out');
+            localStorage.removeItem('betpot_token');
+            set({
+              user: null,
+              token: null,
+              isAuthenticated: false,
+              isLoading: false,
+              lastActivity: null,
+            });
+          } else {
+            // Network error or server error - keep session, just stop loading
+            console.log('API error but keeping session:', error?.message || 'Unknown error');
+            set({ isLoading: false });
+          }
         }
       },
 
@@ -188,7 +198,12 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'betpot-auth',
-      partialize: (state) => ({ token: state.token, lastActivity: state.lastActivity }),
+      partialize: (state) => ({
+        token: state.token,
+        lastActivity: state.lastActivity,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
