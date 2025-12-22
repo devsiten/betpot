@@ -238,16 +238,17 @@ export function MainLayout() {
             </NavLink>
           ))}
 
-          {/* Footer - at bottom */}
-          {sidebarOpen && (
-            <div className="mt-auto pt-6 border-t border-white/10 px-4">
-              <p className="text-xs text-cyan-400/60 font-mono uppercase font-bold">
-                © {new Date().getFullYear()} BETPOT PROTOCOL
-              </p>
-              <p className="text-xs text-yellow-400/60 font-mono mt-1">🔗 DEVNET</p>
-            </div>
-          )}
         </nav>
+
+        {/* Footer - at absolute bottom */}
+        {sidebarOpen && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-[#0a1628]">
+            <p className="text-xs text-cyan-400/60 font-mono uppercase font-bold">
+              © {new Date().getFullYear()} BETPOT PROTOCOL
+            </p>
+            <p className="text-xs text-yellow-400/60 font-mono mt-1">🔗 DEVNET</p>
+          </div>
+        )}
       </aside>
 
       {/* Mobile Header */}

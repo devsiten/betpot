@@ -30,7 +30,7 @@ export function HomePage() {
   const jackpot = jackpotData?.data;
 
   return (
-    <div className="pt-4">
+    <div className="pt-12">
       {/* Hero Section */}
       <section className="relative overflow-hidden mb-8">
         <div className="relative max-w-7xl mx-auto">
