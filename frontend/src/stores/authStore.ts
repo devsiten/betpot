@@ -52,11 +52,21 @@ export const useAuthStore = create<AuthStore>()(
 
       checkSessionTimeout: () => {
         const { lastActivity, isAuthenticated, logout } = get();
-        if (!isAuthenticated || !lastActivity) return false;
+        // Only check timeout if authenticated AND we have a lastActivity timestamp
+        if (!isAuthenticated) return false;
+
+        // If no lastActivity recorded yet, set it now and don't logout
+        if (!lastActivity) {
+          set({ lastActivity: Date.now() });
+          return false;
+        }
 
         const now = Date.now();
-        if (now - lastActivity > SESSION_TIMEOUT) {
-          // Session expired - logout
+        const timeSinceActivity = now - lastActivity;
+
+        // Only logout if MORE than 2 hours have passed
+        if (timeSinceActivity > SESSION_TIMEOUT) {
+          console.log('Session expired after', Math.round(timeSinceActivity / 1000 / 60), 'minutes');
           logout();
           return true; // Session was expired
         }
