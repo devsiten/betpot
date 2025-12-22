@@ -9,7 +9,7 @@ export function TestnetGuidePage() {
                     BETPOT Testnet Guide
                 </h1>
                 <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                    Welcome to the future of decentralized betting on Solana.
+                    Welcome to the future of decentralized betting.
                     Here's everything you need to participate in our testnet.
                 </p>
             </div>
@@ -23,13 +23,13 @@ export function TestnetGuidePage() {
                     <h2 className="text-2xl font-bold text-white">What is BETPOT?</h2>
                 </div>
                 <p className="text-gray-300 leading-relaxed mb-4">
-                    BETPOT is a decentralized jackpot betting platform built on Solana. We bring the thrill of prediction markets
+                    BETPOT is a decentralized jackpot betting platform. We bring the thrill of prediction markets
                     to Web3 with a simple yet exciting mechanic: pick the winning outcome, buy your tickets, and claim your share
                     of the prize pool if you win.
                 </p>
                 <p className="text-gray-300 leading-relaxed">
-                    All transactions happen on-chain for complete transparency. The platform operates on Solana's high-speed,
-                    low-cost network using USDC for betting and SOL for gas fees.
+                    All transactions happen on-chain for complete transparency. Currently testing on Solana Devnet
+                    with more chains coming soon. Uses USDC for betting and native tokens for gas fees.
                 </p>
             </section>
 
@@ -93,7 +93,7 @@ export function TestnetGuidePage() {
                     </li>
                     <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-teal-400" />
-                        <span><strong className="text-white">SOL</strong> for gas fees (minimal on Solana)</span>
+                        <span><strong className="text-white">Native tokens</strong> for gas fees (SOL on Solana testnet)</span>
                     </li>
                 </ul>
             </section>
@@ -182,25 +182,22 @@ export function TestnetGuidePage() {
 
             {/* Supported Wallets */}
             <section className="text-center py-8">
-                <p className="text-gray-500 text-sm mb-4">Supported Wallets</p>
-                <div className="flex items-center justify-center gap-8">
-                    <div className="flex items-center gap-2 text-gray-400">
-                        <img
-                            src="https://phantom.app/img/phantom-icon-purple.svg"
-                            alt="Phantom"
-                            className="w-8 h-8"
-                        />
-                        <span>Phantom</span>
+                <p className="text-gray-500 text-sm mb-6">Supported Wallets for Testnet</p>
+                <div className="flex items-center justify-center gap-8 flex-wrap">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <Wallet className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <span className="text-white font-medium">Phantom</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-400">
-                        <img
-                            src="https://solflare.com/favicon.ico"
-                            alt="Solflare"
-                            className="w-8 h-8"
-                        />
-                        <span>Solflare</span>
+                    <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                        <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                            <Wallet className="w-5 h-5 text-orange-400" />
+                        </div>
+                        <span className="text-white font-medium">Solflare</span>
                     </div>
                 </div>
+                <p className="text-gray-600 text-xs mt-4">More wallets and chains coming soon</p>
             </section>
         </div>
     );
