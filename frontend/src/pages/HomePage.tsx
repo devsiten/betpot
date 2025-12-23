@@ -36,13 +36,17 @@ export function HomePage() {
         <div className="relative max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             {/* Left - Hero Text */}
-            <div className="flex-1 text-left">
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4">
-                <span className="text-text-primary">Bet on What</span>
+            <div className="flex-1 max-w-xl">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary leading-tight mb-6">
+                <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-positive-500 bg-clip-text text-transparent drop-shadow-lg">
+                  Bet on What
+                </span>
                 <br />
-                <span className="gradient-text">You Believe In</span>
+                <span className="bg-gradient-to-r from-positive-500 to-brand-600 bg-clip-text text-transparent drop-shadow-lg">
+                  You Believe In
+                </span>
               </h1>
-              <p className="text-lg text-text-secondary max-w-xl mb-6">
+              <p className="text-lg sm:text-xl text-text-secondary mb-8 font-medium backdrop-blur-sm bg-background-card/30 p-4 rounded-xl border border-border/50 shadow-soft">
                 The decentralized jackpot platform. Browse live markets, discuss events with the community, and place your bets on featured jackpots.
               </p>
 
@@ -59,8 +63,8 @@ export function HomePage() {
 
             {/* Right - How It Works Visual */}
             <div className="flex-1 max-w-md">
-              <div className="bg-background-card rounded-2xl p-5 border border-border shadow-card">
-                <h3 className="text-sm font-bold text-brand-600 uppercase tracking-wider mb-4">How It Works</h3>
+              <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 shadow-elevated">
+                <h3 className="text-base font-black text-brand-600 uppercase tracking-wider mb-5 drop-shadow-sm">How It Works</h3>
 
                 <div className="space-y-4">
                   {/* Step 1 */}
@@ -69,8 +73,8 @@ export function HomePage() {
                       <span className="text-positive-600 font-bold text-lg">1</span>
                     </div>
                     <div>
-                      <h4 className="text-text-primary font-semibold text-sm">Browse Markets</h4>
-                      <p className="text-text-muted text-xs mt-0.5">Explore trending events. These feed into our Jackpot picks.</p>
+                      <h4 className="text-text-primary font-bold text-base">Browse Markets</h4>
+                      <p className="text-text-secondary text-sm mt-1 font-medium">Explore trending events. These feed into our Jackpot picks.</p>
                     </div>
                   </div>
 
@@ -80,8 +84,8 @@ export function HomePage() {
                       <span className="text-brand-600 font-bold text-lg">2</span>
                     </div>
                     <div>
-                      <h4 className="text-text-primary font-semibold text-sm">Place Your Bet</h4>
-                      <p className="text-text-muted text-xs mt-0.5">Go to Jackpot, pick your outcome, and buy tickets.</p>
+                      <h4 className="text-text-primary font-bold text-base">Place Your Bet</h4>
+                      <p className="text-text-secondary text-sm mt-1 font-medium">Go to Jackpot, pick your outcome, and buy tickets.</p>
                     </div>
                   </div>
 
@@ -91,8 +95,8 @@ export function HomePage() {
                       <span className="text-positive-600 font-bold text-lg">3</span>
                     </div>
                     <div>
-                      <h4 className="text-text-primary font-semibold text-sm">Collect Winnings</h4>
-                      <p className="text-text-muted text-xs mt-0.5">If you win, claim your share from the prize pool!</p>
+                      <h4 className="text-text-primary font-bold text-base">Collect Winnings</h4>
+                      <p className="text-text-secondary text-sm mt-1 font-medium">If you win, claim your share from the prize pool!</p>
                     </div>
                   </div>
                 </div>
