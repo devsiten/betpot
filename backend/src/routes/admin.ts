@@ -1,0 +1,1049 @@
+import { Hono } from 'hono';
+import { z } from 'zod';
+import { zValidator } from '@hono/zod-validator';
+import { eq, desc, asc, sql, and, gte, lte, like, or, count, sum } from 'drizzle-orm';
+import { nanoid } from 'nanoid';
+import { auth, requireAdmin, requireSuperAdmin } from '../middleware/auth';
+import { events, eventOptions, tickets, users, adminAuditLogs, platformSettings } from '../db/schema';
+import { AppContext } from '../types';
+
+const admin = new Hono<AppContext>();
+
+// Apply auth + admin middleware to all routes
+admin.use('*', auth, requireAdmin);
+
+// ============================================================================
+// DASHBOARD & ANALYTICS
+// ============================================================================
+
+admin.get('/dashboard', async (c) => {
+  const db = c.get('db');
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const [
+    totalUsersResult,
+    totalEventsResult,
+    totalTicketsResult,
+    activeEventsResult,
+    pendingResolutionResult,
+    todayTicketsResult,
+    weekTicketsResult,
+    monthTicketsResult,
+    totalVolumeResult,
+    recentActivity,
+    topEvents,
+    winnerStats,
+  ] = await Promise.all([
+    db.select({ count: count() }).from(users),
+    db.select({ count: count() }).from(events),
+    db.select({ count: count() }).from(tickets),
+    db.select({ count: count() }).from(events).where(
+      or(eq(events.status, 'open'), eq(events.status, 'upcoming'))
+    ),
+    db.select({ count: count() }).from(events).where(eq(events.status, 'locked')),
+    db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, today)),
+    db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, weekAgo)),
+    db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, monthAgo)),
+    db.select({ total: sum(tickets.purchasePrice) }).from(tickets),
+    db.query.adminAuditLogs.findMany({
+      limit: 15,
+      orderBy: [desc(adminAuditLogs.createdAt)],
+      with: { admin: { columns: { email: true } } },
+    }),
+    db.query.events.findMany({
+      where: or(eq(events.status, 'open'), eq(events.status, 'locked')),
+      limit: 10,
+      orderBy: [desc(events.createdAt)],
+      with: { options: true },
+    }),
+    // Winner statistics
+    db.select({
+      totalWinners: count(),
+      totalPayout: sum(tickets.payoutAmount),
+    }).from(tickets).where(eq(tickets.status, 'won')),
+  ]);
+
+  // Get ticket counts for top events
+  const topEventsWithCounts = await Promise.all(
+    topEvents.map(async (event) => {
+      const ticketCount = await db.select({ count: count() })
+        .from(tickets)
+        .where(eq(tickets.eventId, event.id));
+      return { ...event, ticketCount: ticketCount[0]?.count || 0 };
+    })
+  );
+
+  // Sales trend (last 7 days)
+  const salesTrend = await db.select({
+    date: sql<string>`date(${tickets.createdAt})`,
+    ticketCount: count(),
+    volume: sum(tickets.purchasePrice),
+  })
+    .from(tickets)
+    .where(gte(tickets.createdAt, weekAgo))
+    .groupBy(sql`date(${tickets.createdAt})`)
+    .orderBy(desc(sql`date(${tickets.createdAt})`));
+
+  return c.json({
+    success: true,
+    data: {
+      overview: {
+        totalUsers: totalUsersResult[0]?.count || 0,
+        totalEvents: totalEventsResult[0]?.count || 0,
+        totalTickets: totalTicketsResult[0]?.count || 0,
+        activeEvents: activeEventsResult[0]?.count || 0,
+        pendingResolution: pendingResolutionResult[0]?.count || 0,
+        totalVolume: totalVolumeResult[0]?.total || 0,
+        totalWinners: winnerStats[0]?.totalWinners || 0,
+        totalPayouts: winnerStats[0]?.totalPayout || 0,
+      },
+      ticketStats: {
+        today: todayTicketsResult[0]?.count || 0,
+        week: weekTicketsResult[0]?.count || 0,
+        month: monthTicketsResult[0]?.count || 0,
+      },
+      salesTrend,
+      recentActivity,
+      topEvents: topEventsWithCounts,
+    },
+  });
+});
+
+// ============================================================================
+// EVENT MANAGEMENT
+// ============================================================================
+
+// List all events with filters and pagination
+admin.get('/events', async (c) => {
+  const db = c.get('db');
+  const {
+    status,
+    category,
+    search,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    page = '1',
+    limit = '20',
+  } = c.req.query();
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const offset = (pageNum - 1) * limitNum;
+
+  // Build where conditions
+  const conditions = [];
+  if (status) conditions.push(eq(events.status, status as any));
+  if (category) conditions.push(eq(events.category, category as any));
+  if (search) {
+    conditions.push(
+      or(
+        like(events.title, `%${search}%`),
+        like(events.id, `%${search}%`)
+      )
+    );
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [eventsList, totalResult] = await Promise.all([
+    db.query.events.findMany({
+      where: whereClause,
+      with: { options: true },
+      orderBy: sortOrder === 'asc' ? [asc(events[sortBy as keyof typeof events] as any)] : [desc(events[sortBy as keyof typeof events] as any)],
+      limit: limitNum,
+      offset,
+    }),
+    db.select({ count: count() }).from(events).where(whereClause),
+  ]);
+
+  // Get ticket counts for each event
+  const eventsWithCounts = await Promise.all(
+    eventsList.map(async (event) => {
+      const ticketCount = await db.select({ count: count() })
+        .from(tickets)
+        .where(eq(tickets.eventId, event.id));
+      return { ...event, ticketCount: ticketCount[0]?.count || 0 };
+    })
+  );
+
+  return c.json({
+    success: true,
+    data: eventsWithCounts,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: totalResult[0]?.count || 0,
+      pages: Math.ceil((totalResult[0]?.count || 0) / limitNum),
+    },
+  });
+});
+
+// Create event schema
+const createEventSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional(),
+  category: z.enum(['sports', 'finance', 'crypto', 'politics', 'entertainment']),
+  ticketPrice: z.number().min(1).max(10000).optional(),
+  imageUrl: z.string().url().optional(),
+  options: z.array(z.object({
+    label: z.string().min(1).max(100),
+    ticketLimit: z.number().min(10).max(1000000),
+  })).min(2).max(6),
+  startTime: z.string().datetime(),
+  lockTime: z.string().datetime(),
+  eventTime: z.string().datetime(),
+  status: z.enum(['draft', 'upcoming']).optional(),
+});
+
+// Create new event
+admin.post('/events', zValidator('json', createEventSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const data = c.req.valid('json');
+
+  const startTime = new Date(data.startTime);
+  const lockTime = new Date(data.lockTime);
+  const eventTime = new Date(data.eventTime);
+
+  if (startTime >= lockTime || lockTime >= eventTime) {
+    return c.json({ success: false, error: 'Invalid times: start < lock < event required' }, 400);
+  }
+
+  // Check daily limit
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const maxEvents = parseInt(c.env.MAX_EVENTS_PER_DAY || '3');
+
+  const todayEventsResult = await db.select({ count: count() })
+    .from(events)
+    .where(gte(events.createdAt, today));
+
+  if ((todayEventsResult[0]?.count || 0) >= maxEvents) {
+    return c.json({ success: false, error: `Maximum ${maxEvents} events per day` }, 400);
+  }
+
+  const eventId = nanoid();
+  const ticketPrice = data.ticketPrice || parseFloat(c.env.TICKET_PRICE || '10');
+  const now = new Date();
+
+  // Create event
+  await db.insert(events).values({
+    id: eventId,
+    title: data.title,
+    description: data.description,
+    category: data.category,
+    ticketPrice,
+    imageUrl: data.imageUrl,
+    startTime,
+    lockTime,
+    eventTime,
+    status: data.status || (now >= startTime ? 'open' : 'upcoming'),
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  // Create options
+  const optionsToInsert = data.options.map((opt, index) => ({
+    id: nanoid(),
+    eventId,
+    optionId: String.fromCharCode(65 + index), // A, B, C, D...
+    label: opt.label,
+    ticketLimit: opt.ticketLimit,
+    ticketsSold: 0,
+    poolAmount: 0,
+    isWinner: false,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  await db.insert(eventOptions).values(optionsToInsert);
+
+  // Audit log
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'CREATE_EVENT',
+    entityType: 'Event',
+    entityId: eventId,
+    details: JSON.stringify({ title: data.title, category: data.category }),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    userAgent: c.req.header('User-Agent'),
+    createdAt: now,
+  });
+
+  const createdEvent = await db.query.events.findFirst({
+    where: eq(events.id, eventId),
+    with: { options: true },
+  });
+
+  return c.json({ success: true, data: createdEvent }, 201);
+});
+
+// Get single event with full details
+admin.get('/events/:id', async (c) => {
+  const db = c.get('db');
+  const { id } = c.req.param();
+
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, id),
+    with: {
+      options: true,
+    },
+  });
+
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  // Get tickets with user info
+  const eventTickets = await db.query.tickets.findMany({
+    where: eq(tickets.eventId, id),
+    with: { user: { columns: { email: true, walletAddress: true } } },
+    orderBy: [desc(tickets.createdAt)],
+    limit: 500,
+  });
+
+  return c.json({
+    success: true,
+    data: { ...event, tickets: eventTickets },
+  });
+});
+
+// Update event
+const updateEventSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().optional(),
+  ticketPrice: z.number().min(1).max(10000).optional(),
+  imageUrl: z.string().url().optional().nullable(),
+  status: z.enum(['draft', 'upcoming', 'open']).optional(),
+});
+
+admin.put('/events/:id', zValidator('json', updateEventSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const data = c.req.valid('json');
+
+  const event = await db.query.events.findFirst({ where: eq(events.id, id) });
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (!['draft', 'upcoming', 'open'].includes(event.status)) {
+    return c.json({ success: false, error: 'Cannot edit locked/resolved event' }, 400);
+  }
+
+  await db.update(events)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(events.id, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'UPDATE_EVENT',
+    entityType: 'Event',
+    entityId: id,
+    details: JSON.stringify(data),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  const updated = await db.query.events.findFirst({
+    where: eq(events.id, id),
+    with: { options: true },
+  });
+
+  return c.json({ success: true, data: updated });
+});
+
+// Lock event
+admin.post('/events/:id/lock', async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+
+  const event = await db.query.events.findFirst({ where: eq(events.id, id) });
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (event.status !== 'open') {
+    return c.json({ success: false, error: 'Only open events can be locked' }, 400);
+  }
+
+  await db.update(events)
+    .set({ status: 'locked', updatedAt: new Date() })
+    .where(eq(events.id, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'LOCK_EVENT',
+    entityType: 'Event',
+    entityId: id,
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  return c.json({ success: true, message: 'Event locked' });
+});
+
+// ============================================================================
+// RESOLVE EVENT & WINNER MANAGEMENT
+// ============================================================================
+
+const resolveEventSchema = z.object({
+  winningOption: z.string().min(1),
+});
+
+admin.post('/events/:id/resolve', zValidator('json', resolveEventSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const { winningOption } = c.req.valid('json');
+
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, id),
+    with: { options: true },
+  });
+
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (event.status !== 'locked') {
+    return c.json({ success: false, error: 'Event must be locked before resolution' }, 400);
+  }
+
+  const winner = event.options.find(
+    (o) => o.optionId === winningOption || o.id === winningOption
+  );
+
+  if (!winner) {
+    return c.json({ success: false, error: 'Invalid winning option' }, 400);
+  }
+
+  // Calculate payouts
+  // Platform fee is collected upfront at bet placement (1% per trade)
+  // Pool is distributed to winners without any deduction
+  const totalPool = event.options.reduce((sum, opt) => sum + (opt.poolAmount || 0), 0);
+  const losingPool = totalPool - (winner.poolAmount || 0);
+  const ticketPrice = event.ticketPrice || 10;
+  // Winners get their ticket back + full losing pool (no platform fee deducted)
+  const payoutPerTicket = winner.ticketsSold && winner.ticketsSold > 0
+    ? ticketPrice + (losingPool / winner.ticketsSold)
+    : 0;
+
+  const now = new Date();
+
+  // Update event
+  await db.update(events)
+    .set({
+      status: 'resolved',
+      winningOption: winner.optionId,
+      resolvedAt: now,
+      resolvedBy: user.id,
+      updatedAt: now,
+    })
+    .where(eq(events.id, id));
+
+  // Mark winning option
+  await db.update(eventOptions)
+    .set({ isWinner: true, updatedAt: now })
+    .where(eq(eventOptions.id, winner.id));
+
+  // Update winning tickets
+  await db.update(tickets)
+    .set({ status: 'won', payoutAmount: payoutPerTicket, updatedAt: now })
+    .where(and(eq(tickets.eventId, id), eq(tickets.optionId, winner.id)));
+
+  // Update losing tickets
+  await db.update(tickets)
+    .set({ status: 'lost', payoutAmount: 0, updatedAt: now })
+    .where(and(
+      eq(tickets.eventId, id),
+      sql`${tickets.optionId} != ${winner.id}`
+    ));
+
+  // Audit log
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'RESOLVE_EVENT',
+    entityType: 'Event',
+    entityId: id,
+    details: JSON.stringify({
+      winningOption: winner.optionId,
+      totalPool,
+      losingPool,
+      payoutPerTicket,
+      winnersCount: winner.ticketsSold,
+    }),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: now,
+  });
+
+  return c.json({
+    success: true,
+    data: {
+      eventId: id,
+      winningOption: winner.optionId,
+      winningLabel: winner.label,
+      totalPool,
+      losingPool,
+      payoutPerTicket,
+      winnersCount: winner.ticketsSold || 0,
+      losersCount: event.options
+        .filter(o => o.id !== winner.id)
+        .reduce((sum, o) => sum + (o.ticketsSold || 0), 0),
+    },
+  });
+});
+
+// Cancel event (refund all)
+const cancelEventSchema = z.object({
+  reason: z.string().min(1).max(500),
+});
+
+admin.post('/events/:id/cancel', zValidator('json', cancelEventSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const { reason } = c.req.valid('json');
+
+  const event = await db.query.events.findFirst({ where: eq(events.id, id) });
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (event.status === 'resolved' || event.status === 'cancelled') {
+    return c.json({ success: false, error: 'Event already finalized' }, 400);
+  }
+
+  const now = new Date();
+  const ticketPrice = event.ticketPrice || 10;
+
+  await db.update(events)
+    .set({ status: 'cancelled', updatedAt: now })
+    .where(eq(events.id, id));
+
+  await db.update(tickets)
+    .set({ status: 'refunded', payoutAmount: ticketPrice, updatedAt: now })
+    .where(eq(tickets.eventId, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'CANCEL_EVENT',
+    entityType: 'Event',
+    entityId: id,
+    details: JSON.stringify({ reason }),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: now,
+  });
+
+  return c.json({ success: true, message: 'Event cancelled, refunds initiated' });
+});
+
+// ============================================================================
+// BETS & WINNERS MANAGEMENT
+// ============================================================================
+
+// Get all bets/tickets with advanced filtering and sorting
+admin.get('/bets', async (c) => {
+  const db = c.get('db');
+  const {
+    eventId,
+    userId,
+    status,
+    walletAddress,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    page = '1',
+    limit = '50',
+    winnersOnly,
+    losersOnly,
+    unclaimedOnly,
+  } = c.req.query();
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const offset = (pageNum - 1) * limitNum;
+
+  const conditions = [];
+  if (eventId) conditions.push(eq(tickets.eventId, eventId));
+  if (userId) conditions.push(eq(tickets.userId, userId));
+  if (status) conditions.push(eq(tickets.status, status as any));
+  if (walletAddress) conditions.push(eq(tickets.walletAddress, walletAddress));
+  if (winnersOnly === 'true') conditions.push(eq(tickets.status, 'won'));
+  if (losersOnly === 'true') conditions.push(eq(tickets.status, 'lost'));
+  if (unclaimedOnly === 'true') {
+    conditions.push(eq(tickets.status, 'won'));
+    conditions.push(sql`${tickets.claimedAt} IS NULL`);
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [ticketsList, totalResult] = await Promise.all([
+    db.query.tickets.findMany({
+      where: whereClause,
+      with: {
+        user: { columns: { email: true, walletAddress: true } },
+        event: { columns: { title: true, status: true } },
+        option: { columns: { label: true, isWinner: true } },
+      },
+      orderBy: sortOrder === 'asc'
+        ? [asc(tickets[sortBy as keyof typeof tickets] as any)]
+        : [desc(tickets[sortBy as keyof typeof tickets] as any)],
+      limit: limitNum,
+      offset,
+    }),
+    db.select({ count: count() }).from(tickets).where(whereClause),
+  ]);
+
+  return c.json({
+    success: true,
+    data: ticketsList,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: totalResult[0]?.count || 0,
+      pages: Math.ceil((totalResult[0]?.count || 0) / limitNum),
+    },
+  });
+});
+
+// Get winners for specific event
+admin.get('/events/:id/winners', async (c) => {
+  const db = c.get('db');
+  const { id } = c.req.param();
+  const { sortBy = 'createdAt', sortOrder = 'desc', claimed } = c.req.query();
+
+  const conditions = [
+    eq(tickets.eventId, id),
+    eq(tickets.status, 'won'),
+  ];
+
+  if (claimed === 'true') {
+    conditions.push(sql`${tickets.claimedAt} IS NOT NULL`);
+  } else if (claimed === 'false') {
+    conditions.push(sql`${tickets.claimedAt} IS NULL`);
+  }
+
+  const winners = await db.query.tickets.findMany({
+    where: and(...conditions),
+    with: {
+      user: { columns: { email: true, walletAddress: true } },
+      option: { columns: { label: true } },
+    },
+    orderBy: sortOrder === 'asc'
+      ? [asc(tickets[sortBy as keyof typeof tickets] as any)]
+      : [desc(tickets[sortBy as keyof typeof tickets] as any)],
+  });
+
+  const summary = {
+    totalWinners: winners.length,
+    totalPayout: winners.reduce((sum, t) => sum + (t.payoutAmount || 0), 0),
+    claimed: winners.filter(t => t.claimedAt).length,
+    unclaimed: winners.filter(t => !t.claimedAt).length,
+  };
+
+  return c.json({ success: true, data: { winners, summary } });
+});
+
+// Get losers for specific event
+admin.get('/events/:id/losers', async (c) => {
+  const db = c.get('db');
+  const { id } = c.req.param();
+
+  const losers = await db.query.tickets.findMany({
+    where: and(eq(tickets.eventId, id), eq(tickets.status, 'lost')),
+    with: {
+      user: { columns: { email: true, walletAddress: true } },
+      option: { columns: { label: true } },
+    },
+    orderBy: [desc(tickets.createdAt)],
+  });
+
+  return c.json({
+    success: true,
+    data: {
+      losers,
+      summary: {
+        totalLosers: losers.length,
+        totalLost: losers.reduce((sum, t) => sum + (t.purchasePrice || 0), 0),
+      },
+    },
+  });
+});
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+admin.get('/users', async (c) => {
+  const db = c.get('db');
+  const { search, role, page = '1', limit = '50' } = c.req.query();
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const offset = (pageNum - 1) * limitNum;
+
+  const conditions = [];
+  if (role) conditions.push(eq(users.role, role as any));
+  if (search) {
+    conditions.push(
+      or(
+        like(users.email, `%${search}%`),
+        like(users.walletAddress, `%${search}%`)
+      )
+    );
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [usersList, totalResult] = await Promise.all([
+    db.query.users.findMany({
+      where: whereClause,
+      columns: { passwordHash: false },
+      orderBy: [desc(users.createdAt)],
+      limit: limitNum,
+      offset,
+    }),
+    db.select({ count: count() }).from(users).where(whereClause),
+  ]);
+
+  // Get ticket counts
+  const usersWithStats = await Promise.all(
+    usersList.map(async (user) => {
+      const stats = await db.select({
+        totalTickets: count(),
+        totalWins: sql<number>`SUM(CASE WHEN ${tickets.status} = 'won' THEN 1 ELSE 0 END)`,
+        totalSpent: sum(tickets.purchasePrice),
+        totalWon: sum(tickets.payoutAmount),
+      }).from(tickets).where(eq(tickets.userId, user.id));
+
+      return { ...user, stats: stats[0] };
+    })
+  );
+
+  return c.json({
+    success: true,
+    data: usersWithStats,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: totalResult[0]?.count || 0,
+      pages: Math.ceil((totalResult[0]?.count || 0) / limitNum),
+    },
+  });
+});
+
+// Update user role (super admin only)
+admin.use('/users/:id/role', requireSuperAdmin);
+
+const updateRoleSchema = z.object({
+  role: z.enum(['user', 'admin', 'superadmin']),
+});
+
+admin.put('/users/:id/role', zValidator('json', updateRoleSchema), async (c) => {
+  const db = c.get('db');
+  const adminUser = c.get('user')!;
+  const { id } = c.req.param();
+  const { role } = c.req.valid('json');
+
+  if (id === adminUser.id) {
+    return c.json({ success: false, error: 'Cannot change own role' }, 400);
+  }
+
+  await db.update(users)
+    .set({ role, updatedAt: new Date() })
+    .where(eq(users.id, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: adminUser.id,
+    action: 'UPDATE_USER_ROLE',
+    entityType: 'User',
+    entityId: id,
+    details: JSON.stringify({ newRole: role }),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  return c.json({ success: true, message: 'User role updated' });
+});
+
+// ============================================================================
+// PLATFORM SETTINGS (Super Admin Only)
+// ============================================================================
+
+admin.get('/settings', requireSuperAdmin, async (c) => {
+  const db = c.get('db');
+  const settings = await db.query.platformSettings.findFirst();
+  return c.json({ success: true, data: settings });
+});
+
+const updateSettingsSchema = z.object({
+  ticketPrice: z.number().min(1).max(10000).optional(),
+  platformFee: z.number().min(0).max(0.5).optional(),
+  maxEventsPerDay: z.number().min(1).max(100).optional(),
+  claimDelayHours: z.number().min(0).max(168).optional(),
+  maintenanceMode: z.boolean().optional(),
+});
+
+admin.put('/settings', requireSuperAdmin, zValidator('json', updateSettingsSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const data = c.req.valid('json');
+
+  await db.insert(platformSettings)
+    .values({ id: 'settings', ...data, updatedAt: new Date() })
+    .onConflictDoUpdate({
+      target: platformSettings.id,
+      set: { ...data, updatedAt: new Date() },
+    });
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'UPDATE_SETTINGS',
+    entityType: 'PlatformSettings',
+    entityId: 'settings',
+    details: JSON.stringify(data),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  return c.json({ success: true, message: 'Settings updated' });
+});
+
+// ============================================================================
+// AUDIT LOGS
+// ============================================================================
+
+admin.get('/audit-logs', async (c) => {
+  const db = c.get('db');
+  const { adminId, action, entityType, page = '1', limit = '100' } = c.req.query();
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const offset = (pageNum - 1) * limitNum;
+
+  const conditions = [];
+  if (adminId) conditions.push(eq(adminAuditLogs.adminId, adminId));
+  if (action) conditions.push(eq(adminAuditLogs.action, action));
+  if (entityType) conditions.push(eq(adminAuditLogs.entityType, entityType));
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [logs, totalResult] = await Promise.all([
+    db.query.adminAuditLogs.findMany({
+      where: whereClause,
+      with: { admin: { columns: { email: true } } },
+      orderBy: [desc(adminAuditLogs.createdAt)],
+      limit: limitNum,
+      offset,
+    }),
+    db.select({ count: count() }).from(adminAuditLogs).where(whereClause),
+  ]);
+
+  return c.json({
+    success: true,
+    data: logs,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: totalResult[0]?.count || 0,
+      pages: Math.ceil((totalResult[0]?.count || 0) / limitNum),
+    },
+  });
+});
+
+// ============================================================================
+// JACKPOT MANAGEMENT
+// ============================================================================
+
+// Get current jackpot event
+admin.get('/jackpot', async (c) => {
+  const db = c.get('db');
+
+  const jackpot = await db.query.events.findFirst({
+    where: and(eq(events.isJackpot, true), or(eq(events.status, 'open'), eq(events.status, 'upcoming'))),
+    with: { options: true },
+  });
+
+  if (jackpot) {
+    const ticketCount = await db.select({ count: count() })
+      .from(tickets)
+      .where(eq(tickets.eventId, jackpot.id));
+    return c.json({ success: true, data: { ...jackpot, ticketCount: ticketCount[0]?.count || 0 } });
+  }
+
+  return c.json({ success: true, data: null });
+});
+
+// Set an event as jackpot
+admin.post('/events/:id/jackpot', async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+
+  const event = await db.query.events.findFirst({ where: eq(events.id, id) });
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (!['open', 'upcoming'].includes(event.status)) {
+    return c.json({ success: false, error: 'Only open/upcoming events can be jackpot' }, 400);
+  }
+
+  // Set this event as jackpot (multiple jackpots allowed)
+  await db.update(events)
+    .set({ isJackpot: true, updatedAt: new Date() })
+    .where(eq(events.id, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'SET_JACKPOT',
+    entityType: 'Event',
+    entityId: id,
+    details: JSON.stringify({ title: event.title }),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  return c.json({ success: true, message: 'Event set as jackpot' });
+});
+
+// Remove jackpot status from event
+admin.delete('/events/:id/jackpot', async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+
+  await db.update(events)
+    .set({ isJackpot: false, updatedAt: new Date() })
+    .where(eq(events.id, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'REMOVE_JACKPOT',
+    entityType: 'Event',
+    entityId: id,
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  return c.json({ success: true, message: 'Jackpot status removed' });
+});
+
+// Create event from external API data
+const createFromExternalSchema = z.object({
+  externalId: z.string(),
+  externalSource: z.enum(['odds-api', 'api-sports', 'polymarket']),
+  title: z.string().min(1).max(200),
+  description: z.string().optional(),
+  category: z.enum(['sports', 'finance', 'crypto', 'politics', 'entertainment']),
+  options: z.array(z.object({
+    label: z.string().min(1).max(100),
+    ticketLimit: z.number().min(10).max(1000000),
+  })).min(2).max(6),
+  eventTime: z.string().datetime(),
+  ticketPrice: z.number().min(1).max(10000).optional(),
+  isJackpot: z.boolean().optional(),
+  externalData: z.any().optional(),
+});
+
+admin.post('/events/from-external', zValidator('json', createFromExternalSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const data = c.req.valid('json');
+
+  // Check if event from this external source already exists
+  const existing = await db.query.events.findFirst({
+    where: and(
+      eq(events.externalId, data.externalId),
+      eq(events.externalSource, data.externalSource)
+    ),
+  });
+
+  if (existing) {
+    return c.json({ success: false, error: 'Event already imported from this source' }, 400);
+  }
+
+  const eventTime = new Date(data.eventTime);
+  const now = new Date();
+  const lockTime = new Date(eventTime.getTime() - 5 * 60 * 1000); // 5 min before event
+  const startTime = now < lockTime ? now : new Date(now.getTime() + 60 * 1000);
+
+  // Multiple jackpots are now allowed - no need to clear others
+
+  const eventId = nanoid();
+  const ticketPrice = data.ticketPrice || parseFloat(c.env.TICKET_PRICE || '10');
+
+  await db.insert(events).values({
+    id: eventId,
+    title: data.title,
+    description: data.description || `Imported from ${data.externalSource}`,
+    category: data.category,
+    ticketPrice,
+    startTime,
+    lockTime,
+    eventTime,
+    status: 'open', // Always open for betting when created from admin
+    isJackpot: data.isJackpot || false,
+    externalId: data.externalId,
+    externalSource: data.externalSource,
+    externalData: data.externalData ? JSON.stringify(data.externalData) : null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  // Create options
+  const optionsToInsert = data.options.map((opt, index) => ({
+    id: nanoid(),
+    eventId,
+    optionId: String.fromCharCode(65 + index),
+    label: opt.label,
+    ticketLimit: opt.ticketLimit,
+    ticketsSold: 0,
+    poolAmount: 0,
+    isWinner: false,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  await db.insert(eventOptions).values(optionsToInsert);
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'CREATE_FROM_EXTERNAL',
+    entityType: 'Event',
+    entityId: eventId,
+    details: JSON.stringify({
+      title: data.title,
+      externalId: data.externalId,
+      externalSource: data.externalSource,
+      isJackpot: data.isJackpot,
+    }),
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: now,
+  });
+
+  const createdEvent = await db.query.events.findFirst({
+    where: eq(events.id, eventId),
+    with: { options: true },
+  });
+
+  return c.json({ success: true, data: createdEvent }, 201);
+});
+
+export default admin;
+

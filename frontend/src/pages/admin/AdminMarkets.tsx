@@ -77,7 +77,8 @@ export function AdminMarkets() {
     // Create jackpot mutation
     const createJackpotMutation = useMutation({
         mutationFn: async (event: ExternalEvent) => {
-            const payload = {
+            // Create event from external data with jackpot flag
+            return api.createJackpotFromExternal({
                 externalId: event.id,
                 externalSource: event.source,
                 title: event.title,
@@ -86,18 +87,13 @@ export function AdminMarkets() {
                 options: event.options.map(opt => ({
                     label: opt.label,
                     ticketLimit: parseInt(ticketLimit),
-                    percentage: opt.percentage,
+                    // percentage removed - backend doesn't accept it
                 })),
                 eventTime: event.startTime,
                 ticketPrice: parseFloat(ticketPrice),
                 isJackpot: true,
                 externalData: event,
-            };
-
-            console.log('Creating jackpot with payload:', JSON.stringify(payload, null, 2));
-
-            // Create event from external data with jackpot flag
-            return api.createJackpotFromExternal(payload);
+            });
         },
         onSuccess: () => {
             toast.success('Jackpot created successfully!');
@@ -105,10 +101,8 @@ export function AdminMarkets() {
             queryClient.invalidateQueries({ queryKey: ['jackpot'] });
             setSelectedEvent(null);
         },
-        onError: (error: any) => {
-            console.error('Jackpot creation error:', error);
-            console.error('Error response:', error.response?.data);
-            toast.error(error.response?.data?.error || error.message || 'Failed to create jackpot');
+        onError: (error: Error) => {
+            toast.error(error.message);
         },
     });
 
