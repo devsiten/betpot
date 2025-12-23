@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -17,13 +17,18 @@ import toast from 'react-hot-toast';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import clsx from 'clsx';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { getUSDCBalance, createUSDCTransferTransaction, formatUSDC } from '@/utils/usdc';
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuthStore();
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [usdcBalance, setUsdcBalance] = useState<number>(0);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['event', id],
@@ -43,22 +48,52 @@ export function EventDetailPage() {
   const pool = poolData?.data;
   const userTickets = event?.userTickets || [];
 
+  // Fetch USDC balance when wallet connects
+  useEffect(() => {
+    if (publicKey && connection) {
+      getUSDCBalance(connection, publicKey).then(setUsdcBalance);
+    }
+  }, [publicKey, connection]);
+
   const handlePurchase = async () => {
-    if (!selectedOption || !user?.walletAddress) {
+    if (!selectedOption || !publicKey || !user?.walletAddress) {
       toast.error('Please select an option and connect your wallet');
+      return;
+    }
+
+    const totalCost = (event?.ticketPrice || 0) * quantity;
+
+    // Check USDC balance
+    if (usdcBalance < totalCost) {
+      toast.error(`Insufficient USDC balance. Need ${formatUSDC(totalCost)}, have ${formatUSDC(usdcBalance)}`);
       return;
     }
 
     setIsPurchasing(true);
     try {
-      // In production: Create transaction, get signature, then submit
+      // Create USDC transfer transaction
+      const transaction = await createUSDCTransferTransaction(
+        connection,
+        publicKey,
+        totalCost
+      );
+
+      // Send transaction (SOL pays for gas)
+      const signature = await sendTransaction(transaction, connection);
+
+      // Wait for confirmation
+      toast.loading('Confirming transaction...', { id: 'tx-confirm' });
+      await connection.confirmTransaction(signature, 'confirmed');
+      toast.dismiss('tx-confirm');
+
+      // Submit to backend with transaction signature
       const result = await api.purchaseTicket({
         eventId: id!,
         optionId: selectedOption,
         quantity,
         walletAddress: user.walletAddress,
         chain: 'SOL',
-        purchaseTx: `tx_${Date.now()}`, // Placeholder - real tx hash from wallet
+        purchaseTx: signature,
       });
 
       if (result.success) {
@@ -66,9 +101,16 @@ export function EventDetailPage() {
         refetch();
         setSelectedOption(null);
         setQuantity(1);
+        // Refresh USDC balance
+        getUSDCBalance(connection, publicKey).then(setUsdcBalance);
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Purchase failed');
+      console.error('Purchase error:', error);
+      if (error.message?.includes('User rejected')) {
+        toast.error('Transaction cancelled');
+      } else {
+        toast.error(error.response?.data?.error || 'Purchase failed');
+      }
     } finally {
       setIsPurchasing(false);
     }
@@ -194,6 +236,12 @@ export function EventDetailPage() {
           <p className="text-2xl font-bold text-white">{event.options?.length || 0}</p>
           <p className="text-sm text-dark-400">Options</p>
         </div>
+        {publicKey && (
+          <div className="card p-4 text-center bg-brand-500/10 border-brand-500/30">
+            <p className="text-2xl font-bold text-brand-400">{formatUSDC(usdcBalance)}</p>
+            <p className="text-sm text-brand-300">Your Balance</p>
+          </div>
+        )}
 
       </div>
 
