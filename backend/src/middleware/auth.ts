@@ -98,6 +98,8 @@ export const requireAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
       // Check if wallet is in admin list
       const adminWallets = [
         '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
+        'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
+        '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
       ];
       if (adminWallets.includes(walletAddress)) {
         // Set a minimal user object for wallet-based admin
@@ -118,6 +120,8 @@ export const requireAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
     // Fallback to wallet address check
     const adminWallets = [
       '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
+      'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
+      '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
     ];
     if (user.walletAddress && adminWallets.includes(user.walletAddress)) {
       await next();
