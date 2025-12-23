@@ -144,10 +144,10 @@ export function EventChatPage() {
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div className="flex-1">
-                        <h1 className="text-lg font-bold text-white truncate">
+                        <h1 className="text-lg font-bold text-text-primary truncate">
                             {chatData?.event.title || 'Event Chat'}
                         </h1>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-text-secondary">
                             {chatData?.messages.length || 0} messages • Status: {chatData?.event.status}
                         </p>
                     </div>
@@ -192,14 +192,14 @@ export function EventChatPage() {
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className={`text-xs font-medium ${isMe ? 'text-teal-400' : 'text-gray-400'}`}>
+                                        <span className={`text-xs font-medium ${isMe ? 'text-brand-600' : 'text-text-secondary'}`}>
                                             {isMe ? 'You' : formatAddress(msg.walletAddress)}
                                         </span>
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-xs text-text-muted">
                                             {formatTime(msg.createdAt)}
                                         </span>
                                     </div>
-                                    <p className="text-white text-sm break-words">{msg.message}</p>
+                                    <p className="text-text-primary text-sm break-words">{msg.message}</p>
                                 </div>
                             </div>
                         );
@@ -212,13 +212,13 @@ export function EventChatPage() {
             <div className="p-4 border-t border-white/10">
                 {!connected || !isAuthenticated ? (
                     <div className="text-center py-4">
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-text-secondary text-sm">
                             Please connect wallet and sign in to chat
                         </p>
                     </div>
                 ) : chatData?.event.status === 'resolved' || chatData?.event.status === 'cancelled' ? (
                     <div className="text-center py-4">
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-text-secondary text-sm">
                             Chat is closed for this event
                         </p>
                     </div>
@@ -231,12 +231,12 @@ export function EventChatPage() {
                             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                             placeholder="Type your message..."
                             maxLength={500}
-                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-teal-500/50 transition-colors"
+                            className="flex-1 bg-background-card border border-border rounded-xl px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-colors"
                         />
                         <button
                             onClick={sendMessage}
                             disabled={!newMessage.trim() || sending}
-                            className="px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="px-4 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <Send className="w-5 h-5" />
                             {sending ? 'Sending...' : 'Send'}
