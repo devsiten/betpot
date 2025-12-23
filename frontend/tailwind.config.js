@@ -4,10 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Light theme base
+        // Light theme base - SOFTER backgrounds
         background: {
-          DEFAULT: '#FAFAFA',
-          secondary: '#F5F5F4',
+          DEFAULT: '#F5F5F5', // Softer gray instead of bright white
+          secondary: '#ECECEC',
           card: '#FFFFFF',
         },
         // Warm soft orange - Primary brand color
@@ -49,11 +49,11 @@ export default {
           800: '#9F1239',
           900: '#881337',
         },
-        // Text colors
+        // Text colors - DARKER for better visibility
         text: {
-          primary: '#374151',
-          secondary: '#6B7280',
-          muted: '#9CA3AF',
+          primary: '#1F2937', // Darker gray for main text
+          secondary: '#4B5563', // Darker for secondary text
+          muted: '#6B7280',
         },
         // Border colors
         border: {
