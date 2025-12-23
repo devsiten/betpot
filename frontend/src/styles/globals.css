@@ -129,6 +129,13 @@
   .table tr:hover td {
     @apply bg-background-secondary;
   }
+
+  /* Table container for scrolling */
+  .table-container {
+    @apply w-full overflow-x-auto overflow-y-auto;
+    max-height: calc(100vh - 350px);
+    min-height: 300px;
+  }
 }
 
 @layer utilities {
