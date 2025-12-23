@@ -88,9 +88,21 @@ function useSessionManager() {
   }, [handleActivity, checkSessionTimeout]);
 }
 
-// Admin route wrapper
+// Admin route wrapper - waits for wallet to connect before redirecting
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, connecting } = useWallet();
+
+  // Show loading while wallet is connecting/reconnecting
+  if (connecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-secondary">Connecting wallet...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!connected || !publicKey) {
     return <Navigate to="/" replace />;
