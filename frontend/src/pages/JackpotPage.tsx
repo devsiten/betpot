@@ -67,26 +67,26 @@ export function JackpotPage() {
                                 <Trophy className="w-5 h-5 text-brand-600" />
                                 <span className="text-xs text-brand-600 font-medium uppercase">Jackpot</span>
                             </div>
-                            <span className="text-xs text-text-muted">
+                            <span className="text-xs text-text-secondary font-medium">
                                 {jackpot.category}
                             </span>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-text-primary group-hover:text-brand-600 transition-colors mb-3 line-clamp-2">
+                        <h3 className="text-lg font-bold text-black group-hover:text-brand-600 transition-colors mb-3 line-clamp-2">
                             {jackpot.title}
                         </h3>
 
-                        <div className="flex items-center gap-2 text-text-secondary text-sm mb-4">
+                        <div className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-4">
                             <Clock className="w-4 h-4" />
                             {format(new Date(jackpot.eventTime), 'MMM dd, HH:mm')}
                         </div>
 
                         <div className="bg-background-secondary rounded-lg p-4 mb-4">
-                            <p className="text-xs text-text-muted mb-1">Prize Pool</p>
-                            <p className="text-2xl font-bold text-brand-600">
+                            <p className="text-xs text-gray-600 font-medium mb-1">Prize Pool</p>
+                            <p className="text-2xl font-bold text-black">
                                 ${(jackpot.totalPool || 0).toLocaleString()}
                             </p>
-                            <p className="text-xs text-text-muted mt-1">
+                            <p className="text-xs text-gray-600 font-medium mt-1">
                                 {jackpot.ticketCount || 0} bets
                             </p>
                         </div>
@@ -94,9 +94,9 @@ export function JackpotPage() {
                         {/* Options preview */}
                         <div className="grid grid-cols-2 gap-2">
                             {jackpot.options?.slice(0, 2).map((option: any) => (
-                                <div key={option.id} className="bg-background-secondary rounded-lg p-2 text-center border border-border">
-                                    <p className="text-sm text-text-primary truncate">{option.label}</p>
-                                    <p className="text-xs text-text-muted">{option.ticketsSold || 0} bets</p>
+                                <div key={option.id} className="bg-white rounded-lg p-2 text-center border border-gray-300">
+                                    <p className="text-sm text-black font-medium truncate">{option.label}</p>
+                                    <p className="text-xs text-gray-600">{option.ticketsSold || 0} bets</p>
                                 </div>
                             ))}
                         </div>
