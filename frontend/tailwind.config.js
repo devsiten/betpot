@@ -49,11 +49,12 @@ export default {
           800: '#9F1239',
           900: '#881337',
         },
-        // Text colors - DARKER for better visibility
+        // Text colors - Maximum contrast for visibility
         text: {
-          primary: '#1F2937', // Darker gray for main text
-          secondary: '#4B5563', // Darker for secondary text
-          muted: '#6B7280',
+          primary: '#000000', // Pure black for maximum contrast
+          secondary: '#374151', // Dark gray for secondary text
+          muted: '#6B7280', // Medium gray for muted text
+          white: '#FFFFFF', // Pure white for dark backgrounds
         },
         // Border colors
         border: {
