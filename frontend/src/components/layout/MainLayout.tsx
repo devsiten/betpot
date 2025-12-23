@@ -11,7 +11,6 @@ import {
   Wallet,
   Trophy,
   BookOpen,
-  ChevronDown,
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
@@ -258,44 +257,22 @@ export function MainLayout() {
                     {isSigningIn ? 'Signing...' : 'Sign In'}
                   </button>
                 ) : (
-                  /* Dashboard button with dropdown */
-                  <div className="relative user-menu-container">
-                    <NavLink
-                      to={isAdmin() ? '/admin' : '/dashboard'}
-                      className="flex items-center gap-2 btn btn-primary"
-                    >
-                      {isAdmin() ? (
-                        <>
-                          <Settings className="w-4 h-4" />
-                          Admin Dashboard
-                        </>
-                      ) : (
-                        <>
-                          <Ticket className="w-4 h-4" />
-                          Dashboard
-                        </>
-                      )}
-                    </NavLink>
-
-                    <button
-                      onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="ml-2 p-2 rounded-lg hover:bg-background-secondary transition-all"
-                    >
-                      <ChevronDown className={clsx('w-4 h-4 text-text-muted transition-transform', userMenuOpen && 'rotate-180')} />
-                    </button>
-
-                    {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-background-card rounded-xl border border-border shadow-elevated py-2">
-                        <button
-                          onClick={handleDisconnect}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-negative-500 hover:bg-negative-50 transition-all"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Disconnect
-                        </button>
-                      </div>
+                  <NavLink
+                    to={isAdmin() ? '/admin' : '/dashboard'}
+                    className="flex items-center gap-2 btn btn-primary"
+                  >
+                    {isAdmin() ? (
+                      <>
+                        <Settings className="w-4 h-4" />
+                        Admin Dashboard
+                      </>
+                    ) : (
+                      <>
+                        <Ticket className="w-4 h-4" />
+                        Dashboard
+                      </>
                     )}
-                  </div>
+                  </NavLink>
                 )}
               </div>
 

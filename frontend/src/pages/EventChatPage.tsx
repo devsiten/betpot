@@ -140,7 +140,7 @@ export function EventChatPage() {
             {/* Header */}
             <div className="p-4 border-b border-white/10">
                 <div className="flex items-center gap-4">
-                    <Link to="/events" className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
+                    <Link to="/jackpot" className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div className="flex-1">
@@ -178,8 +178,8 @@ export function EventChatPage() {
                             >
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${isMe
-                                            ? 'bg-teal-500/20 border border-teal-500/30'
-                                            : 'bg-white/5 border border-white/10'
+                                        ? 'bg-teal-500/20 border border-teal-500/30'
+                                        : 'bg-white/5 border border-white/10'
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
