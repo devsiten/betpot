@@ -234,10 +234,9 @@ export function HomePage() {
             ) : (
               liveMarkets.map((event: any) => {
                 return (
-                  <Link
+                  <div
                     key={event.id}
-                    to={`/events/${event.id}`}
-                    className="card card-hover p-0 group overflow-hidden block cursor-pointer"
+                    className="card p-0 overflow-hidden block"
                   >
                     {/* Event Image */}
                     {event.image && (
@@ -245,7 +244,7 @@ export function HomePage() {
                         <img
                           src={event.image}
                           alt={event.title}
-                          className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform"
+                          className="w-full h-full object-cover opacity-90"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                       </div>
@@ -253,7 +252,7 @@ export function HomePage() {
 
                     {/* Card Body */}
                     <div className="p-4">
-                      <h3 className="text-sm font-medium text-text-primary group-hover:text-brand-600 transition-colors line-clamp-2 mb-2">
+                      <h3 className="text-sm font-medium text-text-primary line-clamp-2 mb-2">
                         {event.title}
                       </h3>
 
@@ -320,7 +319,7 @@ export function HomePage() {
                         })()}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })
             )}
