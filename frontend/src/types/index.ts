@@ -20,7 +20,7 @@ export interface AuthState {
 }
 
 // Event types
-export type EventCategory = 'sports' | 'finance' | 'crypto' | 'politics' | 'entertainment';
+export type EventCategory = 'sports' | 'finance' | 'crypto' | 'politics' | 'entertainment' | 'news' | 'other';
 export type EventStatus = 'draft' | 'upcoming' | 'open' | 'locked' | 'resolved' | 'cancelled';
 
 export interface EventOption {

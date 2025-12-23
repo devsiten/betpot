@@ -34,6 +34,8 @@ const categoryColors: Record<EventCategory, string> = {
   crypto: 'bg-orange-500/10 text-orange-400',
   politics: 'bg-red-500/10 text-red-400',
   entertainment: 'bg-pink-500/10 text-pink-400',
+  news: 'bg-purple-500/10 text-purple-400',
+  other: 'bg-gray-500/10 text-gray-400',
 };
 
 export function AdminEvents() {
@@ -130,6 +132,8 @@ export function AdminEvents() {
             <option value="crypto">Crypto</option>
             <option value="politics">Politics</option>
             <option value="entertainment">Entertainment</option>
+            <option value="news">News</option>
+            <option value="other">Other</option>
           </select>
         </div>
       </div>

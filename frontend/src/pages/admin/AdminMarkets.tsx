@@ -77,17 +77,33 @@ export function AdminMarkets() {
     // Create jackpot mutation
     const createJackpotMutation = useMutation({
         mutationFn: async (event: ExternalEvent) => {
+            // Determine the correct category
+            // Sports events from odds-api always use 'sports' category
+            // Polymarket events use their category or the selected polymarket category
+            const validCategories = ['sports', 'finance', 'crypto', 'politics', 'entertainment', 'news', 'other'];
+            let category: string;
+
+            if (eventSource === 'sports') {
+                category = 'sports';
+            } else {
+                // For Polymarket, use event category, selected category, or fallback
+                category = event.category || selectedPolyCategory || 'other';
+                // Map 'latest' to 'other' since it's not a real category
+                if (!validCategories.includes(category)) {
+                    category = 'other';
+                }
+            }
+
             // Create event from external data with jackpot flag
             return api.createJackpotFromExternal({
                 externalId: event.id,
                 externalSource: event.source,
                 title: event.title,
                 description: event.description || `${event.homeTeam || ''} vs ${event.awayTeam || ''}`.trim() || event.title,
-                category: event.category || 'sports',
+                category: category as 'sports' | 'finance' | 'crypto' | 'politics' | 'entertainment' | 'news' | 'other',
                 options: event.options.map(opt => ({
                     label: opt.label,
                     ticketLimit: parseInt(ticketLimit),
-                    // percentage removed - backend doesn't accept it
                 })),
                 eventTime: event.startTime,
                 ticketPrice: parseFloat(ticketPrice),
