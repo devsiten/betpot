@@ -284,20 +284,29 @@ export function MainLayout() {
                     {isSigningIn ? 'Signing...' : 'Sign In'}
                   </button>
                 ) : (
-                  /* User menu dropdown */
+                  /* Dashboard button with dropdown */
                   <div className="relative user-menu-container">
+                    <NavLink
+                      to={isAdmin() ? '/admin' : '/dashboard'}
+                      className="flex items-center gap-2 btn btn-primary"
+                    >
+                      {isAdmin() ? (
+                        <>
+                          <Settings className="w-4 h-4" />
+                          Admin Dashboard
+                        </>
+                      ) : (
+                        <>
+                          <Ticket className="w-4 h-4" />
+                          Dashboard
+                        </>
+                      )}
+                    </NavLink>
+
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background-secondary border border-border hover:border-border-dark transition-all"
+                      className="ml-2 p-2 rounded-lg hover:bg-background-secondary transition-all"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-positive-400 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">
-                          {publicKey?.toBase58().slice(0, 2).toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="text-sm text-text-primary font-medium">
-                        {publicKey?.toBase58().slice(0, 4)}...{publicKey?.toBase58().slice(-4)}
-                      </span>
                       <ChevronDown className={clsx('w-4 h-4 text-text-muted transition-transform', userMenuOpen && 'rotate-180')} />
                     </button>
 
