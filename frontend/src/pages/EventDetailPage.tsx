@@ -309,13 +309,29 @@ export function EventDetailPage() {
               : 0;
             const isWinner = 'isWinner' in option && option.isWinner;
 
+            console.log('Rendering option:', {
+              label: option.label,
+              optId,
+              isOpen,
+              disabled: !isOpen,
+              isSelected
+            });
+
             return (
               <button
                 key={optId}
                 onClick={() => {
+                  console.log('BUTTON CLICKED!', {
+                    optId,
+                    label: option.label,
+                    isOpen,
+                    currentSelected: selectedOption
+                  });
                   if (isOpen) {
                     setSelectedOption(isSelected ? null : optId);
-                    console.log('Option clicked:', optId, option.label);
+                    console.log('Option selected:', optId, option.label);
+                  } else {
+                    console.error('Cannot click - event is not open! Status:', event.status);
                   }
                 }}
                 disabled={!isOpen}
