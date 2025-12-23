@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Send, MessageCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Send, MessageCircle, RefreshCw, AlertCircle, Trophy } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
@@ -151,13 +151,22 @@ export function EventChatPage() {
                             {chatData?.messages.length || 0} messages • Status: {chatData?.event.status}
                         </p>
                     </div>
-                    <button
-                        onClick={fetchMessages}
-                        className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
-                        title="Refresh"
-                    >
-                        <RefreshCw className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to={`/events/${eventId}`}
+                            className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        >
+                            <Trophy className="w-4 h-4" />
+                            Place Bet
+                        </Link>
+                        <button
+                            onClick={fetchMessages}
+                            className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
+                            title="Refresh"
+                        >
+                            <RefreshCw className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
