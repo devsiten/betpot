@@ -92,12 +92,14 @@ export function EventsPage() {
 
   // Render sports event card (Home/Draw/Win style)
   const renderSportsCard = (event: any) => {
-    // All events are now clickable
-    // Jackpot events go to chat, non-jackpot go to detail page (which will show "not yet jackpot" message)
-    const linkTo = (event as any).isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
+    const isJackpot = (event as any).isJackpot;
+    const CardWrapper = isJackpot ? Link : 'div';
+    const cardProps = isJackpot
+      ? { to: `/events/${event.id}`, className: "card card-hover p-0 overflow-hidden block cursor-pointer" }
+      : { className: "card p-0 overflow-hidden block" };
 
     return (
-      <Link key={event.id} to={linkTo} className="card card-hover p-0 overflow-hidden block cursor-pointer">
+      <CardWrapper key={event.id} {...cardProps as any}>
         {/* Event Header */}
         <div className="p-5 border-b border-border bg-background-secondary">
           <div className="flex items-start justify-between mb-3">
@@ -170,20 +172,21 @@ export function EventsPage() {
             </div>
           )}
         </div>
-      </Link>
+      </CardWrapper>
     );
   };
 
   // Render Polymarket event card (Yes/No style with expiration)
   const renderPolymarketCard = (event: any) => {
     const opts = getPolymarketOptions(event);
-
-    // All events are now clickable
-    // Jackpot events go to chat, non-jackpot go to detail page
-    const linkTo = (event as any).isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
+    const isJackpot = (event as any).isJackpot;
+    const CardWrapper = isJackpot ? Link : 'div';
+    const cardProps = isJackpot
+      ? { to: `/events/${event.id}`, className: "card card-hover p-0 overflow-hidden block cursor-pointer" }
+      : { className: "card p-0 overflow-hidden block" };
 
     return (
-      <Link key={event.id} to={linkTo} className="card card-hover p-0 overflow-hidden block cursor-pointer">
+      <CardWrapper key={event.id} {...cardProps as any}>
         {/* Event Image */}
         {event.image && (
           <div className="h-32 bg-gradient-to-br from-positive-100 to-brand-100 relative overflow-hidden">
