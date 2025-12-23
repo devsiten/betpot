@@ -72,10 +72,18 @@ export function EventDetailPage() {
 
     const totalCost = (event?.ticketPrice || 0) * quantity;
 
-    // Check USDC balance
+    // TEMPORARILY DISABLED - Check USDC balance
+    // TODO: Re-enable after fixing balance detection
+    /*
     if (usdcBalance < totalCost) {
       toast.error(`Insufficient USDC balance. Need ${formatUSDC(totalCost)}, have ${formatUSDC(usdcBalance)}`);
       return;
+    }
+    */
+
+    // Warn user but allow to proceed
+    if (usdcBalance < totalCost && usdcBalance > 0) {
+      console.warn('USDC balance check:', { need: totalCost, have: usdcBalance });
     }
 
     setIsPurchasing(true);
