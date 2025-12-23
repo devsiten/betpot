@@ -170,7 +170,11 @@ export function AdminEvents() {
                 </tr>
               ) : (
                 events.map((event) => (
-                  <tr key={event.id} className="group">
+                  <tr
+                    key={event.id}
+                    className="group cursor-pointer hover:bg-background-secondary transition-colors"
+                    onClick={() => navigate(`/admin/events/${event.id}`)}
+                  >
                     <td>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500/20 to-accent-500/20 flex items-center justify-center">
@@ -206,7 +210,7 @@ export function AdminEvents() {
                     <td className="text-dark-300">
                       {format(new Date(event.eventTime), 'MMM dd, yyyy HH:mm')}
                     </td>
-                    <td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <div className="relative">
                         <button
                           onClick={() => setActionMenu(actionMenu === event.id ? null : event.id)}
