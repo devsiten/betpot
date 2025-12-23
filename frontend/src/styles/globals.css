@@ -4,11 +4,7 @@
 
 @layer base {
   body {
-    @apply text-gray-100;
-    background-color: #1a2332;
-    background-image: 
-      radial-gradient(ellipse at top, rgba(45, 65, 85, 0.3) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    @apply text-text-primary bg-background;
   }
 
   h1,
@@ -17,36 +13,32 @@
   h4,
   h5,
   h6 {
-    @apply tracking-tight font-semibold text-white;
+    @apply tracking-tight font-semibold text-text-primary;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar - Light theme */
   ::-webkit-scrollbar {
     @apply w-2;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-[#1a2332];
+    @apply bg-background-secondary;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-white/20 rounded-full hover:bg-white/30;
+    @apply bg-border-dark rounded-full hover:bg-text-muted;
   }
 }
 
 @layer components {
 
-  /* Cards */
+  /* Cards - Light theme with subtle shadows */
   .card {
-    @apply bg-[#232f42]/80 backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-300;
+    @apply bg-background-card border border-border rounded-xl transition-all duration-300 shadow-soft;
   }
 
   .card-hover {
-    @apply hover:border-white/20 hover:bg-[#2a3a50]/90 hover:-translate-y-1;
-  }
-
-  .card-hover:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    @apply hover:shadow-card hover:border-border-dark hover:-translate-y-1;
   }
 
   .stat-card {
@@ -54,101 +46,97 @@
   }
 
   .stat-value {
-    @apply text-3xl font-bold text-white tracking-tight;
+    @apply text-3xl font-bold text-text-primary tracking-tight;
   }
 
-  /* Buttons - Clean White Style */
+  /* Buttons - Clean fintech style */
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm;
   }
 
   .btn-primary {
-    @apply bg-white text-[#1a2332] hover:bg-gray-100 font-semibold;
+    @apply bg-brand-500 text-white hover:bg-brand-600 font-semibold shadow-soft;
   }
 
   .btn-secondary {
-    @apply bg-transparent text-white border border-white/30 hover:bg-white/10 hover:border-white/50 font-medium;
+    @apply bg-transparent text-text-primary border border-border-dark hover:bg-background-secondary hover:border-text-muted font-medium;
   }
 
   .btn-accent {
-    @apply bg-teal-500 hover:bg-teal-400 text-white font-semibold;
+    @apply bg-positive-500 hover:bg-positive-600 text-white font-semibold;
   }
 
   .btn-ghost {
-    @apply text-gray-300 hover:text-white hover:bg-white/10 font-medium;
+    @apply text-text-secondary hover:text-text-primary hover:bg-background-secondary font-medium;
   }
 
   .btn-danger {
-    @apply bg-red-500 text-white hover:bg-red-600 font-semibold;
+    @apply bg-negative-400 text-white hover:bg-negative-600 font-semibold;
   }
 
-  /* Inputs */
+  /* Inputs - Light theme */
   .input {
-    @apply w-full px-4 py-3 bg-[#232f42] border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-teal-500/50 transition-all text-sm;
-  }
-
-  .input:focus {
-    box-shadow: 0 0 10px rgba(20, 184, 166, 0.2);
+    @apply w-full px-4 py-3 bg-background-card border border-border rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all text-sm;
   }
 
   .label {
-    @apply block text-xs font-medium text-gray-400 mb-2;
+    @apply block text-xs font-medium text-text-secondary mb-2;
   }
 
-  /* Status Badges */
+  /* Status Badges - Softer colors */
   .badge {
     @apply px-2.5 py-1 rounded text-xs font-medium;
   }
 
   .badge-success {
-    @apply bg-green-500/20 text-green-400 border border-green-500/30;
+    @apply bg-positive-100 text-positive-700 border border-positive-200;
   }
 
   .badge-warning {
-    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+    @apply bg-brand-100 text-brand-700 border border-brand-200;
   }
 
   .badge-error {
-    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+    @apply bg-negative-100 text-negative-600 border border-negative-200;
   }
 
   .badge-info {
-    @apply bg-teal-500/20 text-teal-400 border border-teal-500/30;
+    @apply bg-positive-100 text-positive-600 border border-positive-200;
   }
 
   .badge-neutral {
-    @apply bg-gray-700/50 text-gray-300 border border-gray-600/30;
+    @apply bg-background-secondary text-text-secondary border border-border;
   }
 
-  /* Gradient Text */
+  /* Gradient Text - Warm orange gradient */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-400 font-semibold;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-500 to-brand-400 font-semibold;
   }
 
-  /* Tables */
+  /* Tables - Light theme */
   .table {
     @apply w-full text-left border-collapse;
   }
 
   .table th {
-    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-400 border-b border-white/10;
+    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-text-muted border-b border-border;
   }
 
   .table td {
-    @apply px-4 py-4 text-sm text-gray-200 border-b border-white/5;
+    @apply px-4 py-4 text-sm text-text-primary border-b border-border-light;
   }
 
   .table tr:hover td {
-    @apply bg-white/[0.05];
+    @apply bg-background-secondary;
   }
 }
 
 @layer utilities {
   .text-glow {
-    text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
   }
 
   .border-glow {
-    box-shadow: 0 0 10px rgba(20, 184, 166, 0.2);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
   }
 }

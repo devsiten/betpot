@@ -94,19 +94,19 @@ export function EventsPage() {
   const renderSportsCard = (event: any) => (
     <Link key={event.id} to={`/events/${event.id}`} className="card card-hover p-0 overflow-hidden block cursor-pointer">
       {/* Event Header */}
-      <div className="p-5 border-b border-white/5 bg-white/[0.02]">
+      <div className="p-5 border-b border-border bg-background-secondary">
         <div className="flex items-start justify-between mb-3">
           <span className="badge badge-success">Live</span>
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded">
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-background-secondary px-2 py-1 rounded border border-border">
             {event.sport || 'Sports'}
           </span>
         </div>
-        <h3 className="text-lg font-bold text-white leading-tight line-clamp-2">
+        <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
           {event.title}
         </h3>
         {/* Start Time / Match Date */}
         {event.startTime && (
-          <div className="flex items-center gap-1 text-xs text-cyan-400 font-mono mt-2">
+          <div className="flex items-center gap-1 text-xs text-positive-600 font-mono mt-2">
             <Clock className="w-3 h-3" />
             {format(new Date(event.startTime), 'MMM dd, yyyy HH:mm')}
           </div>
@@ -120,25 +120,25 @@ export function EventsPage() {
             {event.options.slice(0, 3).map((option: any, idx: number) => {
               // Determine the display label and color
               let displayLabel = option.label;
-              let bgColor = 'bg-blue-500/10';
-              let borderColor = 'border-blue-500/30';
-              let textColor = 'text-blue-400';
+              let bgColor = 'bg-positive-100';
+              let borderColor = 'border-positive-200';
+              let textColor = 'text-positive-700';
 
               if (option.type === 'home' || idx === 0) {
                 displayLabel = 'Home';
-                bgColor = 'bg-green-500/10';
-                borderColor = 'border-green-500/30';
-                textColor = 'text-green-400';
+                bgColor = 'bg-positive-100';
+                borderColor = 'border-positive-200';
+                textColor = 'text-positive-700';
               } else if (option.type === 'draw' || option.label === 'Draw') {
                 displayLabel = 'Draw';
-                bgColor = 'bg-gray-500/10';
-                borderColor = 'border-gray-500/30';
-                textColor = 'text-gray-300';
+                bgColor = 'bg-background-secondary';
+                borderColor = 'border-border-dark';
+                textColor = 'text-text-secondary';
               } else if (option.type === 'away' || idx === 2) {
                 displayLabel = 'Away';
-                bgColor = 'bg-red-500/10';
-                borderColor = 'border-red-500/30';
-                textColor = 'text-red-400';
+                bgColor = 'bg-negative-100';
+                borderColor = 'border-negative-200';
+                textColor = 'text-negative-600';
               }
 
               return (
@@ -160,7 +160,7 @@ export function EventsPage() {
             })}
           </div>
         ) : (
-          <div className="text-center p-3 rounded-lg bg-white/5 text-gray-500 text-xs">
+          <div className="text-center p-3 rounded-lg bg-background-secondary text-text-muted text-xs">
             No odds available
           </div>
         )}
@@ -169,7 +169,6 @@ export function EventsPage() {
   );
 
   // Render Polymarket event card (Yes/No style with expiration)
-  // Now links to internal chat room instead of external Polymarket
   const renderPolymarketCard = (event: any) => {
     const opts = getPolymarketOptions(event);
 
@@ -177,31 +176,31 @@ export function EventsPage() {
       <Link key={event.id} to={`/events/${event.id}/chat`} className="card card-hover p-0 overflow-hidden block cursor-pointer">
         {/* Event Image */}
         {event.image && (
-          <div className="h-32 bg-gradient-to-br from-cyan-900/30 to-purple-900/30 relative overflow-hidden">
+          <div className="h-32 bg-gradient-to-br from-positive-100 to-brand-100 relative overflow-hidden">
             <img
               src={event.image}
               alt={event.title}
-              className="w-full h-full object-cover opacity-80"
+              className="w-full h-full object-cover opacity-90"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
         )}
 
         {/* Event Header */}
-        <div className="p-5 border-b border-white/5 bg-white/[0.02]">
+        <div className="p-5 border-b border-border bg-background-secondary">
           <div className="flex items-start justify-between mb-3">
             <span className="badge badge-success">{event.active !== false ? 'Live' : 'Upcoming'}</span>
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-background-secondary px-2 py-1 rounded border border-border">
               {selectedCategory}
             </span>
           </div>
-          <h3 className="text-lg font-bold text-white leading-tight line-clamp-2">
+          <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
             {event.title}
           </h3>
 
           {/* Expiration Date */}
           {(event.endTime || event.rawData?.endDate) && (
-            <div className="flex items-center gap-1 text-xs text-orange-400 font-mono mt-2">
+            <div className="flex items-center gap-1 text-xs text-brand-600 font-mono mt-2">
               <Clock className="w-3 h-3" />
               Ends: {format(new Date(event.endTime || event.rawData?.endDate), 'MMM dd, yyyy')}
             </div>
@@ -211,7 +210,7 @@ export function EventsPage() {
         {/* Betting Options - Yes/No Style */}
         <div className="p-5">
           {opts.length === 0 ? (
-            <div className="text-center p-3 rounded-lg bg-white/5 text-gray-500 text-xs">
+            <div className="text-center p-3 rounded-lg bg-background-secondary text-text-muted text-xs">
               No outcome data
             </div>
           ) : opts.length === 2 ? (
@@ -228,19 +227,19 @@ export function EventsPage() {
                     className={clsx(
                       'flex-1 text-center p-3 rounded-xl border-2 transition-all',
                       idx === 0
-                        ? 'bg-green-500/10 border-green-500/30'
-                        : 'bg-red-500/10 border-red-500/30'
+                        ? 'bg-positive-100 border-positive-200'
+                        : 'bg-negative-100 border-negative-200'
                     )}
                   >
                     <span className={clsx(
                       'block text-xs font-bold uppercase tracking-wider mb-1',
-                      idx === 0 ? 'text-green-400' : 'text-red-400'
+                      idx === 0 ? 'text-positive-700' : 'text-negative-600'
                     )}>
                       {displayLabel}
                     </span>
                     <span className={clsx(
                       'block text-2xl font-bold',
-                      idx === 0 ? 'text-green-400' : 'text-red-400'
+                      idx === 0 ? 'text-positive-700' : 'text-negative-600'
                     )}>
                       {percentage}%
                     </span>
@@ -253,13 +252,13 @@ export function EventsPage() {
               {opts.slice(0, 3).map((option: any, idx: number) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-xl bg-black/40 border border-white/10 text-center"
+                  className="p-3 rounded-xl bg-background-secondary border border-border text-center"
                 >
-                  <span className="block text-xs font-bold text-white truncate">
+                  <span className="block text-xs font-bold text-text-primary truncate">
                     {option.label}
                   </span>
                   {option.percentage !== undefined && (
-                    <span className="block text-lg font-bold text-cyan-400 mt-1">
+                    <span className="block text-lg font-bold text-positive-600 mt-1">
                       {option.percentage}%
                     </span>
                   )}
@@ -270,9 +269,9 @@ export function EventsPage() {
 
           {/* Tags */}
           {event.tags && event.tags.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap gap-1">
+            <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-1">
               {event.tags.slice(0, 3).map((tag: string, idx: number) => (
-                <span key={idx} className="text-[10px] px-2 py-0.5 bg-white/5 text-gray-400 rounded">
+                <span key={idx} className="text-[10px] px-2 py-0.5 bg-background-secondary text-text-muted rounded border border-border">
                   {tag}
                 </span>
               ))}
@@ -287,8 +286,8 @@ export function EventsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white uppercase tracking-wider">Prediction Markets</h1>
-        <p className="text-gray-400 mt-1 font-mono text-sm">Browse live events across sports, crypto, politics, and more</p>
+        <h1 className="text-3xl font-bold text-text-primary uppercase tracking-wider">Prediction Markets</h1>
+        <p className="text-text-secondary mt-1 font-mono text-sm">Browse live events across sports, crypto, politics, and more</p>
       </div>
 
       {/* Main Category Tabs */}
@@ -302,8 +301,8 @@ export function EventsPage() {
               className={clsx(
                 'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all whitespace-nowrap',
                 selectedCategory === cat.key
-                  ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-[0_0_20px_rgba(14,165,233,0.3)]'
-                  : 'bg-white/5 text-gray-400 hover:text-white border border-white/10 hover:border-white/20'
+                  ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
+                  : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
               <Icon className="w-4 h-4" />
@@ -323,8 +322,8 @@ export function EventsPage() {
               className={clsx(
                 'px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap',
                 selectedLeague === league.key
-                  ? 'bg-white/20 text-white'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-background-secondary text-text-primary border border-border-dark'
+                  : 'bg-background-secondary text-text-muted hover:text-text-primary hover:border-border-dark border border-border'
               )}
             >
               {league.label}
@@ -349,15 +348,15 @@ export function EventsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="card p-6">
-              <div className="h-40 bg-white/5 animate-pulse rounded-lg" />
+              <div className="h-40 bg-background-secondary animate-pulse rounded-lg" />
             </div>
           ))}
         </div>
       ) : events.length === 0 ? (
         <div className="text-center py-16 card">
-          <Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg font-bold">No events found</p>
-          <p className="text-gray-500 text-sm mt-1 font-mono">Try selecting a different category or league</p>
+          <Calendar className="w-16 h-16 text-text-muted mx-auto mb-4" />
+          <p className="text-text-secondary text-lg font-bold">No events found</p>
+          <p className="text-text-muted text-sm mt-1 font-mono">Try selecting a different category or league</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -372,7 +371,7 @@ export function EventsPage() {
       {/* Load More Button */}
       {!isLoading && allEvents.length > 0 && (
         <div className="text-center mt-8 space-y-3">
-          <p className="text-gray-500 text-sm font-mono">
+          <p className="text-text-muted text-sm font-mono">
             Showing {events.length} of {allEvents.length} events
           </p>
           {hasMore && (
