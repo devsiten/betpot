@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Calendar, RefreshCw, Bitcoin, Vote, Trophy, Film, TrendingUp, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
-import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
 
 // Main category tabs
@@ -27,15 +26,7 @@ const sportsLeagues = [
   { key: 'americanfootball_nfl', label: 'NFL' },
 ];
 
-// Admin wallet addresses
-const ADMIN_WALLETS = [
-  '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
-  'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
-  '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
-];
-
 export function EventsPage() {
-  const { publicKey } = useWallet();
   const [selectedCategory, setSelectedCategory] = useState('sports');
   const [selectedLeague, setSelectedLeague] = useState('soccer_epl');
   const [displayCount, setDisplayCount] = useState(24);
