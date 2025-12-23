@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Calendar, RefreshCw, Bitcoin, Vote, Trophy, Film, TrendingUp, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
+import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
 
 // Main category tabs
@@ -26,10 +27,21 @@ const sportsLeagues = [
   { key: 'americanfootball_nfl', label: 'NFL' },
 ];
 
+// Admin wallet addresses
+const ADMIN_WALLETS = [
+  '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
+  'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
+  '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
+];
+
 export function EventsPage() {
+  const { publicKey } = useWallet();
   const [selectedCategory, setSelectedCategory] = useState('sports');
   const [selectedLeague, setSelectedLeague] = useState('soccer_epl');
   const [displayCount, setDisplayCount] = useState(24);
+
+  // Check if user is admin
+  const isAdmin = publicKey && ADMIN_WALLETS.includes(publicKey.toBase58());
 
   // Reset displayCount when category changes
   const handleCategoryChange = (key: string) => {
@@ -91,89 +103,109 @@ export function EventsPage() {
   };
 
   // Render sports event card (Home/Draw/Win style)
-  const renderSportsCard = (event: any) => (
-    <Link key={event.id} to={`/events/${event.id}`} className="card card-hover p-0 overflow-hidden block cursor-pointer">
-      {/* Event Header */}
-      <div className="p-5 border-b border-border bg-background-secondary">
-        <div className="flex items-start justify-between mb-3">
-          <span className="badge badge-success">Live</span>
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-background-secondary px-2 py-1 rounded border border-border">
-            {event.sport || 'Sports'}
-          </span>
+  const renderSportsCard = (event: any) => {
+    // Only jackpot events are clickable (link to chat), or if user is admin
+    const isClickable = event.isJackpot || isAdmin;
+    const linkTo = event.isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
+
+    const CardWrapper = isClickable ? Link : 'div';
+    const cardProps = isClickable
+      ? { to: linkTo, className: "card card-hover p-0 overflow-hidden block cursor-pointer" }
+      : { className: "card p-0 overflow-hidden block opacity-60" };
+
+    return (
+      <CardWrapper key={event.id} {...cardProps as any}>
+        {/* Event Header */}
+        <div className="p-5 border-b border-border bg-background-secondary">
+          <div className="flex items-start justify-between mb-3">
+            <span className="badge badge-success">Live</span>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-background-secondary px-2 py-1 rounded border border-border">
+              {event.sport || 'Sports'}
+            </span>
+          </div>
+          <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
+            {event.title}
+          </h3>
+          {/* Start Time / Match Date */}
+          {event.startTime && (
+            <div className="flex items-center gap-1 text-xs text-positive-600 font-mono mt-2">
+              <Clock className="w-3 h-3" />
+              {format(new Date(event.startTime), 'MMM dd, yyyy HH:mm')}
+            </div>
+          )}
         </div>
-        <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
-          {event.title}
-        </h3>
-        {/* Start Time / Match Date */}
-        {event.startTime && (
-          <div className="flex items-center gap-1 text-xs text-positive-600 font-mono mt-2">
-            <Clock className="w-3 h-3" />
-            {format(new Date(event.startTime), 'MMM dd, yyyy HH:mm')}
-          </div>
-        )}
-      </div>
 
-      {/* Betting Options - Home/Draw/Win Style */}
-      <div className="p-5">
-        {event.options && event.options.length > 0 ? (
-          <div className="grid grid-cols-3 gap-2">
-            {event.options.slice(0, 3).map((option: any, idx: number) => {
-              // Determine the display label and color
-              let displayLabel = option.label;
-              let bgColor = 'bg-positive-100';
-              let borderColor = 'border-positive-200';
-              let textColor = 'text-positive-700';
+        {/* Betting Options - Home/Draw/Win Style */}
+        <div className="p-5">
+          {event.options && event.options.length > 0 ? (
+            <div className="grid grid-cols-3 gap-2">
+              {event.options.slice(0, 3).map((option: any, idx: number) => {
+                // Determine the display label and color
+                let displayLabel = option.label;
+                let bgColor = 'bg-positive-100';
+                let borderColor = 'border-positive-200';
+                let textColor = 'text-positive-700';
 
-              if (option.type === 'home' || idx === 0) {
-                displayLabel = 'Home';
-                bgColor = 'bg-positive-100';
-                borderColor = 'border-positive-200';
-                textColor = 'text-positive-700';
-              } else if (option.type === 'draw' || option.label === 'Draw') {
-                displayLabel = 'Draw';
-                bgColor = 'bg-background-secondary';
-                borderColor = 'border-border-dark';
-                textColor = 'text-text-secondary';
-              } else if (option.type === 'away' || idx === 2) {
-                displayLabel = 'Away';
-                bgColor = 'bg-negative-100';
-                borderColor = 'border-negative-200';
-                textColor = 'text-negative-600';
-              }
+                if (option.type === 'home' || idx === 0) {
+                  displayLabel = 'Home';
+                  bgColor = 'bg-positive-100';
+                  borderColor = 'border-positive-200';
+                  textColor = 'text-positive-700';
+                } else if (option.type === 'draw' || option.label === 'Draw') {
+                  displayLabel = 'Draw';
+                  bgColor = 'bg-background-secondary';
+                  borderColor = 'border-border-dark';
+                  textColor = 'text-text-secondary';
+                } else if (option.type === 'away' || idx === 2) {
+                  displayLabel = 'Away';
+                  bgColor = 'bg-negative-100';
+                  borderColor = 'border-negative-200';
+                  textColor = 'text-negative-600';
+                }
 
-              return (
-                <div
-                  key={idx}
-                  className={clsx(
-                    'p-3 rounded-xl border-2 text-center transition-all hover:scale-105',
-                    bgColor, borderColor
-                  )}
-                >
-                  <span className={clsx('block text-xs font-bold uppercase tracking-wider mb-1', textColor)}>
-                    {displayLabel}
-                  </span>
-                  <span className={clsx('block text-sm font-medium', textColor)}>
-                    {option.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center p-3 rounded-lg bg-background-secondary text-text-muted text-xs">
-            No odds available
-          </div>
-        )}
-      </div>
-    </Link>
-  );
+                return (
+                  <div
+                    key={idx}
+                    className={clsx(
+                      'p-3 rounded-xl border-2 text-center transition-all hover:scale-105',
+                      bgColor, borderColor
+                    )}
+                  >
+                    <span className={clsx('block text-xs font-bold uppercase tracking-wider mb-1', textColor)}>
+                      {displayLabel}
+                    </span>
+                    <span className={clsx('block text-sm font-medium', textColor)}>
+                      {option.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center p-3 rounded-lg bg-background-secondary text-text-muted text-xs">
+              No odds available
+            </div>
+          )}
+        </div>
+      </CardWrapper>
+    );
+  };
 
   // Render Polymarket event card (Yes/No style with expiration)
   const renderPolymarketCard = (event: any) => {
     const opts = getPolymarketOptions(event);
 
+    // Only jackpot events are clickable (link to chat), or if user is admin
+    const isClickable = event.isJackpot || isAdmin;
+    const linkTo = event.isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
+
+    const CardWrapper = isClickable ? Link : 'div';
+    const cardProps = isClickable
+      ? { to: linkTo, className: "card card-hover p-0 overflow-hidden block cursor-pointer" }
+      : { className: "card p-0 overflow-hidden block opacity-60" };
+
     return (
-      <Link key={event.id} to={`/events/${event.id}/chat`} className="card card-hover p-0 overflow-hidden block cursor-pointer">
+      <CardWrapper key={event.id} {...cardProps as any}>
         {/* Event Image */}
         {event.image && (
           <div className="h-32 bg-gradient-to-br from-positive-100 to-brand-100 relative overflow-hidden">
@@ -278,7 +310,7 @@ export function EventsPage() {
             </div>
           )}
         </div>
-      </Link>
+      </CardWrapper>
     );
   };
 
