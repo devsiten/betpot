@@ -94,6 +94,27 @@ export function AdminMarkets() {
                 }
             }
 
+            // Validate options - backend requires min 2, max 6
+            if (!event.options || event.options.length < 2) {
+                throw new Error('Event must have at least 2 betting options. This event cannot be used.');
+            }
+            if (event.options.length > 6) {
+                // Take only first 6 options
+                event.options = event.options.slice(0, 6);
+            }
+
+            // Validate eventTime - must be ISO 8601 format
+            if (!event.startTime) {
+                throw new Error('Event has no start time. Cannot create jackpot.');
+            }
+            
+            // Ensure eventTime is valid ISO format
+            const eventDate = new Date(event.startTime);
+            if (isNaN(eventDate.getTime())) {
+                throw new Error('Invalid event time format.');
+            }
+            const eventTimeISO = eventDate.toISOString();
+
             const payload = {
                 externalId: event.id,
                 externalSource: event.source,
@@ -104,7 +125,7 @@ export function AdminMarkets() {
                     label: opt.label,
                     ticketLimit: parseInt(ticketLimit),
                 })),
-                eventTime: event.startTime,
+                eventTime: eventTimeISO,
                 ticketPrice: parseFloat(ticketPrice),
                 isJackpot: true,
                 externalData: event,
