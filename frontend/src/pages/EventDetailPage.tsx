@@ -51,7 +51,16 @@ export function EventDetailPage() {
   // Fetch USDC balance when wallet connects
   useEffect(() => {
     if (publicKey && connection) {
-      getUSDCBalance(connection, publicKey).then(setUsdcBalance);
+      console.log('=== USDC Balance Check ===');
+      console.log('Wallet:', publicKey.toBase58());
+      console.log('Connection endpoint:', connection.rpcEndpoint);
+      getUSDCBalance(connection, publicKey).then(balance => {
+        console.log('Balance result:', balance);
+        setUsdcBalance(balance);
+      }).catch(err => {
+        console.error('Balance fetch error:', err);
+        setUsdcBalance(0);
+      });
     }
   }, [publicKey, connection]);
 
