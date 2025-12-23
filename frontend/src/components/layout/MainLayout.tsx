@@ -208,15 +208,6 @@ export function MainLayout() {
     { to: '/testnet-guide', label: 'Testnet Guide', icon: BookOpen },
   ];
 
-  const userNavItems = [
-    // Only show user Dashboard if connected AND authenticated AND not admin
-    ...(connected && isAuthenticated && !isAdmin() ? [
-      { to: '/dashboard', label: 'Dashboard', icon: Ticket },
-    ] : []),
-    // Admin Dashboard for admins only
-    ...(isAuthenticated && isAdmin() ? [{ to: '/admin', label: 'Admin Dashboard', icon: Settings }] : []),
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header Navigation */}
@@ -234,23 +225,6 @@ export function MainLayout() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    clsx(
-                      'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                      isActive
-                        ? 'bg-brand-100 text-brand-700'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary'
-                    )
-                  }
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </NavLink>
-              ))}
-              {userNavItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
@@ -360,24 +334,6 @@ export function MainLayout() {
 
             {/* Navigation Links */}
             {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  clsx(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
-                    isActive
-                      ? 'bg-brand-100 text-brand-700'
-                      : 'text-text-secondary hover:bg-background-secondary'
-                  )
-                }
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </NavLink>
-            ))}
-            {userNavItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
