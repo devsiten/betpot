@@ -4,24 +4,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Light theme base - SOFTER backgrounds
+        // Light theme base - subtle blue-gray tint for modern clean look
         background: {
-          DEFAULT: '#F5F5F5', // Softer gray instead of bright white
-          secondary: '#ECECEC',
+          DEFAULT: '#F8FAFC', // Very light blue-gray (slate-50)
+          secondary: '#F1F5F9', // Slightly darker (slate-100)
           card: '#FFFFFF',
         },
-        // Warm soft orange - Primary brand color
+        // Cyan - Primary brand color
         brand: {
-          50: '#FFF7ED',
-          100: '#FFEDD5',
-          200: '#FED7AA',
-          300: '#FDBA74',
-          400: '#FB923C',
-          500: '#F59E0B',
-          600: '#EA580C',
-          700: '#C2410C',
-          800: '#9A3412',
-          900: '#7C2D12',
+          50: '#ECFEFF',
+          100: '#CFFAFE',
+          200: '#A5F3FC',
+          300: '#67E8F9',
+          400: '#22D3EE',
+          500: '#06B6D4',
+          600: '#0891B2',
+          700: '#0E7490',
+          800: '#155E75',
+          900: '#164E63',
         },
         // Pastel lavender/purple - Positive actions
         positive: {
