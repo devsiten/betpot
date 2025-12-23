@@ -54,7 +54,7 @@ export function JackpotPage() {
                 {jackpots.map((jackpot: any) => (
                     <Link
                         key={jackpot.id}
-                        to={`/events/${jackpot.id}/chat`}
+                        to={`/events/${jackpot.id}`}
                         className="card p-6 hover:border-brand-300 transition-all group cursor-pointer bg-gradient-to-br from-brand-50 to-background-card shadow-card"
                     >
                         <div className="flex items-start justify-between mb-4">

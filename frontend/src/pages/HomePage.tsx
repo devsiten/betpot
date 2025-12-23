@@ -236,7 +236,7 @@ export function HomePage() {
                 return (
                   <Link
                     key={event.id}
-                    to={`/events/${event.id}/chat`}
+                    to={`/events/${event.id}`}
                     className="card card-hover p-0 group overflow-hidden block cursor-pointer"
                   >
                     {/* Event Image */}
