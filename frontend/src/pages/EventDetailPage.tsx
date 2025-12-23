@@ -291,6 +291,15 @@ export function EventDetailPage() {
           {isOpen ? 'Select Your Prediction' : 'Betting Options'}
         </h2>
 
+        {/* DEBUG INFO */}
+        <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-600 rounded text-xs">
+          <p className="text-yellow-400 font-bold mb-2">DEBUG INFO:</p>
+          <p className="text-yellow-300">Event Status: {event.status}</p>
+          <p className="text-yellow-300">Is Open: {isOpen ? 'YES' : 'NO'}</p>
+          <p className="text-yellow-300">Options Count: {(pool?.options || event.options)?.length || 0}</p>
+          <p className="text-yellow-300">Selected Option: {selectedOption || 'none'}</p>
+        </div>
+
         <div className="space-y-3">
           {(pool?.options || event.options)?.map((option) => {
             const optId = ('id' in option ? option.id : null) || option.optionId;
