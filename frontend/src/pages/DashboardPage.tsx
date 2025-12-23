@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, TrendingUp, Zap } from 'lucide-react';
+import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, TrendingUp, Zap, Search } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
@@ -16,6 +16,7 @@ export function DashboardPage() {
     const [editingUsername, setEditingUsername] = useState(false);
     const [username, setUsername] = useState('');
     const [copied, setCopied] = useState(false);
+    const [searchTicketId, setSearchTicketId] = useState('');
 
     // Fetch user stats
     const { data: statsData } = useQuery({
@@ -33,6 +34,11 @@ export function DashboardPage() {
 
     const stats = statsData?.data;
     const tickets = ticketsData?.data || [];
+
+    // Filter tickets by search
+    const filteredTickets = searchTicketId.trim()
+        ? tickets.filter(ticket => ticket.id.toLowerCase().includes(searchTicketId.toLowerCase()))
+        : tickets;
 
     const formatAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -214,26 +220,38 @@ export function DashboardPage() {
 
             {/* Bet History - Light theme table */}
             <div className="bg-background-card rounded-2xl border border-border overflow-hidden shadow-card">
-                <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
-                    <h2 className="text-lg font-bold text-text-primary">Ticket History</h2>
-                    <span className="text-xs text-text-muted">{tickets.length} tickets</span>
+                <div className="p-4 sm:p-5 border-b border-border">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                        <h2 className="text-lg font-bold text-text-primary">Ticket History</h2>
+                        <span className="text-xs text-text-muted">{filteredTickets.length} of {tickets.length} tickets</span>
+                    </div>
+
+                    {/* Search Input */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                        <input
+                            type="text"
+                            placeholder="Search by Ticket ID..."
+                            value={searchTicketId}
+                            onChange={(e) => setSearchTicketId(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-background-secondary border border-border rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-colors text-sm"
+                        />
+                    </div>
                 </div>
 
                 {isLoading ? (
                     <div className="p-12 text-center">
                         <div className="animate-spin w-10 h-10 border-3 border-brand-500 border-t-transparent rounded-full mx-auto"></div>
                     </div>
-                ) : tickets.length === 0 ? (
-                    <div className="p-12 sm:p-16 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-background-secondary flex items-center justify-center mx-auto mb-4">
-                            <Clock className="w-8 h-8 text-text-muted" />
-                        </div>
-                        <p className="text-text-secondary font-medium mb-1">No bets yet</p>
-                        <p className="text-text-muted text-sm">Place your first bet to see history here</p>
+                ) : filteredTickets.length === 0 ? (
+                    <div className="p-12 text-center">
+                        <p className="text-text-muted">
+                            {searchTicketId ? 'No tickets found matching your search' : 'No tickets yet'}
+                        </p>
                     </div>
                 ) : (
                     <div className="divide-y divide-border">
-                        {tickets.map((ticket: any) => (
+                        {filteredTickets.map((ticket: any) => (
                             <div key={ticket.id} className="p-4 sm:p-5 hover:bg-background-secondary transition-colors">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                     <div className="flex items-start sm:items-center gap-3 sm:gap-4">
