@@ -100,6 +100,30 @@ export function EventDetailPage() {
   const isOpen = event.status === 'open';
   const totalPool = pool?.totalPool || event.totalPool || 0;
 
+  // Show friendly message for non-jackpot events
+  if (!event.isJackpot) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-100 to-positive-100 flex items-center justify-center mx-auto mb-6 border border-brand-200">
+          <Trophy className="w-10 h-10 text-brand-600" />
+        </div>
+        <h1 className="text-2xl font-bold text-text-primary mb-3">Not Yet a Jackpot Event</h1>
+        <p className="text-text-secondary text-lg mb-2">This event is not yet featured in our jackpot.</p>
+        <p className="text-text-muted mb-8">🤞 Let's hope it gets selected soon!</p>
+        <div className="flex gap-3 justify-center">
+          <Link to="/events" className="btn btn-primary">
+            <ArrowLeft className="w-4 h-4" />
+            Browse All Events
+          </Link>
+          <Link to="/jackpot" className="btn btn-secondary">
+            <Trophy className="w-4 h-4" />
+            View Jackpots
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       {/* Back link */}
