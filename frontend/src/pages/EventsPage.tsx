@@ -40,9 +40,6 @@ export function EventsPage() {
   const [selectedLeague, setSelectedLeague] = useState('soccer_epl');
   const [displayCount, setDisplayCount] = useState(24);
 
-  // Check if user is admin
-  const isAdmin = publicKey && ADMIN_WALLETS.includes(publicKey.toBase58());
-
   // Reset displayCount when category changes
   const handleCategoryChange = (key: string) => {
     setSelectedCategory(key);
@@ -106,7 +103,7 @@ export function EventsPage() {
   const renderSportsCard = (event: any) => {
     // All events are now clickable
     // Jackpot events go to chat, non-jackpot go to detail page (which will show "not yet jackpot" message)
-    const linkTo = event.isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
+    const linkTo = (event as any).isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
 
     return (
       <Link key={event.id} to={linkTo} className="card card-hover p-0 overflow-hidden block cursor-pointer">
@@ -192,7 +189,7 @@ export function EventsPage() {
 
     // All events are now clickable
     // Jackpot events go to chat, non-jackpot go to detail page
-    const linkTo = event.isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
+    const linkTo = (event as any).isJackpot ? `/events/${event.id}/chat` : `/events/${event.id}`;
 
     return (
       <Link key={event.id} to={linkTo} className="card card-hover p-0 overflow-hidden block cursor-pointer">

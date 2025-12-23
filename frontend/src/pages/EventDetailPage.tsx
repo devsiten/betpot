@@ -101,7 +101,7 @@ export function EventDetailPage() {
   const totalPool = pool?.totalPool || event.totalPool || 0;
 
   // Show friendly message for non-jackpot events
-  if (!event.isJackpot) {
+  if (!(event as any).isJackpot) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-100 to-positive-100 flex items-center justify-center mx-auto mb-6 border border-brand-200">
