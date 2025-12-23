@@ -14,6 +14,8 @@
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",
     "@neondatabase/serverless": "^0.10.4",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
     "bs58": "^5.0.0",
     "drizzle-orm": "^0.38.3",
     "hono": "^4.6.14",

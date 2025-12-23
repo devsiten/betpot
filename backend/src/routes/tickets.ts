@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { tickets, events, eventOptions, users } from '../db/schema';
 import { auth } from '../middleware/auth';
 import { AppContext } from '../types';
+import { verifyUSDCTransaction } from '../utils/usdc';
 
 const ticketsRoutes = new Hono<AppContext>();
 
@@ -65,16 +66,33 @@ ticketsRoutes.post('/purchase', zValidator('json', purchaseSchema), async (c) =>
     }, 400);
   }
 
-  // TODO: Verify transaction on-chain before creating tickets
-  // The on-chain payment should include:
-  // - Ticket price (goes to pool)
-  // - 1% platform fee (collected separately, not added to pool)
-  // const isValidTx = await verifySolanaTransaction(data.purchaseTx, ...);
-
   const ticketPrice = event.ticketPrice || 10;
   const totalCost = ticketPrice * data.quantity;
-  // Note: Platform collects 1% fee during payment (handled externally)
-  // Only the ticket price amount is added to the pool
+
+  // Verify USDC transaction on-chain (only for SOL chain)
+  if (data.chain === 'SOL') {
+    try {
+      const isValid = await verifyUSDCTransaction(
+        data.purchaseTx,
+        totalCost,
+        data.walletAddress
+      );
+
+      if (!isValid) {
+        return c.json({
+          success: false,
+          error: 'Transaction verification failed. Please ensure you sent the correct amount of USDC.'
+        }, 400);
+      }
+    } catch (error) {
+      console.error('Transaction verification error:', error);
+      return c.json({
+        success: false,
+        error: 'Failed to verify transaction. Please try again.'
+      }, 500);
+    }
+  }
+
   const now = new Date();
 
   // Create tickets
