@@ -84,7 +84,7 @@ export async function createUSDCTransferTransaction(
     const transaction = new Transaction().add(transferInstruction);
 
     // Get recent blockhash
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    const { blockhash } = await connection.getLatestBlockhash();
     transaction.recentBlockhash = blockhash;
     transaction.feePayer = userPublicKey;
 
