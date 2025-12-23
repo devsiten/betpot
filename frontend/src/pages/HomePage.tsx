@@ -53,7 +53,6 @@ export function HomePage() {
                 </Link>
                 <Link to="/events" className="btn btn-secondary">
                   Browse Markets
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -167,7 +166,6 @@ export function HomePage() {
                 >
                   <Trophy className="w-4 h-4" />
                   Place Your Bet
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -213,9 +211,8 @@ export function HomePage() {
             <div className="w-2 h-2 rounded-full bg-positive-500 animate-pulse"></div>
             <h2 className="text-xl font-semibold text-text-primary">Trending</h2>
           </div>
-          <Link to="/events" className="btn btn-ghost text-sm group">
+          <Link to="/events" className="btn btn-ghost text-sm">
             View All
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 

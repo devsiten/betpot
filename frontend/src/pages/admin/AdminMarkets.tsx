@@ -134,8 +134,8 @@ export function AdminMarkets() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white uppercase tracking-wider">Jackpot Manager</h1>
-                <p className="text-gray-400 mt-1 font-mono text-sm">Select events to feature as Jackpot</p>
+                <h1 className="text-3xl font-bold text-text-primary uppercase tracking-wider">Jackpot Manager</h1>
+                <p className="text-text-secondary mt-1 font-mono text-sm">Select events to feature as Jackpot</p>
             </div>
 
             {/* Current Jackpot */}
@@ -145,10 +145,10 @@ export function AdminMarkets() {
                         <Trophy className="w-8 h-8 text-yellow-500" />
                         <div>
                             <p className="text-xs text-yellow-400 font-bold uppercase tracking-widest">Current Jackpot</p>
-                            <h2 className="text-xl font-bold text-white">{currentJackpot.title}</h2>
+                            <h2 className="text-xl font-bold text-text-primary">{currentJackpot.title}</h2>
                         </div>
                     </div>
-                    <div className="flex items-center gap-6 text-sm text-gray-400 font-mono">
+                    <div className="flex items-center gap-6 text-sm text-text-secondary font-mono">
                         <span>Pool: ${(currentJackpot.totalPool || 0).toLocaleString()}</span>
                         <span>Positions: {currentJackpot.ticketCount || 0}</span>
                         <span>Ends: {format(new Date(currentJackpot.eventTime), 'MMM dd, HH:mm')}</span>
@@ -244,8 +244,8 @@ export function AdminMarkets() {
             ) : externalEvents.length === 0 ? (
                 <div className="text-center py-16 card">
                     <Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg font-bold">No upcoming events</p>
-                    <p className="text-gray-500 text-sm mt-1 font-mono">Try selecting a different sport</p>
+                    <p className="text-text-primary text-lg font-bold">No upcoming events</p>
+                    <p className="text-text-secondary text-sm mt-1 font-mono">Try selecting a different sport</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -277,7 +277,7 @@ export function AdminMarkets() {
                                         {event.sport || event.category || selectedPolyCategory}
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-white leading-tight line-clamp-2">
+                                <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
                                     {event.title}
                                 </h3>
                                 <div className="flex items-center gap-4 mt-2">
@@ -308,7 +308,7 @@ export function AdminMarkets() {
                                                     : 'bg-black/40 border-white/10'
                                             )}
                                         >
-                                            <span className="text-sm font-medium text-white truncate flex-1">
+                                            <span className="text-sm font-medium text-text-primary truncate flex-1">
                                                 {option.label}
                                             </span>
                                             {option.percentage !== undefined ? (
@@ -362,21 +362,21 @@ export function AdminMarkets() {
                         <div className="flex items-center gap-3 mb-6">
                             <Trophy className="w-10 h-10 text-yellow-500" />
                             <div>
-                                <h2 className="text-xl font-bold text-white">Confirm Jackpot</h2>
-                                <p className="text-gray-400 text-sm">This will be the featured bet on the homepage</p>
+                                <h2 className="text-xl font-bold text-text-primary">Confirm Jackpot</h2>
+                                <p className="text-text-secondary text-sm">This will be the featured bet on the homepage</p>
                             </div>
                         </div>
 
                         <div className="bg-black/40 rounded-xl p-4 mb-6">
-                            <h3 className="text-lg font-bold text-white mb-2">{selectedEvent.title}</h3>
-                            <p className="text-sm text-gray-400 font-mono">
+                            <h3 className="text-lg font-bold text-text-primary mb-2">{selectedEvent.title}</h3>
+                            <p className="text-sm text-text-secondary font-mono">
                                 {format(new Date(selectedEvent.startTime), 'MMM dd, yyyy • HH:mm')}
                             </p>
                             <div className="mt-4 grid grid-cols-3 gap-2">
                                 {selectedEvent.options?.map((opt, idx) => (
                                     <div key={idx} className="text-center p-2 bg-white/5 rounded-lg">
                                         <span className="block text-xs text-gray-500">{opt.type}</span>
-                                        <span className="block text-sm text-white truncate">{opt.label}</span>
+                                        <span className="block text-sm text-text-primary truncate">{opt.label}</span>
                                     </div>
                                 ))}
                             </div>
