@@ -374,7 +374,11 @@ export function EventDetailPage() {
                   </button>
                   <span className="text-xl font-bold text-white w-12 text-center">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(q => Math.min(100, q + 1))}
+                    onClick={() => {
+                      const selectedOpt = event.options?.find(o => o.id === selectedOption);
+                      const maxAvailable = selectedOpt ? (selectedOpt.ticketLimit - (selectedOpt.ticketsSold || 0)) : 1000;
+                      setQuantity(q => Math.min(maxAvailable, q + 1));
+                    }}
                     className="p-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-white"
                   >
                     <Plus className="w-4 h-4" />

@@ -23,7 +23,7 @@ function generateSerialNumber(eventId: string, optionId: string): string {
 const purchaseSchema = z.object({
   eventId: z.string(),
   optionId: z.string(),
-  quantity: z.number().min(1).max(100).default(1),
+  quantity: z.number().min(1), // Removed max limit - only check event's available tickets
   walletAddress: z.string().min(32).max(64),
   chain: z.enum(['SOL', 'ETH', 'BSC', 'TRC']),
   purchaseTx: z.string().min(3), // Relaxed for testnet - real validation later
