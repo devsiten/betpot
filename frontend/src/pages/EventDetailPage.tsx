@@ -109,7 +109,7 @@ export function EventDetailPage() {
         </div>
         <h1 className="text-2xl font-bold text-text-primary mb-3">Not Yet a Jackpot Event</h1>
         <p className="text-text-secondary text-lg mb-2">This event is not yet featured in our jackpot.</p>
-        <p className="text-text-muted mb-8">🤞 Let's hope it gets selected soon!</p>
+        <p className="text-text-muted mb-8">Let's hope it gets selected soon!</p>
         <div className="flex gap-3 justify-center">
           <Link to="/events" className="btn btn-primary">
             <ArrowLeft className="w-4 h-4" />
