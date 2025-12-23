@@ -94,8 +94,7 @@ export function AdminMarkets() {
                 }
             }
 
-            // Create event from external data with jackpot flag
-            return api.createJackpotFromExternal({
+            const payload = {
                 externalId: event.id,
                 externalSource: event.source,
                 title: event.title,
@@ -109,7 +108,13 @@ export function AdminMarkets() {
                 ticketPrice: parseFloat(ticketPrice),
                 isJackpot: true,
                 externalData: event,
-            });
+            };
+
+            // Debug log
+            console.log('Creating jackpot with payload:', JSON.stringify(payload, null, 2));
+
+            // Create event from external data with jackpot flag
+            return api.createJackpotFromExternal(payload);
         },
         onSuccess: () => {
             toast.success('Jackpot created successfully!');
@@ -117,8 +122,11 @@ export function AdminMarkets() {
             queryClient.invalidateQueries({ queryKey: ['jackpot'] });
             setSelectedEvent(null);
         },
-        onError: (error: Error) => {
-            toast.error(error.message);
+        onError: (error: any) => {
+            // Show the actual error from the API
+            const errorMessage = error?.response?.data?.error || error?.message || 'Failed to create jackpot';
+            console.error('Jackpot creation error:', error?.response?.data || error);
+            toast.error(errorMessage);
         },
     });
 
