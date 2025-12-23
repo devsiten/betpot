@@ -293,7 +293,8 @@ export function EventDetailPage() {
 
         <div className="space-y-3">
           {(pool?.options || event.options)?.map((option) => {
-            const isSelected = selectedOption === option.id || selectedOption === option.optionId;
+            const optId = ('id' in option ? option.id : null) || option.optionId;
+            const isSelected = selectedOption === optId;
             const percentage = totalPool > 0
               ? ((option.poolAmount || 0) / totalPool) * 100
               : 0;
@@ -301,10 +302,9 @@ export function EventDetailPage() {
 
             return (
               <button
-                key={option.id || option.optionId}
+                key={optId}
                 onClick={() => {
                   if (isOpen) {
-                    const optId = option.id || option.optionId;
                     setSelectedOption(isSelected ? null : optId);
                     console.log('Option clicked:', optId, option.label);
                   }
