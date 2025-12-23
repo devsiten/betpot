@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -91,14 +91,23 @@ function useSessionManager() {
 // Admin route wrapper - waits for wallet to connect before redirecting
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { publicKey, connected, connecting } = useWallet();
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  // Show loading while wallet is connecting/reconnecting
-  if (connecting) {
+  // Wait for wallet adapter to attempt auto-reconnect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 1000); // Give wallet 1 second to auto-reconnect
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loading while initializing or connecting
+  if (isInitializing || connecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-secondary">Connecting wallet...</p>
+          <p className="text-text-secondary">Loading...</p>
         </div>
       </div>
     );
