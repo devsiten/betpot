@@ -291,7 +291,7 @@ export function EventsPage() {
             </div>
           )}
         </div>
-      </Link>
+      </CardWrapper>
     );
   };
 
