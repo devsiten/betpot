@@ -293,7 +293,7 @@ export function EventDetailPage() {
 
         <div className="space-y-3">
           {(pool?.options || event.options)?.map((option) => {
-            const isSelected = selectedOption === option.optionId;
+            const isSelected = selectedOption === option.id || selectedOption === option.optionId;
             const percentage = totalPool > 0
               ? ((option.poolAmount || 0) / totalPool) * 100
               : 0;
@@ -301,8 +301,14 @@ export function EventDetailPage() {
 
             return (
               <button
-                key={option.optionId}
-                onClick={() => isOpen && setSelectedOption(isSelected ? null : option.optionId)}
+                key={option.id || option.optionId}
+                onClick={() => {
+                  if (isOpen) {
+                    const optId = option.id || option.optionId;
+                    setSelectedOption(isSelected ? null : optId);
+                    console.log('Option clicked:', optId, option.label);
+                  }
+                }}
                 disabled={!isOpen}
                 className={clsx(
                   'w-full p-4 rounded-xl border-2 text-left transition-all relative overflow-hidden',
