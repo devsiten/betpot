@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Trophy, Zap, Clock } from 'lucide-react';
+import { Trophy, Zap, Clock } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 import clsx from 'clsx';
