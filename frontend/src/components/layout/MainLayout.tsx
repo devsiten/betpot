@@ -262,8 +262,11 @@ export function MainLayout() {
                   </button>
                 ) : (
                   <>
-                    <MyBetsDropdown />
-                    <NotificationBell />
+                    {/* Hide dropdowns on mobile - use mobile menu instead */}
+                    <div className="hidden md:flex items-center gap-2">
+                      <MyBetsDropdown />
+                      <NotificationBell />
+                    </div>
                     <NavLink
                       to={isAdmin() ? '/admin' : '/dashboard'}
                       className="flex items-center gap-2 btn btn-primary"

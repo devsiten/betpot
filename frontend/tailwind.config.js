@@ -10,18 +10,18 @@ export default {
           secondary: '#F5F5F5', // Slightly warmer gray
           card: '#FFFFFF', // Pure white for cards (contrast)
         },
-        // Solana Purple - Primary brand color
+        // Calm Green/Teal - Primary brand color
         brand: {
-          50: '#FAF5FF',
-          100: '#F3E8FF',
-          200: '#E9D5FF',
-          300: '#D8B4FE',
-          400: '#C084FC',
-          500: '#9945FF', // Solana purple
-          600: '#7C3AED',
-          700: '#6D28D9',
-          800: '#5B21B6',
-          900: '#4C1D95',
+          50: '#F0FDF4',
+          100: '#DCFCE7',
+          200: '#BBF7D0',
+          300: '#86EFAC',
+          400: '#4ADE80',
+          500: '#22C55E', // Calm green
+          600: '#16A34A',
+          700: '#15803D',
+          800: '#166534',
+          900: '#14532D',
         },
         // Green - Positive actions (Yes, Home)
         positive: {
