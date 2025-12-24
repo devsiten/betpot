@@ -350,19 +350,19 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
       { label: '', ticketLimit: 1000 },
     ],
     startTime: '',
-    lockTime: '',
-    eventTime: '',
+    endTime: '',
     status: 'upcoming' as 'draft' | 'upcoming',
   });
 
   const createMutation = useMutation({
     mutationFn: () => {
       // Convert datetime-local format to ISO format for backend
+      // End Time is used for both lockTime and eventTime
       const formData = {
         ...form,
         startTime: form.startTime ? new Date(form.startTime).toISOString() : '',
-        lockTime: form.lockTime ? new Date(form.lockTime).toISOString() : '',
-        eventTime: form.eventTime ? new Date(form.eventTime).toISOString() : '',
+        lockTime: form.endTime ? new Date(form.endTime).toISOString() : '',
+        eventTime: form.endTime ? new Date(form.endTime).toISOString() : '',
       };
       return api.createEvent(formData);
     },
@@ -521,9 +521,10 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* Times */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="label">Start Time</label>
+              <p className="text-gray-500 text-xs mb-1">When event starts & betting opens</p>
               <input
                 type="datetime-local"
                 value={form.startTime}
@@ -533,21 +534,12 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div>
-              <label className="label">Lock Time</label>
+              <label className="label">End Time</label>
+              <p className="text-gray-500 text-xs mb-1">When event ends & betting closes</p>
               <input
                 type="datetime-local"
-                value={form.lockTime}
-                onChange={(e) => setForm({ ...form, lockTime: e.target.value })}
-                className="input"
-                required
-              />
-            </div>
-            <div>
-              <label className="label">Event Time</label>
-              <input
-                type="datetime-local"
-                value={form.eventTime}
-                onChange={(e) => setForm({ ...form, eventTime: e.target.value })}
+                value={form.endTime}
+                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
                 className="input"
                 required
               />
