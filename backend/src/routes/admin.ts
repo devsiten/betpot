@@ -391,6 +391,38 @@ admin.post('/events/:id/lock', async (c) => {
   return c.json({ success: true, message: 'Event locked' });
 });
 
+// Unlock event (reverse a mistaken lock)
+admin.post('/events/:id/unlock', async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+
+  const event = await db.query.events.findFirst({ where: eq(events.id, id) });
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (event.status !== 'locked') {
+    return c.json({ success: false, error: 'Only locked events can be unlocked' }, 400);
+  }
+
+  await db.update(events)
+    .set({ status: 'open', updatedAt: new Date() })
+    .where(eq(events.id, id));
+
+  await db.insert(adminAuditLogs).values({
+    id: nanoid(),
+    adminId: user.id,
+    action: 'UNLOCK_EVENT',
+    entityType: 'Event',
+    entityId: id,
+    ipAddress: c.req.header('CF-Connecting-IP'),
+    createdAt: new Date(),
+  });
+
+  return c.json({ success: true, message: 'Event unlocked' });
+});
+
 // ============================================================================
 // RESOLVE EVENT & WINNER MANAGEMENT
 // ============================================================================
@@ -1336,6 +1368,80 @@ admin.post('/failed-transactions/:id/reject', zValidator('json', z.object({
   return c.json({
     success: true,
     message: 'Transaction rejected',
+  });
+});
+
+// ============================================================================
+// PLATFORM SETTINGS
+// ============================================================================
+
+// Get platform settings
+admin.get('/settings', async (c) => {
+  const db = c.get('db');
+
+  let settings = await db.query.platformSettings.findFirst();
+
+  // Create default settings if they don't exist
+  if (!settings) {
+    await db.insert(platformSettings).values({
+      id: 'settings',
+      ticketPrice: 10,
+      platformFee: 0.01,
+      maxEventsPerDay: 3,
+      claimDelayHours: 3,
+      maintenanceMode: false,
+      updatedAt: new Date(),
+    });
+    settings = await db.query.platformSettings.findFirst();
+  }
+
+  return c.json({
+    success: true,
+    data: settings,
+  });
+});
+
+// Update platform settings
+const updateSettingsSchema = z.object({
+  ticketPrice: z.number().min(1).max(10000).optional(),
+  platformFee: z.number().min(0).max(0.5).optional(),
+  maxEventsPerDay: z.number().min(1).max(100).optional(),
+  claimDelayHours: z.number().min(0).max(168).optional(),
+  maintenanceMode: z.boolean().optional(),
+});
+
+admin.put('/settings', zValidator('json', updateSettingsSchema), async (c) => {
+  const db = c.get('db');
+  const data = c.req.valid('json');
+
+  // Ensure settings row exists
+  let settings = await db.query.platformSettings.findFirst();
+  if (!settings) {
+    await db.insert(platformSettings).values({
+      id: 'settings',
+      ticketPrice: 10,
+      platformFee: 0.01,
+      maxEventsPerDay: 3,
+      claimDelayHours: 3,
+      maintenanceMode: false,
+      updatedAt: new Date(),
+    });
+  }
+
+  // Update with new values
+  await db.update(platformSettings)
+    .set({
+      ...data,
+      updatedAt: new Date(),
+    })
+    .where(eq(platformSettings.id, 'settings'));
+
+  const updated = await db.query.platformSettings.findFirst();
+
+  return c.json({
+    success: true,
+    data: updated,
+    message: 'Settings updated successfully',
   });
 });
 

@@ -73,6 +73,15 @@ export function AdminEventDetail() {
     onError: () => toast.error('Failed to lock event'),
   });
 
+  const unlockMutation = useMutation({
+    mutationFn: () => api.unlockEvent(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'event', id] });
+      toast.success('Event unlocked successfully');
+    },
+    onError: () => toast.error('Failed to unlock event'),
+  });
+
   const event = eventData?.data;
   const tickets = event?.tickets || [];
   const winners = winnersData?.data?.winners || [];
@@ -146,6 +155,17 @@ export function AdminEventDetail() {
             >
               <Lock className="w-4 h-4" />
               Lock Event
+            </button>
+          )}
+          {/* Unlock button for locked events */}
+          {event.status === 'locked' && (
+            <button
+              onClick={() => unlockMutation.mutate()}
+              disabled={unlockMutation.isPending}
+              className="btn btn-secondary"
+            >
+              <Lock className="w-4 h-4" />
+              Unlock Event
             </button>
           )}
           {/* Show Resolve for locked events OR open events past their start time */}

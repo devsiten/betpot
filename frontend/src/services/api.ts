@@ -305,6 +305,11 @@ class ApiService {
     return data;
   }
 
+  async unlockEvent(id: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/events/${id}/unlock`);
+    return data;
+  }
+
   async resolveEvent(id: string, winningOption: string) {
     const { data } = await this.client.post<ApiResponse<{
       eventId: string;
