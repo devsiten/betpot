@@ -132,6 +132,7 @@ function AppContent() {
         <Route path="bets" element={<AdminBets />} />
         <Route path="payment-issues" element={<AdminPaymentIssues />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="winnings" element={<DashboardPage />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
 

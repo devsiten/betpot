@@ -85,6 +85,11 @@ export function AdminMarkets() {
     // Create jackpot mutation
     const createJackpotMutation = useMutation({
         mutationFn: async (event: ExternalEvent) => {
+            // For internal events, just update them to be jackpot
+            if (eventSource === 'myevents' || event.source === 'internal') {
+                return api.setEventJackpot(event.id, true);
+            }
+
             // Determine the correct category
             // Sports events from odds-api always use 'sports' category
             // Polymarket events use their category or the selected polymarket category
@@ -419,8 +424,8 @@ export function AdminMarkets() {
                                     className={clsx(
                                         'mt-4 w-full py-3 rounded-xl font-bold uppercase text-sm tracking-wider transition-all flex items-center justify-center gap-2',
                                         selectedEvent?.id === event.id
-                                            ? 'bg-yellow-500 text-black'
-                                            : 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30'
+                                            ? 'bg-green-600 text-white shadow-lg shadow-green-500/50'
+                                            : 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
                                     )}
                                 >
                                     {selectedEvent?.id === event.id ? (
