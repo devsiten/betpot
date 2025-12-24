@@ -369,6 +369,7 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
         lockTime: form.lockTime ? new Date(form.lockTime).toISOString() : '',
         eventTime: form.endTime ? new Date(form.endTime).toISOString() : '',
       };
+      console.log('Creating event with data:', JSON.stringify(formData, null, 2));
       return api.createEvent(formData);
     },
     onSuccess: (data) => {
