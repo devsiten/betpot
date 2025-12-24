@@ -188,7 +188,7 @@ export function JackpotPage() {
                     <div>
                         <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-3 text-brand-600 font-bold border border-brand-200">2</div>
                         <p className="text-text-primary font-medium">Place Your Bet</p>
-                        <p className="text-text-muted text-sm">Pay with SOL from your wallet</p>
+                        <p className="text-text-muted text-sm">Pay with USDC from your wallet</p>
                     </div>
                     <div>
                         <div className="w-10 h-10 rounded-full bg-positive-100 flex items-center justify-center mx-auto mb-3 text-positive-600 font-bold border border-positive-200">3</div>
