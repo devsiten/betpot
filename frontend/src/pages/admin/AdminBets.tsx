@@ -108,7 +108,7 @@ export function AdminBets() {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="card p-4">
-          <p className="text-2xl font-bold text-white">{pagination?.total || 0}</p>
+          <p className="text-2xl font-bold text-white">{pagination?.total || tickets.length || 0}</p>
           <p className="text-xs text-dark-400">Total Bets</p>
         </div>
         <div className="card p-4 bg-green-500/5 border-green-500/20">
