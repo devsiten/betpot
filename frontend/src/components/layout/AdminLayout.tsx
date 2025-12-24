@@ -43,31 +43,35 @@ export function AdminLayout() {
       {/* Mobile sidebar backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - solid background for visibility */}
       <aside className={clsx(
-        'fixed lg:static inset-y-0 left-0 z-50 flex flex-col bg-dark-900 border-r border-dark-800 transition-all duration-300',
+        'fixed lg:static inset-y-0 left-0 z-50 flex flex-col transition-all duration-300',
+        // Desktop: dark theme
+        'lg:bg-dark-900 lg:border-r lg:border-dark-800',
+        // Mobile: solid white background for visibility
+        'bg-white lg:bg-dark-900 shadow-2xl lg:shadow-none',
         sidebarOpen ? 'w-64' : 'w-20',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}>
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-dark-800">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 lg:border-dark-800">
           {sidebarOpen && (
-            <span className="text-xl font-bold gradient-text">BetPot Admin</span>
+            <span className="text-xl font-bold text-gray-900 lg:text-transparent lg:bg-clip-text lg:bg-gradient-to-r lg:from-primary-400 lg:to-accent-400">BetPot Admin</span>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-dark-800 text-dark-400 hover:text-white hidden lg:flex"
+            className="p-2 rounded-lg hover:bg-gray-100 lg:hover:bg-dark-800 text-gray-500 lg:text-dark-400 hover:text-gray-900 lg:hover:text-white hidden lg:flex"
           >
             <ChevronLeft className={clsx('w-5 h-5 transition-transform', !sidebarOpen && 'rotate-180')} />
           </button>
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-2 rounded-lg hover:bg-dark-800 text-dark-400 hover:text-white lg:hidden"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-900 lg:hidden"
           >
             <X className="w-5 h-5" />
           </button>
@@ -80,11 +84,12 @@ export function AdminLayout() {
               key={item.path}
               to={item.path}
               end={item.exact}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) => clsx(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all',
                 isActive
-                  ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20'
-                  : 'text-dark-400 hover:text-white hover:bg-dark-800'
+                  ? 'bg-brand-100 lg:bg-primary-500/10 text-brand-700 lg:text-primary-400 border border-brand-200 lg:border-primary-500/20'
+                  : 'text-gray-600 lg:text-dark-400 hover:text-gray-900 lg:hover:text-white hover:bg-gray-100 lg:hover:bg-dark-800'
               )}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -94,15 +99,15 @@ export function AdminLayout() {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-dark-800">
+        <div className="p-4 border-t border-gray-200 lg:border-dark-800">
           <div className={clsx('flex items-center gap-3', !sidebarOpen && 'justify-center')}>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold">
               A
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">Admin</p>
-                <p className="text-xs text-dark-400 capitalize">Wallet Connected</p>
+                <p className="text-sm font-medium text-gray-900 lg:text-white truncate">Admin</p>
+                <p className="text-xs text-gray-500 lg:text-dark-400 capitalize">Wallet Connected</p>
               </div>
             )}
           </div>
@@ -110,7 +115,7 @@ export function AdminLayout() {
           <button
             onClick={handleDisconnect}
             className={clsx(
-              'mt-4 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-dark-400 hover:text-red-400 hover:bg-dark-800 transition-all',
+              'mt-4 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 lg:text-dark-400 hover:text-red-500 hover:bg-red-50 lg:hover:bg-dark-800 transition-all',
               !sidebarOpen && 'justify-center'
             )}
           >

@@ -84,8 +84,31 @@ ticketsRoutes.post('/purchase', zValidator('json', purchaseSchema), async (c) =>
       return c.json({ success: false, error: 'Event not found' }, 404);
     }
 
+    // Check if event status allows purchases (only 'open' status)
     if (event.status !== 'open') {
       return c.json({ success: false, error: 'Event is not open for ticket sales' }, 400);
+    }
+
+    // Auto-lock check: 10-minute buffer before event starts
+    const LOCK_BUFFER_MINUTES = 10;
+    const eventTime = event.eventTime ? new Date(event.eventTime) : null;
+    const now = new Date();
+
+    if (eventTime) {
+      const lockTime = new Date(eventTime.getTime() - LOCK_BUFFER_MINUTES * 60 * 1000);
+
+      if (now >= lockTime) {
+        // Auto-lock: event time minus buffer has passed
+        // Update event status to locked
+        await db.update(events)
+          .set({ status: 'locked', updatedAt: now })
+          .where(eq(events.id, event.id));
+
+        return c.json({
+          success: false,
+          error: 'Betting has closed for this event (closes 10 minutes before start)'
+        }, 400);
+      }
     }
 
     // Get option
@@ -102,6 +125,22 @@ ticketsRoutes.post('/purchase', zValidator('json', purchaseSchema), async (c) =>
       return c.json({
         success: false,
         error: `Only ${availableTickets} tickets available`
+      }, 400);
+    }
+
+    // Check if event is sold out (all options)
+    const totalSold = event.options.reduce((sum, opt) => sum + (opt.ticketsSold || 0), 0);
+    const totalLimit = event.options.reduce((sum, opt) => sum + (opt.ticketLimit || 0), 0);
+
+    if (totalLimit > 0 && totalSold >= totalLimit) {
+      // Event is sold out - update status to locked (no more purchases)
+      await db.update(events)
+        .set({ status: 'locked', updatedAt: now })
+        .where(eq(events.id, event.id));
+
+      return c.json({
+        success: false,
+        error: 'This event is sold out'
       }, 400);
     }
 
@@ -125,7 +164,7 @@ ticketsRoutes.post('/purchase', zValidator('json', purchaseSchema), async (c) =>
     console.log('Skipping Solana verification for now');
     console.log('Transaction signature:', data.purchaseTx);
 
-    const now = new Date();
+    // Note: 'now' was already declared above in auto-lock check
 
     console.log('STEP: Creating ticket objects...');
     // Create tickets

@@ -148,15 +148,17 @@ export function AdminEventDetail() {
               Lock Event
             </button>
           )}
-          {event.status === 'locked' && (
-            <button
-              onClick={() => setShowResolveModal(true)}
-              className="btn btn-success"
-            >
-              <Trophy className="w-4 h-4" />
-              Resolve Event
-            </button>
-          )}
+          {/* Show Resolve for locked events OR open events past their start time */}
+          {(event.status === 'locked' ||
+            (event.status === 'open' && new Date(event.eventTime) <= new Date())) && (
+              <button
+                onClick={() => setShowResolveModal(true)}
+                className="btn btn-success"
+              >
+                <Trophy className="w-4 h-4" />
+                Resolve Event
+              </button>
+            )}
           {!['resolved', 'cancelled'].includes(event.status) && (
             <button
               onClick={() => setShowCancelModal(true)}

@@ -91,14 +91,32 @@ export function JackpotPage() {
                             </p>
                         </div>
 
-                        {/* Options preview */}
+                        {/* Options preview with colors */}
                         <div className="grid grid-cols-2 gap-2">
-                            {jackpot.options?.slice(0, 2).map((option: any) => (
-                                <div key={option.id} className="bg-white rounded-lg p-2 text-center border border-gray-300">
-                                    <p className="text-sm text-black font-medium truncate">{option.label}</p>
-                                    <p className="text-xs text-gray-600">{option.ticketsSold || 0} bets</p>
-                                </div>
-                            ))}
+                            {jackpot.options?.slice(0, 2).map((option: any, idx: number) => {
+                                // Determine colors based on option label
+                                const label = option.label?.toLowerCase() || '';
+                                const isPositive = label === 'yes' || label === 'home' || idx === 0;
+                                const isDraw = label === 'draw';
+
+                                const bgColor = isDraw
+                                    ? 'bg-gray-100 border-gray-300'
+                                    : isPositive
+                                        ? 'bg-positive-100 border-positive-300'
+                                        : 'bg-negative-100 border-negative-300';
+                                const textColor = isDraw
+                                    ? 'text-gray-700'
+                                    : isPositive
+                                        ? 'text-positive-700'
+                                        : 'text-negative-700';
+
+                                return (
+                                    <div key={option.id} className={`rounded-lg p-2 text-center border ${bgColor}`}>
+                                        <p className={`text-sm font-medium truncate ${textColor}`}>{option.label}</p>
+                                        <p className="text-xs text-gray-600">{option.ticketsSold || 0} bets</p>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <button className="w-full mt-4 py-2 bg-brand-100 text-brand-700 rounded-lg font-medium text-sm group-hover:bg-brand-200 transition-colors flex items-center justify-center gap-2">
