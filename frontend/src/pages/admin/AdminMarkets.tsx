@@ -44,7 +44,7 @@ interface ExternalEvent {
 }
 
 export function AdminMarkets() {
-    const [eventSource, setEventSource] = useState<'sports' | 'polymarket'>('sports');
+    const [eventSource, setEventSource] = useState<'sports' | 'polymarket' | 'myevents'>('sports');
     const [selectedSport, setSelectedSport] = useState('soccer_epl');
     const [selectedPolyCategory, setSelectedPolyCategory] = useState('crypto');
     const [selectedEvent, setSelectedEvent] = useState<ExternalEvent | null>(null);
@@ -66,6 +66,14 @@ export function AdminMarkets() {
         queryFn: () => api.getPolymarketEvents(selectedPolyCategory),
         staleTime: 5 * 60 * 1000,
         enabled: eventSource === 'polymarket',
+    });
+
+    // Fetch internal (manually created) events for My Events tab
+    const { data: internalEventsData, isLoading: loadingInternal, refetch: refetchInternal } = useQuery({
+        queryKey: ['admin-internal-events'],
+        queryFn: () => api.getAdminEvents({ limit: 50 }),
+        staleTime: 1 * 60 * 1000,
+        enabled: eventSource === 'myevents',
     });
 
     // Fetch current jackpot
@@ -107,7 +115,7 @@ export function AdminMarkets() {
             if (!event.startTime) {
                 throw new Error('Event has no start time. Cannot create jackpot.');
             }
-            
+
             // Ensure eventTime is valid ISO format
             const eventDate = new Date(event.startTime);
             if (isNaN(eventDate.getTime())) {
@@ -151,17 +159,39 @@ export function AdminMarkets() {
         },
     });
 
-    const isLoading = eventSource === 'sports' ? loadingSports : loadingPolymarket;
+    const isLoading = eventSource === 'sports'
+        ? loadingSports
+        : eventSource === 'polymarket'
+            ? loadingPolymarket
+            : loadingInternal;
+
+    // Convert internal events to ExternalEvent format for My Events tab
+    const internalEventsFormatted = (internalEventsData?.data || [])
+        .filter((e: any) => !e.isJackpot && e.status !== 'cancelled' && e.status !== 'resolved')
+        .map((e: any) => ({
+            id: e.id,
+            source: 'internal',
+            title: e.title,
+            description: e.description,
+            category: e.category,
+            startTime: e.startTime,
+            options: e.options || [],
+        }));
+
     const externalEvents = eventSource === 'sports'
         ? (sportsData?.data || [])
-        : (polymarketData?.data || []);
+        : eventSource === 'polymarket'
+            ? (polymarketData?.data || [])
+            : internalEventsFormatted;
     const currentJackpot = jackpotData?.data;
 
     const handleRefresh = () => {
         if (eventSource === 'sports') {
             refetchSports();
-        } else {
+        } else if (eventSource === 'polymarket') {
             refetchPolymarket();
+        } else {
+            refetchInternal();
         }
     };
 
@@ -224,6 +254,17 @@ export function AdminMarkets() {
                     )}
                 >
                     📊 Prediction Markets
+                </button>
+                <button
+                    onClick={() => setEventSource('myevents')}
+                    className={clsx(
+                        'px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                        eventSource === 'myevents'
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                            : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
+                    )}
+                >
+                    📝 My Events
                 </button>
             </div>
 
