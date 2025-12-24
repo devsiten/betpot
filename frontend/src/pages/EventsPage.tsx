@@ -262,21 +262,34 @@ export function EventsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2">
-              {opts.slice(0, 3).map((option: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-xl bg-background-secondary border border-border text-center"
-                >
-                  <span className="block text-xs font-bold text-text-primary truncate">
-                    {option.label}
-                  </span>
-                  {option.percentage !== undefined && (
-                    <span className="block text-lg font-bold text-positive-600 mt-1">
-                      {option.percentage}%
+              {opts.slice(0, 3).map((option: any, idx: number) => {
+                const lbl = option.label?.toLowerCase() || '';
+                const isFirst = idx === 0 || lbl === 'yes' || lbl === 'home';
+                const isLast = idx === 2 || lbl === 'no' || lbl === 'away';
+
+                const bgColor = isFirst ? 'bg-positive-100 border-positive-200'
+                  : isLast ? 'bg-negative-100 border-negative-200'
+                    : 'bg-amber-50 border-amber-200';
+                const textColor = isFirst ? 'text-positive-700'
+                  : isLast ? 'text-negative-600'
+                    : 'text-amber-700';
+
+                return (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-xl border text-center ${bgColor}`}
+                  >
+                    <span className={`block text-xs font-bold truncate ${textColor}`}>
+                      {option.label}
                     </span>
-                  )}
-                </div>
-              ))}
+                    {option.percentage !== undefined && (
+                      <span className={`block text-lg font-bold mt-1 ${textColor}`}>
+                        {option.percentage}%
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 

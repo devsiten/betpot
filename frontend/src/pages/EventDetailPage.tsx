@@ -307,6 +307,20 @@ export function EventDetailPage() {
               : 0;
             const isWinner = 'isWinner' in option && option.isWinner;
 
+            // Color based on option label
+            const lbl = option.label?.toLowerCase() || '';
+            const isPositive = lbl === 'yes' || lbl === 'home';
+            const isNegative = lbl === 'no' || lbl === 'away';
+            const isDraw = lbl === 'draw';
+
+            const labelColor = isPositive
+              ? 'border-green-400 bg-green-50'
+              : isNegative
+                ? 'border-red-400 bg-red-50'
+                : isDraw
+                  ? 'border-amber-400 bg-amber-50'
+                  : 'border-gray-300 bg-gray-100';
+
             console.log('Rendering option:', {
               label: option.label,
               optId,
@@ -338,7 +352,7 @@ export function EventDetailPage() {
                   isOpen && 'cursor-pointer hover:border-dark-600',
                   isSelected && 'border-primary-500 bg-primary-500/10',
                   isWinner && 'border-green-500 bg-green-500/10',
-                  !isSelected && !isWinner && 'border-gray-300 bg-gray-100'
+                  !isSelected && !isWinner && labelColor
                 )}
               >
                 <div className="relative z-10 flex items-center justify-between">
