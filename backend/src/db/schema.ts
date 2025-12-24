@@ -127,8 +127,8 @@ export const platformSettings = sqliteTable('platform_settings', {
   id: text('id').primaryKey().default('settings'),
   ticketPrice: real('ticket_price').default(10.00),
   platformFee: real('platform_fee').default(0.01),
-  maxEventsPerDay: integer('max_events_per_day').default(3),
-  claimDelayHours: integer('claim_delay_hours').default(3),
+  maxEventsPerDay: integer('max_events_per_day').default(10),
+  claimDelayHours: integer('claim_delay_hours').default(0),
   maintenanceMode: integer('maintenance_mode', { mode: 'boolean' }).default(false),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });

@@ -1396,8 +1396,8 @@ admin.get('/settings', async (c) => {
       id: 'settings',
       ticketPrice: 10,
       platformFee: 0.01,
-      maxEventsPerDay: 3,
-      claimDelayHours: 3,
+      maxEventsPerDay: 10,
+      claimDelayHours: 0,
       maintenanceMode: false,
       updatedAt: new Date(),
     });
@@ -1430,8 +1430,8 @@ admin.put('/settings', zValidator('json', platformSettingsSchema), async (c) => 
       id: 'settings',
       ticketPrice: 10,
       platformFee: 0.01,
-      maxEventsPerDay: 3,
-      claimDelayHours: 3,
+      maxEventsPerDay: 10,
+      claimDelayHours: 0,
       maintenanceMode: false,
       updatedAt: new Date(),
     });

@@ -41,18 +41,16 @@ export function AdminSettings() {
     onError: () => toast.error('Failed to update settings'),
   });
 
-  // Update form when data loads
-  useState(() => {
-    if (data?.data) {
-      setFormData({
-        ticketPrice: data.data.ticketPrice,
-        platformFee: data.data.platformFee,
-        maxEventsPerDay: data.data.maxEventsPerDay,
-        claimDelayHours: data.data.claimDelayHours,
-        maintenanceMode: data.data.maintenanceMode,
-      });
-    }
-  });
+  // Update form when data loads from API
+  if (data?.data && formData.ticketPrice !== data.data.ticketPrice) {
+    setFormData({
+      ticketPrice: data.data.ticketPrice ?? 10,
+      platformFee: data.data.platformFee ?? 0.01,
+      maxEventsPerDay: data.data.maxEventsPerDay ?? 3,
+      claimDelayHours: data.data.claimDelayHours ?? 0,
+      maintenanceMode: data.data.maintenanceMode ?? false,
+    });
+  }
 
   if (!isAdmin) {
     return (
