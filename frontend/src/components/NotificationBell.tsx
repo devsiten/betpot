@@ -44,11 +44,12 @@ export function NotificationBell() {
     }, []);
 
     // Fetch notifications
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, isError } = useQuery({
         queryKey: ['notifications'],
         queryFn: () => api.getNotifications(),
         enabled: isAuthenticated,
         refetchInterval: 30000, // Refresh every 30 seconds
+        retry: false, // Don't retry on failure - keep bell clickable
     });
 
     const notifications: Notification[] = data?.data || [];
@@ -113,6 +114,11 @@ export function NotificationBell() {
                         {isLoading ? (
                             <div className="p-8 text-center">
                                 <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                            </div>
+                        ) : isError ? (
+                            <div className="p-8 text-center text-text-muted">
+                                <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">Unable to load notifications</p>
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 text-center text-text-muted">

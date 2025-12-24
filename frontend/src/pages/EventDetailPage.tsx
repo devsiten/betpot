@@ -311,7 +311,6 @@ export function EventDetailPage() {
             const lbl = option.label?.toLowerCase() || '';
             const isPositive = lbl === 'yes' || lbl === 'home';
             const isNegative = lbl === 'no' || lbl === 'away';
-            const isDraw = lbl === 'draw';
 
             const labelColor = isPositive
               ? 'border-green-400 bg-green-50'
