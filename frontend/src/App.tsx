@@ -99,7 +99,23 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return children;
+}
+
+// Dashboard with admin sidebar for admins only
+function AdminDashboardWrapper() {
+  const { publicKey, connected } = useWallet();
+
+  // Check if user is admin
+  const isAdmin = connected && publicKey && ADMIN_WALLETS.includes(publicKey.toBase58());
+
+  // If admin, redirect to admin winnings page which has sidebar
+  if (isAdmin) {
+    return <Navigate to="/admin/winnings" replace />;
+  }
+
+  // Regular user - just show dashboard without admin sidebar
+  return <DashboardPage />;
 }
 
 function AppContent() {
@@ -114,7 +130,7 @@ function AppContent() {
         <Route path="/jackpot" element={<JackpotPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<AdminDashboardWrapper />} />
         <Route path="/testnet-guide" element={<TestnetGuidePage />} />
         <Route path="/events/:eventId/chat" element={<EventChatPage />} />
       </Route>
