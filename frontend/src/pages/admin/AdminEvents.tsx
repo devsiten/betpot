@@ -356,7 +356,16 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: () => api.createEvent(form),
+    mutationFn: () => {
+      // Convert datetime-local format to ISO format for backend
+      const formData = {
+        ...form,
+        startTime: form.startTime ? new Date(form.startTime).toISOString() : '',
+        lockTime: form.lockTime ? new Date(form.lockTime).toISOString() : '',
+        eventTime: form.eventTime ? new Date(form.eventTime).toISOString() : '',
+      };
+      return api.createEvent(formData);
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'events'] });
       toast.success('Event created successfully');
@@ -365,7 +374,10 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
         navigate(`/admin/events/${data.data.id}`);
       }
     },
-    onError: () => toast.error('Failed to create event'),
+    onError: (error: any) => {
+      const message = error?.response?.data?.error || 'Failed to create event';
+      toast.error(message);
+    },
   });
 
   const addOption = () => {

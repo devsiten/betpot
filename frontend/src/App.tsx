@@ -102,8 +102,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   // Wait for wallet adapter to attempt auto-reconnect
   useEffect(() => {
-    // If there was a previously connected wallet, wait longer
-    const delay = wasConnected ? 2500 : 500;
+    // If there was a previously connected wallet, wait longer for reconnection
+    const delay = wasConnected ? 4000 : 1000;
 
     const timer = setTimeout(() => {
       setIsInitializing(false);

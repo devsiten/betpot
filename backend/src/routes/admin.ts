@@ -60,11 +60,11 @@ admin.get('/dashboard', async (c) => {
         orderBy: [desc(events.createdAt)],
         with: { options: true },
       }),
-      // Winner statistics
+      // Winner statistics (include both won and claimed)
       db.select({
         totalWinners: count(),
         totalPayout: sum(tickets.payoutAmount),
-      }).from(tickets).where(eq(tickets.status, 'won')),
+      }).from(tickets).where(or(eq(tickets.status, 'won'), eq(tickets.status, 'claimed'))),
     ]);
 
     // Get ticket counts for top events
