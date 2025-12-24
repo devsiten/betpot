@@ -17,99 +17,108 @@ admin.use('*', auth, requireAdmin);
 // ============================================================================
 
 admin.get('/dashboard', async (c) => {
-  const db = c.get('db');
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+  try {
+    const db = c.get('db');
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [
-    totalUsersResult,
-    totalEventsResult,
-    totalTicketsResult,
-    activeEventsResult,
-    pendingResolutionResult,
-    todayTicketsResult,
-    weekTicketsResult,
-    monthTicketsResult,
-    totalVolumeResult,
-    recentActivity,
-    topEvents,
-    winnerStats,
-  ] = await Promise.all([
-    db.select({ count: count() }).from(users),
-    db.select({ count: count() }).from(events),
-    db.select({ count: count() }).from(tickets),
-    db.select({ count: count() }).from(events).where(
-      or(eq(events.status, 'open'), eq(events.status, 'upcoming'))
-    ),
-    db.select({ count: count() }).from(events).where(eq(events.status, 'locked')),
-    db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, today)),
-    db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, weekAgo)),
-    db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, monthAgo)),
-    db.select({ total: sum(tickets.purchasePrice) }).from(tickets),
-    db.query.adminAuditLogs.findMany({
-      limit: 15,
-      orderBy: [desc(adminAuditLogs.createdAt)],
-      with: { admin: { columns: { email: true } } },
-    }),
-    db.query.events.findMany({
-      where: or(eq(events.status, 'open'), eq(events.status, 'locked')),
-      limit: 10,
-      orderBy: [desc(events.createdAt)],
-      with: { options: true },
-    }),
-    // Winner statistics
-    db.select({
-      totalWinners: count(),
-      totalPayout: sum(tickets.payoutAmount),
-    }).from(tickets).where(eq(tickets.status, 'won')),
-  ]);
-
-  // Get ticket counts for top events
-  const topEventsWithCounts = await Promise.all(
-    topEvents.map(async (event) => {
-      const ticketCount = await db.select({ count: count() })
-        .from(tickets)
-        .where(eq(tickets.eventId, event.id));
-      return { ...event, ticketCount: ticketCount[0]?.count || 0 };
-    })
-  );
-
-  // Sales trend (last 7 days)
-  const salesTrend = await db.select({
-    date: sql<string>`date(${tickets.createdAt})`,
-    ticketCount: count(),
-    volume: sum(tickets.purchasePrice),
-  })
-    .from(tickets)
-    .where(gte(tickets.createdAt, weekAgo))
-    .groupBy(sql`date(${tickets.createdAt})`)
-    .orderBy(desc(sql`date(${tickets.createdAt})`));
-
-  return c.json({
-    success: true,
-    data: {
-      overview: {
-        totalUsers: totalUsersResult[0]?.count || 0,
-        totalEvents: totalEventsResult[0]?.count || 0,
-        totalTickets: totalTicketsResult[0]?.count || 0,
-        activeEvents: activeEventsResult[0]?.count || 0,
-        pendingResolution: pendingResolutionResult[0]?.count || 0,
-        totalVolume: totalVolumeResult[0]?.total || 0,
-        totalWinners: winnerStats[0]?.totalWinners || 0,
-        totalPayouts: winnerStats[0]?.totalPayout || 0,
-      },
-      ticketStats: {
-        today: todayTicketsResult[0]?.count || 0,
-        week: weekTicketsResult[0]?.count || 0,
-        month: monthTicketsResult[0]?.count || 0,
-      },
-      salesTrend,
+    const [
+      totalUsersResult,
+      totalEventsResult,
+      totalTicketsResult,
+      activeEventsResult,
+      pendingResolutionResult,
+      todayTicketsResult,
+      weekTicketsResult,
+      monthTicketsResult,
+      totalVolumeResult,
       recentActivity,
-      topEvents: topEventsWithCounts,
-    },
-  });
+      topEvents,
+      winnerStats,
+    ] = await Promise.all([
+      db.select({ count: count() }).from(users),
+      db.select({ count: count() }).from(events),
+      db.select({ count: count() }).from(tickets),
+      db.select({ count: count() }).from(events).where(
+        or(eq(events.status, 'open'), eq(events.status, 'upcoming'))
+      ),
+      db.select({ count: count() }).from(events).where(eq(events.status, 'locked')),
+      db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, today)),
+      db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, weekAgo)),
+      db.select({ count: count() }).from(tickets).where(gte(tickets.createdAt, monthAgo)),
+      db.select({ total: sum(tickets.purchasePrice) }).from(tickets),
+      db.query.adminAuditLogs.findMany({
+        limit: 15,
+        orderBy: [desc(adminAuditLogs.createdAt)],
+        with: { admin: { columns: { email: true } } },
+      }),
+      db.query.events.findMany({
+        where: or(eq(events.status, 'open'), eq(events.status, 'locked')),
+        limit: 10,
+        orderBy: [desc(events.createdAt)],
+        with: { options: true },
+      }),
+      // Winner statistics
+      db.select({
+        totalWinners: count(),
+        totalPayout: sum(tickets.payoutAmount),
+      }).from(tickets).where(eq(tickets.status, 'won')),
+    ]);
+
+    // Get ticket counts for top events
+    const topEventsWithCounts = await Promise.all(
+      topEvents.map(async (event) => {
+        const ticketCount = await db.select({ count: count() })
+          .from(tickets)
+          .where(eq(tickets.eventId, event.id));
+        return { ...event, ticketCount: ticketCount[0]?.count || 0 };
+      })
+    );
+
+    // Sales trend (last 7 days)
+    const salesTrend = await db.select({
+      date: sql<string>`date(${tickets.createdAt})`,
+      ticketCount: count(),
+      volume: sum(tickets.purchasePrice),
+    })
+      .from(tickets)
+      .where(gte(tickets.createdAt, weekAgo))
+      .groupBy(sql`date(${tickets.createdAt})`)
+      .orderBy(desc(sql`date(${tickets.createdAt})`));
+
+    return c.json({
+      success: true,
+      data: {
+        overview: {
+          totalUsers: totalUsersResult[0]?.count || 0,
+          totalEvents: totalEventsResult[0]?.count || 0,
+          totalTickets: totalTicketsResult[0]?.count || 0,
+          activeEvents: activeEventsResult[0]?.count || 0,
+          pendingResolution: pendingResolutionResult[0]?.count || 0,
+          totalVolume: totalVolumeResult[0]?.total || 0,
+          totalWinners: winnerStats[0]?.totalWinners || 0,
+          totalPayouts: winnerStats[0]?.totalPayout || 0,
+        },
+        ticketStats: {
+          today: todayTicketsResult[0]?.count || 0,
+          week: weekTicketsResult[0]?.count || 0,
+          month: monthTicketsResult[0]?.count || 0,
+        },
+        salesTrend,
+        recentActivity,
+        topEvents: topEventsWithCounts,
+      },
+    });
+  } catch (error: any) {
+    console.error('Dashboard error:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to load dashboard',
+      details: error.message || 'Unknown error',
+    }, 500);
+  }
 });
 
 // ============================================================================

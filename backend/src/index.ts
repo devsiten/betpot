@@ -27,18 +27,14 @@ app.use('*', async (c, next) => {
   await next();
 });
 
-// CORS
+// CORS - Allow all origins for maximum browser compatibility
 app.use('*', cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://betpot.pages.dev',
-    'https://betpot-cloudflare.pages.dev',
-    /\.pages\.dev$/,  // Allow all Cloudflare Pages preview URLs
-  ],
+  origin: '*',  // Allow all origins - needed for mobile/Web3 browsers
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Wallet-Address'],
-  credentials: true,
+  exposeHeaders: ['Content-Length', 'X-Request-Id'],
+  maxAge: 86400,
+  credentials: false,  // Must be false when origin is '*'
 }));
 
 // Security headers
