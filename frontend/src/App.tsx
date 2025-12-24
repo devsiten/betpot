@@ -90,7 +90,7 @@ function useSessionManager() {
 
 // Admin route wrapper - waits for wallet to connect before redirecting
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { publicKey, connected, connecting, wallet } = useWallet();
+  const { publicKey, connected, connecting } = useWallet();
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Check if wallet adapter is trying to auto-reconnect
