@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Save, AlertCircle } from 'lucide-react';
+import { Settings, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/services/api';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -187,16 +187,11 @@ export function AdminSettings() {
           )}
         </div>
 
-        {/* Submit */}
+        {/* Settings Locked Notice */}
         <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="btn btn-primary"
-          >
-            <Save className="w-4 h-4" />
-            {mutation.isPending ? 'Saving...' : 'Save Settings'}
-          </button>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-amber-700 text-sm">
+            🔒 Settings are locked. Contact developer to make changes.
+          </div>
         </div>
       </form>
     </div>
