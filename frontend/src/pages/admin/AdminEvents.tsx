@@ -350,6 +350,7 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
       { label: '', ticketLimit: 1000 },
     ],
     startTime: '',
+    lockTime: '',
     endTime: '',
     status: 'upcoming' as 'draft' | 'upcoming',
   });
@@ -357,11 +358,10 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   const createMutation = useMutation({
     mutationFn: () => {
       // Convert datetime-local format to ISO format for backend
-      // End Time is used for both lockTime and eventTime
       const formData = {
         ...form,
         startTime: form.startTime ? new Date(form.startTime).toISOString() : '',
-        lockTime: form.endTime ? new Date(form.endTime).toISOString() : '',
+        lockTime: form.lockTime ? new Date(form.lockTime).toISOString() : '',
         eventTime: form.endTime ? new Date(form.endTime).toISOString() : '',
       };
       return api.createEvent(formData);
@@ -521,10 +521,10 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* Times */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="label">Start Time</label>
-              <p className="text-gray-500 text-xs mb-1">When event starts & betting opens</p>
+              <p className="text-gray-500 text-xs mb-1">When betting opens</p>
               <input
                 type="datetime-local"
                 value={form.startTime}
@@ -534,8 +534,19 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div>
+              <label className="label">Lock Time</label>
+              <p className="text-gray-500 text-xs mb-1">When betting closes</p>
+              <input
+                type="datetime-local"
+                value={form.lockTime}
+                onChange={(e) => setForm({ ...form, lockTime: e.target.value })}
+                className="input"
+                required
+              />
+            </div>
+            <div>
               <label className="label">End Time</label>
-              <p className="text-gray-500 text-xs mb-1">When event ends & betting closes</p>
+              <p className="text-gray-500 text-xs mb-1">When event ends</p>
               <input
                 type="datetime-local"
                 value={form.endTime}
