@@ -24,10 +24,23 @@ export function HomePage() {
     queryFn: () => api.getJackpot(),
   });
 
+  // Fetch internal events sorted by eventTime (ending soon first)
+  const { data: eventsData } = useQuery({
+    queryKey: ['events-ending-soon'],
+    queryFn: () => api.getEvents({ status: 'open', limit: 4 }),
+    staleTime: 30 * 1000,
+  });
+
   const allMarkets = polymarketData?.data || [];
   const liveMarkets = allMarkets.slice(0, displayCount);
   const hasMore = allMarkets.length > displayCount;
   const jackpot = jackpotData?.data;
+
+  // Get ending soon events (internal events sorted by eventTime)
+  const endingSoonEvents = (eventsData?.data || [])
+    .filter((e: any) => e.eventTime && new Date(e.eventTime) > new Date())
+    .sort((a: any, b: any) => new Date(a.eventTime).getTime() - new Date(b.eventTime).getTime())
+    .slice(0, 4);
 
   return (
     <div className="pt-4">
@@ -66,55 +79,56 @@ export function HomePage() {
               <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 shadow-elevated">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-base font-black text-brand-600 uppercase tracking-wider drop-shadow-sm">🔥 Ending Soon</h3>
-                  <Link to="/events" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+                  <Link to="/events?sort=ending" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
                     View All →
                   </Link>
                 </div>
 
-                {jackpot ? (
-                  <div className="space-y-3">
-                    {/* Show the current jackpot as ending soon */}
-                    <Link
-                      to="/jackpot"
-                      className="block bg-gradient-to-r from-positive-50 to-brand-50 rounded-xl p-4 border border-positive-200 hover:shadow-md transition-all"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0">
-                          <Trophy className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-text-primary font-bold text-sm truncate">{jackpot.title}</h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Clock className="w-3 h-3 text-brand-500" />
-                            <span className="text-xs text-text-secondary font-medium">
-                              Ends {format(new Date(jackpot.eventTime), 'MMM dd, HH:mm')}
+                {endingSoonEvents.length > 0 ? (
+                  <div className="space-y-2">
+                    {endingSoonEvents.map((event: any) => (
+                      <Link
+                        key={event.id}
+                        to={event.isJackpot ? '/jackpot' : `/events/${event.id}`}
+                        className="block bg-gradient-to-r from-positive-50 to-brand-50 rounded-xl p-3 border border-positive-200 hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={clsx(
+                            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                            event.isJackpot
+                              ? "bg-gradient-to-br from-brand-400 to-brand-600"
+                              : "bg-gradient-to-br from-positive-400 to-positive-600"
+                          )}>
+                            {event.isJackpot ? (
+                              <Trophy className="w-4 h-4 text-white" />
+                            ) : (
+                              <Clock className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-text-primary font-bold text-xs truncate">{event.title}</h4>
+                            <span className="text-[10px] text-text-secondary font-medium">
+                              Ends {format(new Date(event.eventTime), 'MMM dd, HH:mm')}
                             </span>
                           </div>
+                          {event.isJackpot && (
+                            <div className="text-right">
+                              <p className="text-[10px] text-text-muted">Pool</p>
+                              <p className="text-xs font-bold text-positive-600">${(event.totalPool || 0).toLocaleString()}</p>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-text-muted">Pool</p>
-                          <p className="text-sm font-bold text-positive-600">${(jackpot.totalPool || 0).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </Link>
-
-                    {/* CTA to join */}
-                    <Link
-                      to="/jackpot"
-                      className="block w-full py-3 text-center bg-gradient-to-r from-brand-500 to-positive-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-brand-500/30 transition-all text-sm"
-                    >
-                      <Zap className="w-4 h-4 inline mr-2" />
-                      Place Your Bet Now
-                    </Link>
+                      </Link>
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
                     <div className="w-12 h-12 rounded-xl bg-background-secondary flex items-center justify-center mx-auto mb-3">
-                      <Trophy className="w-6 h-6 text-text-muted" />
+                      <Clock className="w-6 h-6 text-text-muted" />
                     </div>
-                    <p className="text-text-muted text-sm">No active jackpot events</p>
+                    <p className="text-text-muted text-sm">No events ending soon</p>
                     <Link to="/events" className="text-brand-500 text-sm font-medium hover:underline mt-2 inline-block">
-                      Browse Markets →
+                      Browse Events →
                     </Link>
                   </div>
                 )}
