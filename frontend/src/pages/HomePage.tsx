@@ -148,18 +148,35 @@ export function HomePage() {
 
               {/* Options */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
-                {jackpot.options?.map((option) => (
-                  <div
-                    key={option.id}
-                    className="p-4 rounded-lg bg-background border border-brand-100 hover:border-brand-300 transition-all cursor-pointer group"
-                  >
-                    <p className="text-text-primary font-medium group-hover:text-brand-600 transition-colors">{option.label}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-text-muted">{option.ticketsSold || 0} bets</span>
-                      <span className="text-lg font-semibold text-brand-600">${option.poolAmount?.toFixed(0) || 0}</span>
+                {jackpot.options?.map((option: any, idx: number) => {
+                  const label = option.label?.toLowerCase() || '';
+                  const isPositive = label === 'yes' || label === 'home' || (idx === 0 && !label.includes('draw'));
+                  const isDraw = label === 'draw';
+
+                  const bgColor = isDraw
+                    ? 'bg-amber-50 border-amber-200 hover:border-amber-400'
+                    : isPositive
+                      ? 'bg-positive-50 border-positive-200 hover:border-positive-400'
+                      : 'bg-negative-50 border-negative-200 hover:border-negative-400';
+                  const textColor = isDraw
+                    ? 'text-amber-700'
+                    : isPositive
+                      ? 'text-positive-700'
+                      : 'text-negative-600';
+
+                  return (
+                    <div
+                      key={option.id}
+                      className={`p-4 rounded-lg border transition-all cursor-pointer group ${bgColor}`}
+                    >
+                      <p className={`font-medium group-hover:opacity-80 transition-colors ${textColor}`}>{option.label}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs text-text-muted">{option.ticketsSold || 0} bets</span>
+                        <span className={`text-lg font-semibold ${textColor}`}>${option.poolAmount?.toFixed(0) || 0}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* CTA */}

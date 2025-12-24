@@ -156,6 +156,14 @@ export function AdminDashboard() {
           loading={isLoading}
         />
         <StatCard
+          icon={DollarSign}
+          label="Platform Fees Earned"
+          value={`$${((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(2)}`}
+          change="1% of volume"
+          changeType="up"
+          loading={isLoading}
+        />
+        <StatCard
           icon={Clock}
           label="Events Pending Resolution"
           value={dashboard?.overview.pendingResolution || 0}
