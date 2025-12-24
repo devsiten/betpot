@@ -190,7 +190,7 @@ export function AdminSettings() {
         {/* Settings Locked Notice */}
         <div className="flex justify-end">
           <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-amber-700 text-sm">
-            🔒 Settings are locked. Contact developer to make changes.
+            🔒 Settings are locked
           </div>
         </div>
       </form>
