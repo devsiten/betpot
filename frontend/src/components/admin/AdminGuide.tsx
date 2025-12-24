@@ -21,8 +21,8 @@ interface GuideSection {
     content: React.ReactNode;
 }
 
-export function AdminGuide() {
-    const [isOpen, setIsOpen] = useState(false);
+export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
     const sections: GuideSection[] = [
@@ -54,7 +54,7 @@ export function AdminGuide() {
                     <p><strong>Step 3:</strong> Click <span className="bg-positive-100 text-positive-700 px-2 py-0.5 rounded font-medium">Set as Jackpot</span> on any event</p>
                     <p><strong>Step 4:</strong> Confirm the jackpot creation - this imports the event with proper odds</p>
                     <div className="bg-brand-50 border border-brand-200 rounded-lg p-3 mt-2">
-                        <p className="text-brand-700 font-medium">💡 Tip: Choose events with high interest for better engagement</p>
+                        <p className="text-brand-700 font-medium">Tip: Choose events with high interest for better engagement</p>
                     </div>
                 </div>
             ),
@@ -73,7 +73,7 @@ export function AdminGuide() {
                         <li><strong>Cancel Event</strong> - Cancel and refund all tickets</li>
                     </ul>
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-2">
-                        <p className="text-amber-700 font-medium">⚠️ Important: Always resolve events within 2-3 hours after they end</p>
+                        <p className="text-amber-700 font-medium">Important: Always resolve events within 2-3 hours after they end</p>
                     </div>
                 </div>
             ),
@@ -94,7 +94,7 @@ export function AdminGuide() {
                         <li>Confirm - this calculates payouts for all winners!</li>
                     </ol>
                     <div className="bg-positive-50 border border-positive-200 rounded-lg p-3 mt-2">
-                        <p className="text-positive-700 font-medium">✅ Winners can claim their payouts after resolution</p>
+                        <p className="text-positive-700 font-medium">Winners can claim their payouts after resolution</p>
                     </div>
                 </div>
             ),
@@ -145,7 +145,7 @@ export function AdminGuide() {
                         <li><strong>Rejected</strong> - Marked as invalid</li>
                     </ul>
                     <div className="bg-negative-50 border border-negative-200 rounded-lg p-3 mt-2">
-                        <p className="text-negative-700 font-medium">🚨 Always investigate pending issues promptly!</p>
+                        <p className="text-negative-700 font-medium">Always investigate pending issues promptly!</p>
                     </div>
                 </div>
             ),
@@ -196,7 +196,7 @@ export function AdminGuide() {
             {isOpen && (
                 <div className="card mt-2 p-4 space-y-2">
                     <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-4">
-                        <h4 className="font-bold text-brand-700 mb-2">🎯 Your Main Responsibilities</h4>
+                        <h4 className="font-bold text-brand-700 mb-2">Your Main Responsibilities</h4>
                         <ol className="list-decimal list-inside text-sm text-brand-600 space-y-1">
                             <li>Create jackpots from Markets page</li>
                             <li>Monitor events and betting activity</li>
