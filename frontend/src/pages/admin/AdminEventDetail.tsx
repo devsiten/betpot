@@ -612,10 +612,10 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-900 border border-dark-800 rounded-2xl w-full max-w-md">
-        <div className="p-6 border-b border-dark-800">
-          <h2 className="text-xl font-bold text-white">Resolve Event</h2>
-          <p className="text-dark-400 mt-1">Select the winning option</p>
+      <div className="bg-white lg:bg-dark-900 border border-gray-200 lg:border-dark-800 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="p-6 border-b border-gray-200 lg:border-dark-800">
+          <h2 className="text-xl font-bold text-gray-900 lg:text-white">Resolve Event</h2>
+          <p className="text-gray-500 lg:text-dark-400 mt-1">Select the winning option</p>
         </div>
 
         <div className="p-6 space-y-4">
@@ -626,18 +626,18 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
               className={clsx(
                 'w-full p-4 rounded-lg border text-left transition-all',
                 selectedOption === option.optionId
-                  ? 'bg-green-500/10 border-green-500/50'
-                  : 'bg-dark-800/50 border-dark-700 hover:border-dark-600'
+                  ? 'bg-green-100 lg:bg-green-500/10 border-green-500'
+                  : 'bg-gray-50 lg:bg-dark-800/50 border-gray-200 lg:border-dark-700 hover:border-gray-300 lg:hover:border-dark-600'
               )}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-lg bg-dark-700 flex items-center justify-center font-bold">
+                  <span className="w-10 h-10 rounded-lg bg-gray-200 lg:bg-dark-700 flex items-center justify-center font-bold text-gray-900 lg:text-white">
                     {option.optionId}
                   </span>
                   <div>
-                    <p className="font-medium text-white">{option.label}</p>
-                    <p className="text-sm text-dark-400">{option.ticketsSold} tickets</p>
+                    <p className="font-medium text-gray-900 lg:text-white">{option.label}</p>
+                    <p className="text-sm text-gray-500 lg:text-dark-400">{option.ticketsSold} tickets</p>
                   </div>
                 </div>
                 {selectedOption === option.optionId && (
@@ -648,7 +648,7 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
           ))}
         </div>
 
-        <div className="p-6 border-t border-dark-800 flex justify-end gap-3">
+        <div className="p-6 border-t border-gray-200 lg:border-dark-800 flex justify-end gap-3">
           <button onClick={onClose} className="btn btn-secondary">
             Cancel
           </button>

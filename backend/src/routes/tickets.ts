@@ -387,8 +387,8 @@ ticketsRoutes.post('/claim', zValidator('json', claimSchema), async (c) => {
     return c.json({ success: false, error: 'Ticket already claimed' }, 400);
   }
 
-  // Check claim delay
-  const claimDelayHours = 3; // From settings
+  // Check claim delay (0 = immediate claiming)
+  const claimDelayHours = 0;
   const resolvedAt = ticket.event?.resolvedAt;
   if (resolvedAt) {
     const claimAvailableAt = new Date(resolvedAt.getTime() + claimDelayHours * 60 * 60 * 1000);
@@ -489,7 +489,7 @@ ticketsRoutes.post('/claim-all', zValidator('json', batchClaimSchema), async (c)
   }
 
   // Check claim delay for each ticket (skip those not ready)
-  const claimDelayHours = 3;
+  const claimDelayHours = 0; // Immediate claiming
   const now = new Date();
   const readyToClaim = claimable.filter(ticket => {
     const resolvedAt = ticket.event?.resolvedAt;
@@ -499,7 +499,7 @@ ticketsRoutes.post('/claim-all', zValidator('json', batchClaimSchema), async (c)
   });
 
   if (readyToClaim.length === 0) {
-    return c.json({ success: false, error: 'No tickets are ready to claim yet (3 hour delay after resolution)' }, 400);
+    return c.json({ success: false, error: 'No tickets are ready to claim yet' }, 400);
   }
 
   // Calculate total payout
