@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -90,67 +90,12 @@ function useSessionManager() {
   }, [handleActivity, checkSessionTimeout]);
 }
 
-// Admin route wrapper - waits for wallet to connect before redirecting
+// Admin route wrapper - instant check, no waiting
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { publicKey, connected, connecting } = useWallet();
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const { publicKey, connected } = useWallet();
 
-  // Check if this user was previously an admin (stored on successful admin access)
-  const wasAdmin = typeof window !== 'undefined' &&
-    localStorage.getItem('betpot_admin_session') === 'true';
-
-  // Store admin session when successfully connected as admin
-  useEffect(() => {
-    if (connected && publicKey && ADMIN_WALLETS.includes(publicKey.toBase58())) {
-      localStorage.setItem('betpot_admin_session', 'true');
-    }
-  }, [connected, publicKey]);
-
-  // Wait for wallet to reconnect
-  useEffect(() => {
-    // If already connected as admin, stop waiting immediately
-    if (connected && publicKey && ADMIN_WALLETS.includes(publicKey.toBase58())) {
-      setIsInitializing(false);
-      return;
-    }
-
-    // If was previously an admin, wait longer for wallet to reconnect
-    // Otherwise, use shorter timeout
-    const timeout = wasAdmin ? 10000 : 2000;
-
-    const timer = setTimeout(() => {
-      setIsInitializing(false);
-      setHasTimedOut(true);
-    }, timeout);
-
-    return () => clearTimeout(timer);
-  }, [connected, publicKey, wasAdmin]);
-
-  // Show loading while waiting for wallet
-  if (isInitializing || connecting) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-secondary">Connecting wallet...</p>
-          {wasAdmin && <p className="text-text-muted text-sm mt-2">Please approve in your wallet</p>}
-        </div>
-      </div>
-    );
-  }
-
-  // If not connected after timeout, clear admin session and redirect
-  if (!connected || !publicKey) {
-    if (hasTimedOut && wasAdmin) {
-      localStorage.removeItem('betpot_admin_session');
-    }
-    return <Navigate to="/" replace />;
-  }
-
-  // Check if wallet is admin
-  if (!ADMIN_WALLETS.includes(publicKey.toBase58())) {
-    localStorage.removeItem('betpot_admin_session');
+  // Not connected or not admin - redirect immediately
+  if (!connected || !publicKey || !ADMIN_WALLETS.includes(publicKey.toBase58())) {
     return <Navigate to="/" replace />;
   }
 

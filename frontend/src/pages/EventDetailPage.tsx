@@ -204,6 +204,11 @@ export function EventDetailPage() {
           )}>
             {event.status}
           </span>
+          {event.status === 'locked' && (
+            <span className="text-amber-600 bg-amber-50 px-3 py-1 rounded-full text-sm font-medium">
+              ⏳ Waiting for result - please check back in 2-3 hours
+            </span>
+          )}
           <span className="text-sm text-gray-600 capitalize">{event.category}</span>
         </div>
 

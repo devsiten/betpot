@@ -22,8 +22,8 @@ export function AdminSettings() {
   const [formData, setFormData] = useState({
     ticketPrice: 10,
     platformFee: 0.01,
-    maxEventsPerDay: 3,
-    claimDelayHours: 3,
+    maxEventsPerDay: 10,
+    claimDelayHours: 0,
     maintenanceMode: false,
   });
 
