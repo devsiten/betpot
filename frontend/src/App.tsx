@@ -18,6 +18,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { JackpotPage } from '@/pages/JackpotPage';
 import { TestnetGuidePage } from '@/pages/TestnetGuidePage';
 import { EventChatPage } from '@/pages/EventChatPage';
+import { HowItWorksPage } from '@/pages/HowItWorksPage';
 
 // Admin pages
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
@@ -132,6 +133,7 @@ function AppContent() {
         <Route path="/events/:id" element={<EventDetailPage />} />
         <Route path="/dashboard" element={<AdminDashboardWrapper />} />
         <Route path="/testnet-guide" element={<TestnetGuidePage />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/events/:eventId/chat" element={<EventChatPage />} />
       </Route>
 
