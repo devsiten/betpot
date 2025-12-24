@@ -4,11 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Calm Solana-inspired background - 80% white / 20% Solana purple mix
+        // Calm off-white background - easy on the eyes, not too bright
         background: {
-          DEFAULT: '#F5F0FF', // Calm soft lavender (80/20 white-purple)
-          secondary: '#EDE5FF', // Slightly deeper lavender 
-          card: '#FFFFFF', // Pure white for cards
+          DEFAULT: '#FAFAFA', // Calm off-white (not harsh)
+          secondary: '#F5F5F5', // Slightly warmer gray
+          card: '#FFFFFF', // Pure white for cards (contrast)
         },
         // Solana Purple - Primary brand color
         brand: {
