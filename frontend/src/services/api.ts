@@ -257,6 +257,20 @@ class ApiService {
     return data;
   }
 
+  async claimAllTickets(walletAddress: string, signature: string) {
+    const { data } = await this.client.post<ApiResponse<{
+      claimedCount: number;
+      totalPayout: number;
+      claimTx: string;
+      walletAddress: string;
+      ticketIds: string[];
+    }>>('/tickets/claim-all', {
+      walletAddress,
+      signature,
+    });
+    return data;
+  }
+
   // ========== ADMIN ==========
 
   async getAdminDashboard() {

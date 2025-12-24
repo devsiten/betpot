@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, TrendingUp, Zap, Search, Ticket, ChevronLeft, ChevronRight, Hash } from 'lucide-react';
+import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, TrendingUp, Zap, Search, Ticket, ChevronLeft, ChevronRight, Hash, Gift, DollarSign, Loader2 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
@@ -13,7 +13,8 @@ const TICKETS_PER_PAGE = 10;
 
 export function DashboardPage() {
     const navigate = useNavigate();
-    const { publicKey, connected, disconnect } = useWallet();
+    const queryClient = useQueryClient();
+    const { publicKey, connected, disconnect, signMessage } = useWallet();
     const { logout, isAuthenticated } = useAuthStore();
     const [editingUsername, setEditingUsername] = useState(false);
     const [username, setUsername] = useState('');
@@ -21,6 +22,7 @@ export function DashboardPage() {
     const [copiedTicketId, setCopiedTicketId] = useState<string | null>(null);
     const [searchTicketId, setSearchTicketId] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [isClaiming, setIsClaiming] = useState(false);
 
     // Fetch user stats
     const { data: statsData } = useQuery({
@@ -36,8 +38,58 @@ export function DashboardPage() {
         enabled: connected && isAuthenticated,
     });
 
+    // Fetch claimable tickets
+    const { data: claimableData, refetch: refetchClaimable } = useQuery({
+        queryKey: ['claimable-tickets'],
+        queryFn: () => api.getClaimableTickets(),
+        enabled: connected && isAuthenticated,
+    });
+
     const stats = statsData?.data;
     const tickets = ticketsData?.data || [];
+    const claimableTickets = claimableData?.data?.tickets || [];
+    const totalClaimable = claimableData?.data?.totalClaimable || 0;
+
+    // Calculate winnings vs refunds
+    const claimableWinnings = claimableTickets
+        .filter(t => t.status === 'won')
+        .reduce((sum, t) => sum + (t.payoutAmount || 0), 0);
+    const claimableRefunds = claimableTickets
+        .filter(t => t.status === 'refunded')
+        .reduce((sum, t) => sum + (t.payoutAmount || 0), 0);
+
+    // Handle claim all
+    const handleClaimAll = async () => {
+        if (!publicKey || !signMessage) {
+            toast.error('Please connect your wallet');
+            return;
+        }
+
+        setIsClaiming(true);
+        try {
+            // Sign a message to verify ownership
+            const message = new TextEncoder().encode(`Claim all winnings: ${Date.now()}`);
+            const signature = await signMessage(message);
+            const signatureBase64 = Buffer.from(signature).toString('base64');
+
+            const result = await api.claimAllTickets(publicKey.toBase58(), signatureBase64);
+
+            if (result.success) {
+                toast.success(`Successfully claimed $${result.data?.totalPayout?.toFixed(2)} from ${result.data?.claimedCount} tickets!`);
+                // Refresh data
+                refetchClaimable();
+                queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
+                queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+            } else {
+                toast.error(result.error || 'Failed to claim');
+            }
+        } catch (error: any) {
+            console.error('Claim error:', error);
+            toast.error(error.response?.data?.error || error.message || 'Failed to claim');
+        } finally {
+            setIsClaiming(false);
+        }
+    };
 
     // Filter tickets by search
     const filteredTickets = searchTicketId.trim()
@@ -211,6 +263,85 @@ export function DashboardPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Claimable Earnings Card - Only shows when there's something to claim */}
+            {totalClaimable > 0 && (
+                <div className="bg-gradient-to-br from-positive-50 via-positive-100 to-positive-50 rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8 border-2 border-positive-300 shadow-lg relative overflow-hidden">
+                    {/* Decorative elements */}
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-positive-200 rounded-full blur-2xl opacity-50" />
+                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-40" />
+
+                    <div className="relative">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                            {/* Left side - Info */}
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-10 h-10 rounded-xl bg-positive-500 flex items-center justify-center">
+                                        <Gift className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-positive-800">Claimable Earnings</h3>
+                                        <p className="text-xs text-positive-600">{claimableTickets.length} ticket{claimableTickets.length !== 1 ? 's' : ''} ready to claim</p>
+                                    </div>
+                                </div>
+
+                                {/* Amount breakdown */}
+                                <div className="mt-4 space-y-2">
+                                    {claimableWinnings > 0 && (
+                                        <div className="flex items-center justify-between bg-white/60 rounded-lg px-3 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <Trophy className="w-4 h-4 text-positive-600" />
+                                                <span className="text-sm text-positive-700">Winnings</span>
+                                            </div>
+                                            <span className="font-bold text-positive-700">${claimableWinnings.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    {claimableRefunds > 0 && (
+                                        <div className="flex items-center justify-between bg-white/60 rounded-lg px-3 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <Clock className="w-4 h-4 text-yellow-600" />
+                                                <span className="text-sm text-yellow-700">Refunds</span>
+                                            </div>
+                                            <span className="font-bold text-yellow-700">${claimableRefunds.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right side - Total & Button */}
+                            <div className="flex flex-col items-center lg:items-end gap-3">
+                                <div className="text-center lg:text-right">
+                                    <p className="text-xs text-positive-600 uppercase tracking-wider font-medium">Total Available</p>
+                                    <p className="text-3xl sm:text-4xl font-bold text-positive-700">${totalClaimable.toFixed(2)}</p>
+                                </div>
+
+                                <button
+                                    onClick={handleClaimAll}
+                                    disabled={isClaiming}
+                                    className={clsx(
+                                        'flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-all shadow-lg',
+                                        isClaiming
+                                            ? 'bg-positive-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-positive-500 to-positive-600 hover:from-positive-600 hover:to-positive-700 hover:shadow-xl hover:scale-[1.02]'
+                                    )}
+                                >
+                                    {isClaiming ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Claiming...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <DollarSign className="w-5 h-5" />
+                                            Claim All ${totalClaimable.toFixed(2)}
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Stats Grid - Light theme cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">

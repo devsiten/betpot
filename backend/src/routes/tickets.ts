@@ -395,4 +395,82 @@ ticketsRoutes.get('/claimable/list', async (c) => {
   });
 });
 
+// Batch claim all claimable tickets
+const batchClaimSchema = z.object({
+  walletAddress: z.string(),
+  signature: z.string(),
+});
+
+ticketsRoutes.post('/claim-all', zValidator('json', batchClaimSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { walletAddress } = c.req.valid('json');
+
+  // Get all claimable tickets
+  const claimable = await db.query.tickets.findMany({
+    where: and(
+      eq(tickets.userId, user.id),
+      sql`${tickets.status} IN ('won', 'refunded')`,
+      sql`${tickets.claimedAt} IS NULL`
+    ),
+    with: {
+      event: {
+        columns: { id: true, title: true, resolvedAt: true },
+      },
+    },
+  });
+
+  if (claimable.length === 0) {
+    return c.json({ success: false, error: 'No tickets available to claim' }, 400);
+  }
+
+  // Check claim delay for each ticket (skip those not ready)
+  const claimDelayHours = 3;
+  const now = new Date();
+  const readyToClaim = claimable.filter(ticket => {
+    const resolvedAt = ticket.event?.resolvedAt;
+    if (!resolvedAt) return true; // No resolved time means refunded event
+    const claimAvailableAt = new Date(resolvedAt.getTime() + claimDelayHours * 60 * 60 * 1000);
+    return now >= claimAvailableAt;
+  });
+
+  if (readyToClaim.length === 0) {
+    return c.json({ success: false, error: 'No tickets are ready to claim yet (3 hour delay after resolution)' }, 400);
+  }
+
+  // Calculate total payout
+  const totalPayout = readyToClaim.reduce((sum, t) => sum + (t.payoutAmount || 0), 0);
+
+  // TODO: Execute on-chain batch payout transfer
+  // const claimTx = await executeBatchPayout(walletAddress, totalPayout);
+  const claimTx = `batch_claim_${nanoid()}`;
+
+  // Update all tickets to claimed
+  const ticketIds = readyToClaim.map(t => t.id);
+
+  // Update tickets one by one to avoid SQL variable limit
+  for (const ticketId of ticketIds) {
+    await db.update(tickets)
+      .set({
+        status: 'claimed',
+        claimTx,
+        claimedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(tickets.id, ticketId));
+  }
+
+  return c.json({
+    success: true,
+    data: {
+      claimedCount: readyToClaim.length,
+      totalPayout,
+      claimTx,
+      walletAddress,
+      ticketIds,
+    },
+  });
+});
+
 export default ticketsRoutes;
+
