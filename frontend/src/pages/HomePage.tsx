@@ -61,45 +61,63 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Right - How It Works Visual */}
+            {/* Right - Ending Soon */}
             <div className="flex-1 max-w-md">
               <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 shadow-elevated">
-                <h3 className="text-base font-black text-brand-600 uppercase tracking-wider mb-5 drop-shadow-sm">How It Works</h3>
-
-                <div className="space-y-4">
-                  {/* Step 1 */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-positive-100 flex items-center justify-center flex-shrink-0 border border-positive-200">
-                      <span className="text-positive-600 font-bold text-lg">1</span>
-                    </div>
-                    <div>
-                      <h4 className="text-text-primary font-bold text-base">Browse Markets</h4>
-                      <p className="text-text-secondary text-sm mt-1 font-medium">Explore trending events. These feed into our Jackpot picks.</p>
-                    </div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0 border border-brand-200">
-                      <span className="text-brand-600 font-bold text-lg">2</span>
-                    </div>
-                    <div>
-                      <h4 className="text-text-primary font-bold text-base">Place Your Bet</h4>
-                      <p className="text-text-secondary text-sm mt-1 font-medium">Go to Jackpot, pick your outcome, and buy tickets.</p>
-                    </div>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-positive-100 flex items-center justify-center flex-shrink-0 border border-positive-200">
-                      <span className="text-positive-600 font-bold text-lg">3</span>
-                    </div>
-                    <div>
-                      <h4 className="text-text-primary font-bold text-base">Collect Winnings</h4>
-                      <p className="text-text-secondary text-sm mt-1 font-medium">If you win, claim your share from the prize pool!</p>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-base font-black text-brand-600 uppercase tracking-wider drop-shadow-sm">🔥 Ending Soon</h3>
+                  <Link to="/events" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+                    View All →
+                  </Link>
                 </div>
+
+                {jackpot ? (
+                  <div className="space-y-3">
+                    {/* Show the current jackpot as ending soon */}
+                    <Link
+                      to="/jackpot"
+                      className="block bg-gradient-to-r from-positive-50 to-brand-50 rounded-xl p-4 border border-positive-200 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0">
+                          <Trophy className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-text-primary font-bold text-sm truncate">{jackpot.title}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Clock className="w-3 h-3 text-brand-500" />
+                            <span className="text-xs text-text-secondary font-medium">
+                              Ends {format(new Date(jackpot.eventTime), 'MMM dd, HH:mm')}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-text-muted">Pool</p>
+                          <p className="text-sm font-bold text-positive-600">${(jackpot.totalPool || 0).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* CTA to join */}
+                    <Link
+                      to="/jackpot"
+                      className="block w-full py-3 text-center bg-gradient-to-r from-brand-500 to-positive-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-brand-500/30 transition-all text-sm"
+                    >
+                      <Zap className="w-4 h-4 inline mr-2" />
+                      Place Your Bet Now
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 rounded-xl bg-background-secondary flex items-center justify-center mx-auto mb-3">
+                      <Trophy className="w-6 h-6 text-text-muted" />
+                    </div>
+                    <p className="text-text-muted text-sm">No active jackpot events</p>
+                    <Link to="/events" className="text-brand-500 text-sm font-medium hover:underline mt-2 inline-block">
+                      Browse Markets →
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
