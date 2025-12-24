@@ -14,10 +14,6 @@ export function JackpotPage() {
     const jackpots = (jackpotData as any)?.jackpots || [];
     const hasJackpots = jackpots.length > 0;
 
-    // Sort jackpots by lock time (soonest first) for "Ending Soon"
-    const endingSoon = [...jackpots]
-        .sort((a, b) => new Date(a.lockTime).getTime() - new Date(b.lockTime).getTime())
-        .slice(0, 5);
 
     if (isLoading) {
         return (
@@ -127,54 +123,6 @@ export function JackpotPage() {
                 ))}
             </div>
 
-            {/* Ending Soon Section */}
-            {endingSoon.length > 0 && (
-                <div className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                            <Clock className="w-6 h-6 text-negative-500" />
-                            Ending Soon
-                        </h2>
-                        <span className="text-sm text-text-muted">Betting closes soon!</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {endingSoon.map((jackpot: any) => (
-                            <Link
-                                key={jackpot.id}
-                                to={`/events/${jackpot.id}`}
-                                className="card p-4 hover:border-negative-300 transition-all group cursor-pointer bg-gradient-to-br from-negative-50 to-background-card border-negative-200"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-negative-500" />
-                                        <span className="text-xs text-negative-600 font-bold uppercase">Urgent</span>
-                                    </div>
-                                    <span className="text-xs text-text-muted">{jackpot.category}</span>
-                                </div>
-
-                                <h3 className="text-base font-semibold text-text-primary group-hover:text-negative-600 transition-colors mb-2 line-clamp-2">
-                                    {jackpot.title}
-                                </h3>
-
-                                <div className="bg-negative-100 rounded-lg p-3 mb-3 border border-negative-200">
-                                    <p className="text-xs text-negative-700 font-medium mb-1">Betting Closes</p>
-                                    <p className="text-sm font-bold text-negative-600">
-                                        {format(new Date(jackpot.lockTime), 'MMM dd, HH:mm')}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-text-muted">Prize Pool</span>
-                                    <span className="font-bold text-brand-600">
-                                        ${(jackpot.totalPool || 0).toLocaleString()}
-                                    </span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
 
             {/* How it works */}
             <div className="p-6 card">
