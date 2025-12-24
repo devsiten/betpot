@@ -16,6 +16,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
 import bs58 from 'bs58';
 import { useAuthStore } from '@/stores/authStore';
+import { NotificationBell } from '@/components/NotificationBell';
+import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import toast from 'react-hot-toast';
 
 // Custom Connect Button - Only Phantom and Solflare
@@ -259,22 +261,26 @@ export function MainLayout() {
                     {isSigningIn ? 'Signing...' : 'Sign In'}
                   </button>
                 ) : (
-                  <NavLink
-                    to={isAdmin() ? '/admin' : '/dashboard'}
-                    className="flex items-center gap-2 btn btn-primary"
-                  >
-                    {isAdmin() ? (
-                      <>
-                        <Settings className="w-4 h-4" />
-                        Admin Dashboard
-                      </>
-                    ) : (
-                      <>
-                        <Ticket className="w-4 h-4" />
-                        Dashboard
-                      </>
-                    )}
-                  </NavLink>
+                  <>
+                    <MyBetsDropdown />
+                    <NotificationBell />
+                    <NavLink
+                      to={isAdmin() ? '/admin' : '/dashboard'}
+                      className="flex items-center gap-2 btn btn-primary"
+                    >
+                      {isAdmin() ? (
+                        <>
+                          <Settings className="w-4 h-4" />
+                          Admin Dashboard
+                        </>
+                      ) : (
+                        <>
+                          <Ticket className="w-4 h-4" />
+                          Dashboard
+                        </>
+                      )}
+                    </NavLink>
+                  </>
                 )}
               </div>
 
