@@ -4,24 +4,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Light theme base - subtle blue-gray tint for modern clean look
+        // Calm Solana-inspired background - 80% white / 20% Solana purple mix
         background: {
-          DEFAULT: '#F8FAFC', // Very light blue-gray (slate-50)
-          secondary: '#F1F5F9', // Slightly darker (slate-100)
-          card: '#FFFFFF',
+          DEFAULT: '#F5F0FF', // Calm soft lavender (80/20 white-purple)
+          secondary: '#EDE5FF', // Slightly deeper lavender 
+          card: '#FFFFFF', // Pure white for cards
         },
-        // Cyan - Primary brand color
+        // Solana Purple - Primary brand color
         brand: {
-          50: '#ECFEFF',
-          100: '#CFFAFE',
-          200: '#A5F3FC',
-          300: '#67E8F9',
-          400: '#22D3EE',
-          500: '#06B6D4',
-          600: '#0891B2',
-          700: '#0E7490',
-          800: '#155E75',
-          900: '#164E63',
+          50: '#FAF5FF',
+          100: '#F3E8FF',
+          200: '#E9D5FF',
+          300: '#D8B4FE',
+          400: '#C084FC',
+          500: '#9945FF', // Solana purple
+          600: '#7C3AED',
+          700: '#6D28D9',
+          800: '#5B21B6',
+          900: '#4C1D95',
         },
         // Green - Positive actions (Yes, Home)
         positive: {
