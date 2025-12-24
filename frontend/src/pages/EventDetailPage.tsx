@@ -350,7 +350,7 @@ export function EventDetailPage() {
                 className={clsx(
                   'w-full p-4 rounded-xl border-2 text-left transition-all relative overflow-hidden',
                   isOpen && 'cursor-pointer hover:border-dark-600',
-                  isSelected && 'border-primary-500 bg-primary-500/10',
+                  isSelected && 'border-positive-500 bg-positive-500/10',
                   isWinner && 'border-green-500 bg-green-500/10',
                   !isSelected && !isWinner && labelColor
                 )}
@@ -359,7 +359,7 @@ export function EventDetailPage() {
                   <div className="flex items-center gap-3">
                     <span className={clsx(
                       'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
-                      isSelected ? 'bg-primary-500 text-black' : 'bg-dark-700 text-gray-600'
+                      isSelected ? 'bg-positive-500 text-white' : 'bg-dark-700 text-gray-600'
                     )}>
                       {option.optionId}
                     </span>
@@ -381,7 +381,7 @@ export function EventDetailPage() {
                   <div
                     className={clsx(
                       'h-full transition-all',
-                      isWinner ? 'bg-green-500' : isSelected ? 'bg-primary-500' : 'bg-dark-600'
+                      isWinner ? 'bg-green-500' : isSelected ? 'bg-positive-500' : 'bg-dark-600'
                     )}
                     style={{ width: `${percentage}%` }}
                   />
