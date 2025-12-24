@@ -5,8 +5,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 
-// Use the frontend proxy to avoid ad blocker issues
-const API_URL = '';
+// Use the backend API directly
+const API_URL = 'https://betpot-api.devsiten.workers.dev';
 
 interface Message {
     id: string;
