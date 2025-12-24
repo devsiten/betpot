@@ -481,25 +481,13 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
             <label className="label">Betting Options</label>
             <div className="space-y-3">
               {form.options.map((option, index) => (
-                <div key={index} className="flex gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center text-dark-400 font-bold">
-                    {String.fromCharCode(65 + index)}
-                  </div>
+                <div key={index} className="flex gap-3 items-center">
                   <input
                     type="text"
                     value={option.label}
                     onChange={(e) => updateOption(index, 'label', e.target.value)}
                     className="input flex-1"
-                    placeholder={`Option ${String.fromCharCode(65 + index)} label`}
-                    required
-                  />
-                  <input
-                    type="number"
-                    value={option.ticketLimit}
-                    onChange={(e) => updateOption(index, 'ticketLimit', parseInt(e.target.value))}
-                    className="input w-32"
-                    placeholder="Limit"
-                    min={10}
+                    placeholder={`Option ${index + 1} (e.g. Yes, No, Home, Away)`}
                     required
                   />
                   {form.options.length > 2 && (
