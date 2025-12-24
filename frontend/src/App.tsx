@@ -94,46 +94,63 @@ function useSessionManager() {
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { publicKey, connected, connecting } = useWallet();
   const [isInitializing, setIsInitializing] = useState(true);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
 
-  // Check if wallet adapter is trying to auto-reconnect
-  // Phantom stores the wallet name in localStorage when connected
-  const wasConnected = typeof window !== 'undefined' &&
-    localStorage.getItem('walletName') !== null;
+  // Check if this user was previously an admin (stored on successful admin access)
+  const wasAdmin = typeof window !== 'undefined' &&
+    localStorage.getItem('betpot_admin_session') === 'true';
 
-  // Wait for wallet adapter to attempt auto-reconnect
+  // Store admin session when successfully connected as admin
   useEffect(() => {
-    // If there was a previously connected wallet, wait longer for reconnection
-    const delay = wasConnected ? 4000 : 1000;
+    if (connected && publicKey && ADMIN_WALLETS.includes(publicKey.toBase58())) {
+      localStorage.setItem('betpot_admin_session', 'true');
+    }
+  }, [connected, publicKey]);
+
+  // Wait for wallet to reconnect
+  useEffect(() => {
+    // If already connected as admin, stop waiting immediately
+    if (connected && publicKey && ADMIN_WALLETS.includes(publicKey.toBase58())) {
+      setIsInitializing(false);
+      return;
+    }
+
+    // If was previously an admin, wait longer for wallet to reconnect
+    // Otherwise, use shorter timeout
+    const timeout = wasAdmin ? 10000 : 2000;
 
     const timer = setTimeout(() => {
       setIsInitializing(false);
-    }, delay);
-
-    // If wallet connects before timeout, stop waiting
-    if (connected && publicKey) {
-      setIsInitializing(false);
-    }
+      setHasTimedOut(true);
+    }, timeout);
 
     return () => clearTimeout(timer);
-  }, [connected, publicKey, wasConnected]);
+  }, [connected, publicKey, wasAdmin]);
 
-  // Show loading while initializing or connecting
+  // Show loading while waiting for wallet
   if (isInitializing || connecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-secondary">Loading admin...</p>
+          <p className="text-text-secondary">Connecting wallet...</p>
+          {wasAdmin && <p className="text-text-muted text-sm mt-2">Please approve in your wallet</p>}
         </div>
       </div>
     );
   }
 
+  // If not connected after timeout, clear admin session and redirect
   if (!connected || !publicKey) {
+    if (hasTimedOut && wasAdmin) {
+      localStorage.removeItem('betpot_admin_session');
+    }
     return <Navigate to="/" replace />;
   }
 
+  // Check if wallet is admin
   if (!ADMIN_WALLETS.includes(publicKey.toBase58())) {
+    localStorage.removeItem('betpot_admin_session');
     return <Navigate to="/" replace />;
   }
 
