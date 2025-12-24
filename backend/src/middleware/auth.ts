@@ -100,6 +100,7 @@ export const requireAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
         '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
         'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
         '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
+        'GJrjFmeqSvLwDdRJiQFoYXUiRQgF95bE9NddZfEsJQvz',
       ];
       if (adminWallets.includes(walletAddress)) {
         // Set a minimal user object for wallet-based admin
@@ -122,6 +123,7 @@ export const requireAdmin: MiddlewareHandler<AppContext> = async (c, next) => {
       '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
       'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
       '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
+      'GJrjFmeqSvLwDdRJiQFoYXUiRQgF95bE9NddZfEsJQvz',
     ];
     if (user.walletAddress && adminWallets.includes(user.walletAddress)) {
       await next();
@@ -141,6 +143,7 @@ export const requireSuperAdmin: MiddlewareHandler<AppContext> = async (c, next) 
     '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
     'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
     '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
+    'GJrjFmeqSvLwDdRJiQFoYXUiRQgF95bE9NddZfEsJQvz',
   ];
 
   // Check for wallet-based super admin via header
