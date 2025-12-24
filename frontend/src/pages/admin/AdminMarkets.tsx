@@ -247,7 +247,7 @@ export function AdminMarkets() {
                             : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
                     )}
                 >
-                    🏆 Live Sports
+                    Live Sports
                 </button>
                 <button
                     onClick={() => setEventSource('polymarket')}
@@ -258,7 +258,7 @@ export function AdminMarkets() {
                             : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
                     )}
                 >
-                    📊 Prediction Markets
+                    Prediction Markets
                 </button>
                 <button
                     onClick={() => setEventSource('myevents')}
@@ -269,7 +269,7 @@ export function AdminMarkets() {
                             : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
                     )}
                 >
-                    📝 My Events
+                    My Events
                 </button>
             </div>
 

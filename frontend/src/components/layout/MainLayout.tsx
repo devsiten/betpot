@@ -364,7 +364,7 @@ export function MainLayout() {
             <p className="text-xs text-text-muted font-medium">
               © {new Date().getFullYear()} BETPOT PROTOCOL
             </p>
-            <span className="text-xs text-brand-500 font-medium px-2 py-1 bg-brand-50 rounded">🔗 DEVNET</span>
+            <span className="text-xs text-brand-500 font-medium px-2 py-1 bg-brand-50 rounded">DEVNET</span>
           </div>
         </div>
       </footer>

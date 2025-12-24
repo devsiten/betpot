@@ -50,13 +50,13 @@ export function HomePage() {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             {/* Left - Hero Text */}
             <div className="flex-1 max-w-xl">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary leading-tight mb-6 uppercase">
                 <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-positive-500 bg-clip-text text-transparent drop-shadow-lg">
-                  Bet on What
+                  BET ON WHAT
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-positive-500 to-brand-600 bg-clip-text text-transparent drop-shadow-lg">
-                  You Believe In
+                  YOU BELIEVE IN
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-text-secondary mb-8 font-medium backdrop-blur-sm bg-background-card/30 p-4 rounded-xl border border-border/50 shadow-soft">
@@ -78,7 +78,7 @@ export function HomePage() {
             <div className="flex-1 max-w-md">
               <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 shadow-elevated">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-base font-black text-brand-600 uppercase tracking-wider drop-shadow-sm">🔥 Ending Soon</h3>
+                  <h3 className="text-base font-black text-brand-600 uppercase tracking-wider drop-shadow-sm flex items-center gap-2"><Zap className="w-4 h-4" /> Ending Soon</h3>
                   <Link to="/events?sort=ending" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
                     View All →
                   </Link>
@@ -152,7 +152,7 @@ export function HomePage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-brand-600 text-xs font-medium">🔥 Featured Match</span>
+                        <span className="text-brand-600 text-xs font-medium">Featured Match</span>
                         <span className="badge badge-success">Live</span>
                       </div>
                       <h2 className="text-xl md:text-2xl font-semibold text-text-primary mt-1">{jackpot.title}</h2>

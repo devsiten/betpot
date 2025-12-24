@@ -48,7 +48,7 @@ export function JackpotPage() {
             <div className="text-center mb-8">
                 <div className="inline-flex items-center gap-2 bg-brand-100 text-brand-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
                     <Trophy className="w-4 h-4" />
-                    🔥 Featured Jackpots ({jackpots.length})
+                    Featured Jackpots ({jackpots.length})
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2">Active Jackpots</h1>
                 <p className="text-text-secondary">Pick your winner and join the prize pool</p>
