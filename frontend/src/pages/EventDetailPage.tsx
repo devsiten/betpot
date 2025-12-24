@@ -317,9 +317,7 @@ export function EventDetailPage() {
               ? 'border-green-400 bg-green-50'
               : isNegative
                 ? 'border-red-400 bg-red-50'
-                : isDraw
-                  ? 'border-amber-400 bg-amber-50'
-                  : 'border-gray-300 bg-gray-100';
+                : 'border-gray-300 bg-gray-100';
 
             console.log('Rendering option:', {
               label: option.label,
