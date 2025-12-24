@@ -359,7 +359,12 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
     mutationFn: () => {
       // Convert datetime-local format to ISO format for backend
       const formData = {
-        ...form,
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        ticketPrice: form.ticketPrice,
+        options: form.options,
+        status: form.status,
         startTime: form.startTime ? new Date(form.startTime).toISOString() : '',
         lockTime: form.lockTime ? new Date(form.lockTime).toISOString() : '',
         eventTime: form.endTime ? new Date(form.endTime).toISOString() : '',
