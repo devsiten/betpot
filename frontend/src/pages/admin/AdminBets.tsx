@@ -96,8 +96,8 @@ export function AdminBets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Bets & Winners</h1>
-          <p className="text-dark-400 mt-1">Manage all tickets and payouts</p>
+          <h1 className="text-2xl font-bold text-text-primary">Bets & Winners</h1>
+          <p className="text-text-muted mt-1">Manage all tickets and payouts</p>
         </div>
         <button className="btn btn-secondary">
           <Download className="w-4 h-4" />
@@ -108,24 +108,24 @@ export function AdminBets() {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="card p-4">
-          <p className="text-2xl font-bold text-white">{pagination?.total || tickets.length || 0}</p>
-          <p className="text-xs text-dark-400">Total Bets</p>
+          <p className="text-2xl font-bold text-text-primary">{pagination?.total || tickets.length || 0}</p>
+          <p className="text-xs text-text-muted">Total Bets</p>
         </div>
         <div className="card p-4 bg-green-500/5 border-green-500/20">
-          <p className="text-2xl font-bold text-green-400">{stats.won}</p>
-          <p className="text-xs text-dark-400">Winners (page)</p>
+          <p className="text-2xl font-bold text-green-600">{stats.won}</p>
+          <p className="text-xs text-text-muted">Winners (page)</p>
         </div>
         <div className="card p-4 bg-red-500/5 border-red-500/20">
-          <p className="text-2xl font-bold text-red-400">{stats.lost}</p>
-          <p className="text-xs text-dark-400">Losers (page)</p>
+          <p className="text-2xl font-bold text-red-600">{stats.lost}</p>
+          <p className="text-xs text-text-muted">Losers (page)</p>
         </div>
         <div className="card p-4 bg-yellow-500/5 border-yellow-500/20">
-          <p className="text-2xl font-bold text-yellow-400">{stats.unclaimed}</p>
-          <p className="text-xs text-dark-400">Unclaimed</p>
+          <p className="text-2xl font-bold text-yellow-600">{stats.unclaimed}</p>
+          <p className="text-xs text-text-muted">Unclaimed</p>
         </div>
         <div className="card p-4">
-          <p className="text-2xl font-bold text-white">${stats.totalPayout.toLocaleString()}</p>
-          <p className="text-xs text-dark-400">Payout (page)</p>
+          <p className="text-2xl font-bold text-text-primary">${stats.totalPayout.toLocaleString()}</p>
+          <p className="text-xs text-text-muted">Payout (page)</p>
         </div>
       </div>
 
