@@ -24,6 +24,7 @@ import {
 } from 'recharts';
 import { format, formatDistanceToNow } from 'date-fns';
 import { api } from '@/services/api';
+import { AdminGuide } from '@/components/admin/AdminGuide';
 import clsx from 'clsx';
 
 function StatCard({
@@ -109,6 +110,9 @@ export function AdminDashboard() {
         <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
         <p className="text-text-secondary mt-1">Overview of your platform performance</p>
       </div>
+
+      {/* Admin Guide */}
+      <AdminGuide />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

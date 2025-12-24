@@ -10,7 +10,6 @@ import {
   Menu,
   X,
   ChevronLeft,
-  Bell,
   Search,
   Trophy,
   Gift,
@@ -153,11 +152,6 @@ export function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Notifications */}
-            <button className="p-2 rounded-lg hover:bg-dark-800 text-dark-400 hover:text-white relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
 
             {/* Back to site */}
             <NavLink
