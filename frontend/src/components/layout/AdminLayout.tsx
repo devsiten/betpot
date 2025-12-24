@@ -26,8 +26,8 @@ const navItems = [
   { path: '/admin/bets', icon: Ticket, label: 'Bets & Winners' },
   { path: '/admin/payment-issues', icon: AlertTriangle, label: 'Payment Issues' },
   { path: '/admin/users', icon: Users, label: 'Users' },
-  { path: '/admin/settings', icon: Settings, label: 'Settings' },
   { path: '/dashboard', icon: Gift, label: 'My Winnings' },
+  { path: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
 export function AdminLayout() {
