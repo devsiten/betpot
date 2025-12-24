@@ -13,6 +13,7 @@ import {
   Bell,
   Search,
   Trophy,
+  Gift,
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
@@ -26,6 +27,7 @@ const navItems = [
   { path: '/admin/payment-issues', icon: AlertTriangle, label: 'Payment Issues' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
+  { path: '/dashboard', icon: Gift, label: 'My Winnings' },
 ];
 
 export function AdminLayout() {
