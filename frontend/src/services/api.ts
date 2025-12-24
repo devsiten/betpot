@@ -471,6 +471,22 @@ class ApiService {
     const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/failed-transactions/${id}/reject`, { reason });
     return data;
   }
+
+  // Notifications API
+  async getNotifications(limit = 20) {
+    const { data } = await this.client.get<ApiResponse<any>>(`/notifications?limit=${limit}`);
+    return data;
+  }
+
+  async markNotificationRead(id: string) {
+    const { data } = await this.client.put<ApiResponse<any>>(`/notifications/${id}/read`);
+    return data;
+  }
+
+  async markAllNotificationsRead() {
+    const { data } = await this.client.put<ApiResponse<any>>(`/notifications/read-all`);
+    return data;
+  }
 }
 
 export const api = new ApiService();

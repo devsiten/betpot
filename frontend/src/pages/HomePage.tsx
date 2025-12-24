@@ -19,11 +19,6 @@ export function HomePage() {
 
 
 
-  const { data: jackpotData } = useQuery({
-    queryKey: ['jackpot'],
-    queryFn: () => api.getJackpot(),
-  });
-
   // Fetch internal events sorted by eventTime (ending soon first)
   const { data: eventsData } = useQuery({
     queryKey: ['events-ending-soon'],
@@ -34,7 +29,6 @@ export function HomePage() {
   const allMarkets = polymarketData?.data || [];
   const liveMarkets = allMarkets.slice(0, displayCount);
   const hasMore = allMarkets.length > displayCount;
-  const jackpot = jackpotData?.data;
 
   // Get ending soon events (internal events sorted by eventTime)
   const endingSoonEvents = (eventsData?.data || [])
@@ -79,7 +73,7 @@ export function HomePage() {
               <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 shadow-elevated">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-base font-black text-brand-600 uppercase tracking-wider drop-shadow-sm flex items-center gap-2"><Zap className="w-4 h-4" /> Ending Soon</h3>
-                  <Link to="/events?sort=ending" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+                  <Link to="/jackpot" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
                     View All →
                   </Link>
                 </div>
@@ -137,125 +131,6 @@ export function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* JACKPOT SECTION */}
-      {jackpot && (
-        <section className="max-w-7xl mx-auto mb-12">
-          <div className="relative overflow-hidden rounded-xl border border-brand-200 bg-gradient-to-br from-brand-50 via-background-card to-brand-50 shadow-card">
-            <div className="relative p-6 md:p-8">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                {/* Jackpot Header */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-soft">
-                      <Trophy className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-brand-600 text-xs font-medium">Featured Match</span>
-                        <span className="badge badge-success">Live</span>
-                      </div>
-                      <h2 className="text-xl md:text-2xl font-semibold text-text-primary mt-1">{jackpot.title}</h2>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
-                    <span className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-brand-500" />
-                      {format(new Date(jackpot.eventTime), 'MMM dd, HH:mm')}
-                    </span>
-                    <span>|</span>
-                    <span>{jackpot.ticketCount || 0} bets placed</span>
-                  </div>
-                </div>
-
-                {/* Jackpot Pool */}
-                <div className="text-center lg:text-right">
-                  <p className="text-xs font-medium text-brand-600 mb-1">Total Prize Pool</p>
-                  <p className="text-3xl md:text-4xl font-bold text-text-primary">
-                    ${(jackpot.totalPool || 0).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Options */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
-                {jackpot.options?.map((option: any, idx: number) => {
-                  const label = option.label?.toLowerCase() || '';
-                  const isPositive = label === 'yes' || label === 'home' || (idx === 0 && !label.includes('draw'));
-                  const isDraw = label === 'draw';
-
-                  const bgColor = isDraw
-                    ? 'bg-amber-50 border-amber-200 hover:border-amber-400'
-                    : isPositive
-                      ? 'bg-positive-50 border-positive-200 hover:border-positive-400'
-                      : 'bg-negative-50 border-negative-200 hover:border-negative-400';
-                  const textColor = isDraw
-                    ? 'text-amber-700'
-                    : isPositive
-                      ? 'text-positive-700'
-                      : 'text-negative-600';
-
-                  return (
-                    <div
-                      key={option.id}
-                      className={`p-4 rounded-lg border transition-all cursor-pointer group ${bgColor}`}
-                    >
-                      <p className={`font-medium group-hover:opacity-80 transition-colors ${textColor}`}>{option.label}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-text-muted">{option.ticketsSold || 0} bets</span>
-                        <span className={`text-lg font-semibold ${textColor}`}>${option.poolAmount?.toFixed(0) || 0}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* CTA */}
-              <div className="mt-6 flex justify-center">
-                <Link
-                  to={`/events/${jackpot.id}`}
-                  className="btn btn-primary"
-                >
-                  <Trophy className="w-4 h-4" />
-                  Place Your Bet
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Ending Soon - Jackpot Events Only */}
-      {jackpot && (
-        <section className="max-w-7xl mx-auto pb-8">
-          <div className="card p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-positive-600" />
-              <h3 className="text-lg font-bold text-text-primary">Ending Soon</h3>
-              <span className="badge badge-warning text-xs">Jackpot</span>
-            </div>
-            <Link
-              to={`/events/${jackpot.id}`}
-              className="block p-4 bg-background-secondary rounded-lg border border-brand-100 hover:border-brand-300 transition-all cursor-pointer"
-            >
-              <p className="text-base text-text-primary font-medium">{jackpot.title}</p>
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-3">
-                  {jackpot.options?.slice(0, 2).map((opt: any, idx: number) => (
-                    <span key={idx} className={clsx('text-xs font-bold', idx === 0 ? 'text-positive-600' : 'text-negative-500')}>
-                      {opt.label}: ${opt.poolAmount?.toFixed(0) || 0}
-                    </span>
-                  ))}
-                </div>
-                <span className="text-[10px] text-text-muted">
-                  {format(new Date(jackpot.eventTime), 'MMM dd, HH:mm')}
-                </span>
-              </div>
-            </Link>
-          </div>
-        </section>
-      )}
 
       {/* Trending Markets */}
       <section className="max-w-7xl mx-auto pb-16">
