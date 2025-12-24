@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, TrendingUp, Zap, Search } from 'lucide-react';
+import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, TrendingUp, Zap, Search, Ticket, ChevronLeft, ChevronRight, Hash } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
+
+const TICKETS_PER_PAGE = 10;
 
 export function DashboardPage() {
     const navigate = useNavigate();
@@ -16,7 +18,9 @@ export function DashboardPage() {
     const [editingUsername, setEditingUsername] = useState(false);
     const [username, setUsername] = useState('');
     const [copied, setCopied] = useState(false);
+    const [copiedTicketId, setCopiedTicketId] = useState<string | null>(null);
     const [searchTicketId, setSearchTicketId] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Fetch user stats
     const { data: statsData } = useQuery({
@@ -39,6 +43,31 @@ export function DashboardPage() {
     const filteredTickets = searchTicketId.trim()
         ? tickets.filter(ticket => ticket.id.toLowerCase().includes(searchTicketId.toLowerCase()))
         : tickets;
+
+    // Pagination
+    const totalPages = Math.ceil(filteredTickets.length / TICKETS_PER_PAGE);
+    const startIndex = (currentPage - 1) * TICKETS_PER_PAGE;
+    const paginatedTickets = filteredTickets.slice(startIndex, startIndex + TICKETS_PER_PAGE);
+
+    // Reset to page 1 when search changes
+    const handleSearchChange = (value: string) => {
+        setSearchTicketId(value);
+        setCurrentPage(1);
+    };
+
+    // Format ticket ID for display (show shortened version)
+    const formatTicketId = (id: string) => {
+        if (id.length <= 12) return id;
+        return `${id.slice(0, 8)}`;
+    };
+
+    // Copy ticket ID to clipboard
+    const copyTicketId = (id: string) => {
+        navigator.clipboard.writeText(id);
+        setCopiedTicketId(id);
+        toast.success('Ticket ID copied!');
+        setTimeout(() => setCopiedTicketId(null), 2000);
+    };
 
     const formatAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -222,8 +251,13 @@ export function DashboardPage() {
             <div className="bg-background-card rounded-2xl border border-border overflow-hidden shadow-card">
                 <div className="p-4 sm:p-5 border-b border-border">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                        <h2 className="text-lg font-bold text-text-primary">Ticket History</h2>
-                        <span className="text-xs text-text-muted">{filteredTickets.length} of {tickets.length} tickets</span>
+                        <div className="flex items-center gap-2">
+                            <Ticket className="w-5 h-5 text-brand-600" />
+                            <h2 className="text-lg font-bold text-text-primary">Ticket History</h2>
+                        </div>
+                        <span className="text-xs text-text-muted bg-background-secondary px-2 py-1 rounded-full">
+                            {filteredTickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''}
+                        </span>
                     </div>
 
                     {/* Search Input */}
@@ -233,7 +267,7 @@ export function DashboardPage() {
                             type="text"
                             placeholder="Search by Ticket ID..."
                             value={searchTicketId}
-                            onChange={(e) => setSearchTicketId(e.target.value)}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 bg-background-secondary border border-border rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-colors text-sm"
                         />
                     </div>
@@ -245,71 +279,149 @@ export function DashboardPage() {
                     </div>
                 ) : filteredTickets.length === 0 ? (
                     <div className="p-12 text-center">
+                        <Ticket className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
                         <p className="text-text-muted">
                             {searchTicketId ? 'No tickets found matching your search' : 'No tickets yet'}
                         </p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-border">
-                        {filteredTickets.map((ticket: any) => (
-                            <div key={ticket.id} className="p-4 sm:p-5 hover:bg-background-secondary transition-colors">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                    <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                                        {/* Status Icon */}
-                                        <div className={clsx(
-                                            'w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0',
-                                            ticket.status === 'won' && 'bg-positive-100 border border-positive-200',
-                                            ticket.status === 'claimed' && 'bg-positive-100 border border-positive-200',
-                                            ticket.status === 'lost' && 'bg-negative-100 border border-negative-200',
-                                            ticket.status === 'active' && 'bg-brand-100 border border-brand-200',
-                                            ticket.status === 'refunded' && 'bg-background-secondary border border-border'
-                                        )}>
-                                            {(ticket.status === 'won' || ticket.status === 'claimed') && <Trophy className="w-5 h-5 text-positive-600" />}
-                                            {ticket.status === 'lost' && <XCircle className="w-5 h-5 text-negative-500" />}
-                                            {ticket.status === 'active' && <Clock className="w-5 h-5 text-brand-600" />}
-                                            {ticket.status === 'refunded' && <Clock className="w-5 h-5 text-text-muted" />}
-                                        </div>
-
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-text-primary font-medium truncate">{ticket.event?.title || 'Unknown Event'}</p>
-                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-text-secondary mt-1">
-                                                <span className="flex items-center gap-1">
-                                                    <span className="text-text-muted">Pick:</span>
-                                                    <span className="text-text-primary">{ticket.optionLabel}</span>
+                    <>
+                        {/* Ticket Cards */}
+                        <div className="divide-y divide-border max-h-[600px] overflow-y-auto">
+                            {paginatedTickets.map((ticket: any, index: number) => (
+                                <div key={ticket.id} className="p-4 sm:p-5 hover:bg-background-secondary/50 transition-colors">
+                                    {/* Ticket Header with Number */}
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-1.5 bg-background-secondary px-2.5 py-1 rounded-lg border border-border">
+                                                <Hash className="w-3.5 h-3.5 text-brand-600" />
+                                                <span className="text-xs font-mono font-semibold text-text-primary">
+                                                    {formatTicketId(ticket.id)}
                                                 </span>
-                                                <span className="hidden sm:inline text-border-dark">•</span>
-                                                <span>{format(new Date(ticket.createdAt), 'MMM dd, yyyy')}</span>
+                                                <button
+                                                    onClick={() => copyTicketId(ticket.id)}
+                                                    className="p-0.5 hover:bg-border rounded transition-colors ml-1"
+                                                    title="Copy full ticket ID"
+                                                >
+                                                    {copiedTicketId === ticket.id ? (
+                                                        <Check className="w-3 h-3 text-positive-600" />
+                                                    ) : (
+                                                        <Copy className="w-3 h-3 text-text-muted" />
+                                                    )}
+                                                </button>
                                             </div>
+                                            <span className="text-[10px] text-text-muted">
+                                                #{startIndex + index + 1}
+                                            </span>
                                         </div>
-                                    </div>
 
-                                    <div className="flex items-center justify-between sm:flex-col sm:items-end gap-1 pl-14 sm:pl-0">
-                                        <p className={clsx(
-                                            'text-lg sm:text-xl font-bold',
-                                            (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600',
-                                            ticket.status === 'lost' && 'text-negative-500',
-                                            ticket.status === 'active' && 'text-text-primary',
-                                            ticket.status === 'refunded' && 'text-text-muted'
-                                        )}>
-                                            {(ticket.status === 'won' || ticket.status === 'claimed') && `+$${ticket.payoutAmount?.toFixed(2) || ticket.purchasePrice}`}
-                                            {ticket.status === 'lost' && `-$${ticket.purchasePrice.toFixed(2)}`}
-                                            {ticket.status === 'active' && `$${ticket.purchasePrice.toFixed(2)}`}
-                                            {ticket.status === 'refunded' && `$${ticket.purchasePrice.toFixed(2)}`}
-                                        </p>
+                                        {/* Status Badge */}
                                         <span className={clsx(
-                                            'text-[10px] sm:text-xs uppercase font-bold px-2 py-0.5 rounded',
-                                            (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-positive-100 text-positive-700',
-                                            ticket.status === 'lost' && 'bg-negative-100 text-negative-600',
-                                            ticket.status === 'active' && 'bg-brand-100 text-brand-700',
-                                            ticket.status === 'refunded' && 'bg-background-secondary text-text-muted'
+                                            'text-[10px] sm:text-xs uppercase font-bold px-2.5 py-1 rounded-full',
+                                            (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-positive-100 text-positive-700 border border-positive-200',
+                                            ticket.status === 'lost' && 'bg-negative-100 text-negative-600 border border-negative-200',
+                                            ticket.status === 'active' && 'bg-brand-100 text-brand-700 border border-brand-200',
+                                            ticket.status === 'refunded' && 'bg-yellow-100 text-yellow-700 border border-yellow-200'
                                         )}>
-                                            {ticket.status === 'claimed' ? 'WON' : ticket.status}
+                                            {ticket.status === 'claimed' ? 'WON' : ticket.status === 'refunded' ? 'REFUND' : ticket.status}
                                         </span>
                                     </div>
+
+                                    {/* Ticket Content */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div className="flex items-start sm:items-center gap-3">
+                                            {/* Status Icon */}
+                                            <div className={clsx(
+                                                'w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0',
+                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-gradient-to-br from-positive-100 to-positive-50 border border-positive-200',
+                                                ticket.status === 'lost' && 'bg-gradient-to-br from-negative-100 to-negative-50 border border-negative-200',
+                                                ticket.status === 'active' && 'bg-gradient-to-br from-brand-100 to-brand-50 border border-brand-200',
+                                                ticket.status === 'refunded' && 'bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-200'
+                                            )}>
+                                                {(ticket.status === 'won' || ticket.status === 'claimed') && <Trophy className="w-5 h-5 text-positive-600" />}
+                                                {ticket.status === 'lost' && <XCircle className="w-5 h-5 text-negative-500" />}
+                                                {ticket.status === 'active' && <Clock className="w-5 h-5 text-brand-600" />}
+                                                {ticket.status === 'refunded' && <Clock className="w-5 h-5 text-yellow-600" />}
+                                            </div>
+
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-text-primary font-semibold truncate text-sm sm:text-base">
+                                                    {ticket.event?.title || 'Unknown Event'}
+                                                </p>
+                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-secondary mt-1">
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="text-text-muted">Pick:</span>
+                                                        <span className="text-text-primary font-medium">{ticket.optionLabel}</span>
+                                                    </span>
+                                                    <span className="text-border-dark hidden sm:inline">•</span>
+                                                    <span className="text-text-muted">
+                                                        {format(new Date(ticket.createdAt), 'MMM dd, yyyy')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Amount */}
+                                        <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
+                                            <p className={clsx(
+                                                'text-lg sm:text-xl font-bold',
+                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600',
+                                                ticket.status === 'lost' && 'text-negative-500',
+                                                ticket.status === 'active' && 'text-text-primary',
+                                                ticket.status === 'refunded' && 'text-yellow-600'
+                                            )}>
+                                                {(ticket.status === 'won' || ticket.status === 'claimed') && `+$${ticket.payoutAmount?.toFixed(2) || ticket.purchasePrice}`}
+                                                {ticket.status === 'lost' && `-$${ticket.purchasePrice.toFixed(2)}`}
+                                                {ticket.status === 'active' && `$${ticket.purchasePrice.toFixed(2)}`}
+                                                {ticket.status === 'refunded' && `$${ticket.purchasePrice.toFixed(2)}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="p-4 border-t border-border bg-background-secondary/30">
+                                <div className="flex items-center justify-between">
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                        className={clsx(
+                                            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                                            currentPage === 1
+                                                ? 'text-text-muted cursor-not-allowed'
+                                                : 'text-text-primary hover:bg-background-secondary border border-border'
+                                        )}
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Previous</span>
+                                    </button>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-text-secondary">
+                                            Page <span className="font-semibold text-text-primary">{currentPage}</span> of <span className="font-semibold text-text-primary">{totalPages}</span>
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className={clsx(
+                                            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                                            currentPage === totalPages
+                                                ? 'text-text-muted cursor-not-allowed'
+                                                : 'text-text-primary hover:bg-background-secondary border border-border'
+                                        )}
+                                    >
+                                        <span className="hidden sm:inline">Next</span>
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
