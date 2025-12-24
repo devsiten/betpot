@@ -1402,7 +1402,7 @@ admin.get('/settings', async (c) => {
 });
 
 // Update platform settings
-const updateSettingsSchema = z.object({
+const platformSettingsSchema = z.object({
   ticketPrice: z.number().min(1).max(10000).optional(),
   platformFee: z.number().min(0).max(0.5).optional(),
   maxEventsPerDay: z.number().min(1).max(100).optional(),
@@ -1410,7 +1410,7 @@ const updateSettingsSchema = z.object({
   maintenanceMode: z.boolean().optional(),
 });
 
-admin.put('/settings', zValidator('json', updateSettingsSchema), async (c) => {
+admin.put('/settings', zValidator('json', platformSettingsSchema), async (c) => {
   const db = c.get('db');
   const data = c.req.valid('json');
 
