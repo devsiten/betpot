@@ -345,6 +345,7 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
     description: '',
     category: 'sports' as EventCategory,
     ticketPrice: 10,
+    totalTickets: 1000,
     options: [
       { label: '', ticketLimit: 1000 },
       { label: '', ticketLimit: 1000 },
@@ -357,13 +358,19 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
 
   const createMutation = useMutation({
     mutationFn: () => {
+      // Calculate ticket limit per option (total / number of options)
+      const ticketLimitPerOption = Math.floor(form.totalTickets / form.options.length);
+
       // Convert datetime-local format to ISO format for backend
       const formData = {
         title: form.title,
         description: form.description,
         category: form.category,
         ticketPrice: form.ticketPrice,
-        options: form.options,
+        options: form.options.map(opt => ({
+          label: opt.label,
+          ticketLimit: ticketLimitPerOption,
+        })),
         status: form.status,
         startTime: form.startTime ? new Date(form.startTime).toISOString() : '',
         lockTime: form.lockTime ? new Date(form.lockTime).toISOString() : '',
@@ -472,6 +479,17 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
                 className="input"
                 min={1}
                 max={10000}
+              />
+            </div>
+            <div>
+              <label className="label">Total Tickets</label>
+              <input
+                type="number"
+                value={form.totalTickets}
+                onChange={(e) => setForm({ ...form, totalTickets: parseInt(e.target.value) })}
+                className="input"
+                min={10}
+                max={100000}
               />
             </div>
           </div>
