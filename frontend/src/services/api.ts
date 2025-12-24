@@ -418,6 +418,49 @@ class ApiService {
     const { data } = await this.client.put<ApiResponse<{ message: string }>>('/admin/settings', settings);
     return data;
   }
+
+  // ========== FAILED TRANSACTIONS ==========
+
+  async getFailedTransactions(status: string = 'pending') {
+    const { data } = await this.client.get<ApiResponse<{
+      id: string;
+      walletAddress: string;
+      transactionSignature: string;
+      eventId: string;
+      optionId: string;
+      optionLabel: string | null;
+      quantity: number;
+      amount: number;
+      chain: string;
+      errorMessage: string;
+      status: string;
+      resolvedBy: string | null;
+      resolvedAt: string | null;
+      resolutionNote: string | null;
+      createdAt: string;
+      event?: { id: string; title: string; status: string };
+    }[]> & { count: number }>('/admin/failed-transactions', { params: { status } });
+    return data;
+  }
+
+  async resolveFailedTransaction(id: string, note?: string) {
+    const { data } = await this.client.post<ApiResponse<{
+      ticketIds: string[];
+      quantity: number;
+      event: { id: string; title: string };
+    }>>(`/admin/failed-transactions/${id}/resolve`, { note });
+    return data;
+  }
+
+  async refundFailedTransaction(id: string, refundTx?: string, note?: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/failed-transactions/${id}/refund`, { refundTx, note });
+    return data;
+  }
+
+  async rejectFailedTransaction(id: string, reason: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/failed-transactions/${id}/reject`, { reason });
+    return data;
+  }
 }
 
 export const api = new ApiService();

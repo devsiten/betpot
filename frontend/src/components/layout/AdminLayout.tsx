@@ -16,12 +16,14 @@ import {
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
+import { AlertTriangle } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { path: '/admin/markets', icon: Trophy, label: 'Jackpot Manager' },
   { path: '/admin/events', icon: Calendar, label: 'Events' },
   { path: '/admin/bets', icon: Ticket, label: 'Bets & Winners' },
+  { path: '/admin/payment-issues', icon: AlertTriangle, label: 'Payment Issues' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
 ];

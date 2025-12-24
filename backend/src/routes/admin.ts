@@ -4,7 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 import { eq, desc, asc, sql, and, gte, lte, like, or, count, sum } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { auth, requireAdmin, requireSuperAdmin } from '../middleware/auth';
-import { events, eventOptions, tickets, users, adminAuditLogs, platformSettings } from '../db/schema';
+import { events, eventOptions, tickets, users, adminAuditLogs, platformSettings, failedTransactions } from '../db/schema';
 import { AppContext } from '../types';
 
 const admin = new Hono<AppContext>();
@@ -1106,6 +1106,237 @@ admin.post('/events/from-external', zValidator('json', createFromExternalSchema)
       details: error.cause ? String(error.cause) : undefined,
     }, 500);
   }
+});
+
+// ============================================================================
+// FAILED TRANSACTIONS / PAYMENT RESOLUTION
+// ============================================================================
+
+// Get all failed transactions
+admin.get('/failed-transactions', async (c) => {
+  const db = c.get('db');
+  const { status = 'pending' } = c.req.query();
+
+  const results = await db.select()
+    .from(failedTransactions)
+    .where(eq(failedTransactions.status, status as any))
+    .orderBy(desc(failedTransactions.createdAt));
+
+  // Get event details for each transaction
+  const enrichedResults = await Promise.all(results.map(async (tx) => {
+    const event = await db.query.events.findFirst({
+      where: eq(events.id, tx.eventId),
+      columns: { id: true, title: true, status: true },
+    });
+    return { ...tx, event };
+  }));
+
+  return c.json({
+    success: true,
+    data: enrichedResults,
+    count: results.length,
+  });
+});
+
+// Get single failed transaction
+admin.get('/failed-transactions/:id', async (c) => {
+  const db = c.get('db');
+  const { id } = c.req.param();
+
+  const tx = await db.select().from(failedTransactions).where(eq(failedTransactions.id, id)).limit(1);
+
+  if (!tx.length) {
+    return c.json({ success: false, error: 'Transaction not found' }, 404);
+  }
+
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, tx[0].eventId),
+    with: { options: true },
+  });
+
+  return c.json({
+    success: true,
+    data: { ...tx[0], event },
+  });
+});
+
+// Resolve failed transaction by manually issuing tickets
+admin.post('/failed-transactions/:id/resolve', zValidator('json', z.object({
+  note: z.string().optional(),
+})), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const { note } = c.req.valid('json');
+
+  // Get the failed transaction
+  const txResult = await db.select().from(failedTransactions).where(eq(failedTransactions.id, id)).limit(1);
+
+  if (!txResult.length) {
+    return c.json({ success: false, error: 'Transaction not found' }, 404);
+  }
+
+  const tx = txResult[0];
+
+  if (tx.status !== 'pending') {
+    return c.json({ success: false, error: 'Transaction already resolved' }, 400);
+  }
+
+  // Get event and option
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, tx.eventId),
+    with: { options: true },
+  });
+
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  const option = event.options.find(o => o.optionId === tx.optionId || o.id === tx.optionId);
+  if (!option) {
+    return c.json({ success: false, error: 'Option not found' }, 404);
+  }
+
+  // Find or create user
+  let userId = '';
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.walletAddress, tx.walletAddress),
+  });
+
+  if (existingUser) {
+    userId = existingUser.id;
+  } else {
+    userId = nanoid();
+    await db.insert(users).values({
+      id: userId,
+      email: `${tx.walletAddress}@wallet.user`,
+      passwordHash: 'wallet-auth-no-password',
+      walletAddress: tx.walletAddress,
+      role: 'user',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  const now = new Date();
+  const newTicketIds: string[] = [];
+
+  // Create tickets
+  for (let i = 0; i < tx.quantity; i++) {
+    const ticketId = nanoid();
+    const serialNumber = `BP-${option.optionId}-${Date.now().toString(36).toUpperCase()}-${nanoid(6).toUpperCase()}`;
+
+    await db.insert(tickets).values({
+      id: ticketId,
+      serialNumber,
+      eventId: tx.eventId,
+      optionId: option.id,
+      optionLabel: option.label,
+      userId,
+      walletAddress: tx.walletAddress,
+      chain: tx.chain || 'SOL',
+      purchasePrice: tx.amount / tx.quantity,
+      purchaseTx: tx.transactionSignature,
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    newTicketIds.push(ticketId);
+  }
+
+  // Update option stats
+  await db.update(eventOptions)
+    .set({
+      ticketsSold: sql`${eventOptions.ticketsSold} + ${tx.quantity}`,
+      poolAmount: sql`${eventOptions.poolAmount} + ${tx.amount}`,
+      updatedAt: now,
+    })
+    .where(eq(eventOptions.id, option.id));
+
+  // Update event total pool
+  await db.update(events)
+    .set({
+      totalPool: sql`${events.totalPool} + ${tx.amount}`,
+      updatedAt: now,
+    })
+    .where(eq(events.id, tx.eventId));
+
+  // Mark transaction as resolved
+  await db.update(failedTransactions)
+    .set({
+      status: 'resolved',
+      resolvedBy: user.id,
+      resolvedAt: now,
+      resolutionNote: note || 'Tickets manually issued by admin',
+      updatedAt: now,
+    })
+    .where(eq(failedTransactions.id, id));
+
+  return c.json({
+    success: true,
+    data: {
+      ticketIds: newTicketIds,
+      quantity: tx.quantity,
+      event: { id: event.id, title: event.title },
+    },
+    message: `Successfully issued ${tx.quantity} tickets for wallet ${tx.walletAddress.slice(0, 8)}...`,
+  });
+});
+
+// Mark failed transaction as refunded
+admin.post('/failed-transactions/:id/refund', zValidator('json', z.object({
+  refundTx: z.string().optional(),
+  note: z.string().optional(),
+})), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const { refundTx, note } = c.req.valid('json');
+
+  const now = new Date();
+
+  const result = await db.update(failedTransactions)
+    .set({
+      status: 'refunded',
+      resolvedBy: user.id,
+      resolvedAt: now,
+      resolutionNote: note || `Refunded via tx: ${refundTx || 'manual'}`,
+      updatedAt: now,
+    })
+    .where(and(eq(failedTransactions.id, id), eq(failedTransactions.status, 'pending')));
+
+  return c.json({
+    success: true,
+    message: 'Transaction marked as refunded',
+  });
+});
+
+// Reject failed transaction (invalid or fraudulent)
+admin.post('/failed-transactions/:id/reject', zValidator('json', z.object({
+  reason: z.string(),
+})), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const { reason } = c.req.valid('json');
+
+  const now = new Date();
+
+  await db.update(failedTransactions)
+    .set({
+      status: 'rejected',
+      resolvedBy: user.id,
+      resolvedAt: now,
+      resolutionNote: `Rejected: ${reason}`,
+      updatedAt: now,
+    })
+    .where(eq(failedTransactions.id, id));
+
+  return c.json({
+    success: true,
+    message: 'Transaction rejected',
+  });
 });
 
 export default admin;

@@ -145,6 +145,33 @@ export const eventMessages = sqliteTable('event_messages', {
   createdIdx: index('messages_created_idx').on(table.createdAt),
 }));
 
+// Failed Transactions - for admin resolution when ticket creation fails
+export const failedTransactionStatuses = ['pending', 'resolved', 'refunded', 'rejected'] as const;
+export type FailedTransactionStatus = typeof failedTransactionStatuses[number];
+
+export const failedTransactions = sqliteTable('failed_transactions', {
+  id: text('id').primaryKey(),
+  walletAddress: text('wallet_address').notNull(),
+  transactionSignature: text('transaction_signature').notNull(),
+  eventId: text('event_id').notNull(),
+  optionId: text('option_id').notNull(),
+  optionLabel: text('option_label'),
+  quantity: integer('quantity').notNull(),
+  amount: real('amount').notNull(),
+  chain: text('chain').$type<Chain>().default('SOL'),
+  errorMessage: text('error_message').notNull(),
+  status: text('status').$type<FailedTransactionStatus>().default('pending'),
+  resolvedBy: text('resolved_by'), // Admin ID who resolved
+  resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
+  resolutionNote: text('resolution_note'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  walletIdx: index('failed_tx_wallet_idx').on(table.walletAddress),
+  statusIdx: index('failed_tx_status_idx').on(table.status),
+  createdIdx: index('failed_tx_created_idx').on(table.createdAt),
+}));
+
 // ============================================================================
 // RELATIONS
 // ============================================================================

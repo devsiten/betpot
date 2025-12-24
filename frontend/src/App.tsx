@@ -27,6 +27,7 @@ import { AdminBets } from '@/pages/admin/AdminBets';
 import { AdminUsers } from '@/pages/admin/AdminUsers';
 import { AdminSettings } from '@/pages/admin/AdminSettings';
 import { AdminMarkets } from '@/pages/admin/AdminMarkets';
+import { AdminPaymentIssues } from '@/pages/admin/AdminPaymentIssues';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ const ADMIN_WALLETS = [
   '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
   'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
   '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
+  'GJrjFmeqSvLwDdRJiQFoYXUiRQgF95bE9NddZfEsJQvz',
 ];
 
 // Session management hook - tracks activity and auto-logout after 2 hours
@@ -166,6 +168,7 @@ function AppContent() {
         <Route path="events" element={<AdminEvents />} />
         <Route path="events/:id" element={<AdminEventDetail />} />
         <Route path="bets" element={<AdminBets />} />
+        <Route path="payment-issues" element={<AdminPaymentIssues />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>

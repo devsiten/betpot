@@ -15,6 +15,13 @@
       "when": 1766361728492,
       "tag": "0001_nifty_adam_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1766557593059,
+      "tag": "0002_charming_nightcrawler",
+      "breakpoints": true
     }
   ]
 }

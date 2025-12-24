@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { eq, desc, and, sql, count, sum } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
-import { tickets, events, eventOptions, users } from '../db/schema';
+import { tickets, events, eventOptions, users, failedTransactions } from '../db/schema';
 import { auth } from '../middleware/auth';
 import { AppContext } from '../types';
 import { verifyUSDCTransaction } from '../utils/usdc';
@@ -228,6 +228,31 @@ ticketsRoutes.post('/purchase', zValidator('json', purchaseSchema), async (c) =>
     }, 201);
   } catch (error: any) {
     console.error('Purchase ticket error:', error);
+
+    // Log the failed transaction for admin resolution
+    try {
+      const db = c.get('db');
+      const data = c.req.valid('json');
+
+      await db.insert(failedTransactions).values({
+        id: nanoid(),
+        walletAddress: data.walletAddress,
+        transactionSignature: data.purchaseTx,
+        eventId: data.eventId,
+        optionId: data.optionId,
+        quantity: data.quantity,
+        amount: data.quantity * 10, // Default ticket price - adjust as needed
+        chain: data.chain,
+        errorMessage: error.message || 'Unknown error during ticket creation',
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      console.log('Logged failed transaction for admin resolution:', data.purchaseTx);
+    } catch (logError) {
+      console.error('Failed to log failed transaction:', logError);
+    }
+
     return c.json({
       success: false,
       error: `Purchase failed: ${error.message || 'Unknown error'}`,
