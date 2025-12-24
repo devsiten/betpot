@@ -337,6 +337,54 @@ export function MainLayout() {
               </NavLink>
             ))}
 
+            {/* Dashboard and Admin Links for Authenticated Users */}
+            {connected && isAuthenticated && (
+              <div className="border-t border-border pt-4 mt-4 space-y-2">
+                {/* My Bets Link */}
+                <NavLink
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    clsx(
+                      'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
+                      isActive
+                        ? 'bg-brand-100 text-brand-700'
+                        : 'text-text-secondary hover:bg-background-secondary'
+                    )
+                  }
+                >
+                  <Ticket className="w-4 h-4" />
+                  My Tickets
+                </NavLink>
+
+                {/* Dashboard/Admin Dashboard */}
+                <NavLink
+                  to={isAdmin() ? '/admin' : '/dashboard'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    clsx(
+                      'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
+                      isActive
+                        ? 'bg-brand-100 text-brand-700'
+                        : 'text-text-secondary hover:bg-background-secondary'
+                    )
+                  }
+                >
+                  {isAdmin() ? (
+                    <>
+                      <Settings className="w-4 h-4" />
+                      Admin Dashboard
+                    </>
+                  ) : (
+                    <>
+                      <Wallet className="w-4 h-4" />
+                      Dashboard
+                    </>
+                  )}
+                </NavLink>
+              </div>
+            )}
+
             {/* Disconnect Button */}
             {connected && isAuthenticated && (
               <div className="border-t border-border pt-4 mt-4">
