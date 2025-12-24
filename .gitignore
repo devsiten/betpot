@@ -12,7 +12,7 @@ dist/
 .dev.vars
 
 # Backend - keep private, deploy to Cloudflare only
-# backend/
+backend/
 
 # IDE
 .vscode/
