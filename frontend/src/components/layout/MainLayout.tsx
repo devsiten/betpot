@@ -303,7 +303,7 @@ export function MainLayout() {
   return (
     <div className="min-h-screen">
       {/* Header Navigation */}
-      <header className="sticky top-0 z-50 bg-background-card border-b border-border shadow-soft">
+      <header className="sticky top-0 z-50 bg-background-card dark:bg-gray-900 border-b border-border dark:border-gray-800 shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -311,7 +311,7 @@ export function MainLayout() {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0 shadow-soft">
                 <span className="text-white font-bold text-xl">B</span>
               </div>
-              <span className="text-xl font-semibold text-text-primary hidden sm:block">BETPOT</span>
+              <span className="text-xl font-semibold text-text-primary dark:text-white hidden sm:block">BETPOT</span>
             </NavLink>
 
             {/* Desktop Navigation */}
@@ -324,8 +324,8 @@ export function MainLayout() {
                     clsx(
                       'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
                       isActive
-                        ? 'bg-brand-100 text-brand-700'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary'
+                        ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400'
+                        : 'text-text-secondary dark:text-gray-400 hover:text-text-primary dark:hover:text-white hover:bg-background-secondary dark:hover:bg-gray-800'
                     )
                   }
                 >
