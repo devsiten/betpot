@@ -101,19 +101,19 @@ export function EventsPage() {
     return (
       <CardWrapper key={event.id} {...cardProps as any}>
         {/* Event Header */}
-        <div className="p-5 border-b border-border bg-background-secondary">
+        <div className="p-5 border-b border-border dark:border-gray-800 bg-background-secondary dark:bg-gray-800">
           <div className="flex items-start justify-between mb-3">
             <span className="badge badge-success">Live</span>
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-background-secondary px-2 py-1 rounded border border-border">
+            <span className="text-[10px] font-bold text-text-muted dark:text-gray-400 uppercase tracking-widest bg-background-secondary dark:bg-gray-700 px-2 py-1 rounded border border-border dark:border-gray-600">
               {event.sport || 'Sports'}
             </span>
           </div>
-          <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
+          <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
             {event.title}
           </h3>
           {/* Start Time / Match Date */}
           {event.startTime && (
-            <div className="flex items-center gap-1 text-xs text-positive-600 font-mono mt-2">
+            <div className="flex items-center gap-1 text-xs text-positive-600 dark:text-positive-400 font-mono mt-2">
               <Clock className="w-3 h-3" />
               {format(new Date(event.startTime), 'MMM dd, yyyy HH:mm')}
             </div>
@@ -200,20 +200,20 @@ export function EventsPage() {
         )}
 
         {/* Event Header */}
-        <div className="p-5 border-b border-border bg-background-secondary">
+        <div className="p-5 border-b border-border dark:border-gray-800 bg-background-secondary dark:bg-gray-800">
           <div className="flex items-start justify-between mb-3">
             <span className="badge badge-success">{event.active !== false ? 'Live' : 'Upcoming'}</span>
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-background-secondary px-2 py-1 rounded border border-border">
+            <span className="text-[10px] font-bold text-text-muted dark:text-gray-400 uppercase tracking-widest bg-background-secondary dark:bg-gray-700 px-2 py-1 rounded border border-border dark:border-gray-600">
               {selectedCategory}
             </span>
           </div>
-          <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
+          <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
             {event.title}
           </h3>
 
           {/* Expiration Date */}
           {(event.endTime || event.rawData?.endDate) && (
-            <div className="flex items-center gap-1 text-xs text-brand-600 font-mono mt-2">
+            <div className="flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 font-mono mt-2">
               <Clock className="w-3 h-3" />
               Ends: {format(new Date(event.endTime || event.rawData?.endDate), 'MMM dd, yyyy')}
             </div>
