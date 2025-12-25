@@ -5,6 +5,7 @@ import { Trophy, Zap, Clock } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 import clsx from 'clsx';
+import { EventCountdown } from '@/components/CountdownTimer';
 
 export function HomePage() {
   const [displayCount, setDisplayCount] = useState(40);
@@ -84,7 +85,7 @@ export function HomePage() {
                       <Link
                         key={event.id}
                         to={event.isJackpot ? '/jackpot' : `/events/${event.id}`}
-                        className="block bg-gradient-to-r from-positive-50 to-brand-50 rounded-xl p-3 border border-positive-200 hover:shadow-md transition-all"
+                        className="block bg-gradient-to-r from-positive-50 to-brand-50 dark:from-positive-900/30 dark:to-brand-900/30 rounded-xl p-3 border border-positive-200 dark:border-positive-800 hover:shadow-md transition-all"
                       >
                         <div className="flex items-center gap-3">
                           <div className={clsx(
@@ -100,15 +101,19 @@ export function HomePage() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-text-primary font-bold text-xs truncate">{event.title}</h4>
-                            <span className="text-[10px] text-text-secondary font-medium">
-                              Ends {format(new Date(event.eventTime), 'MMM dd, HH:mm')}
-                            </span>
+                            <h4 className="text-text-primary dark:text-white font-bold text-xs truncate">{event.title}</h4>
+                            <EventCountdown
+                              startTime={event.startTime || event.eventTime}
+                              lockTime={event.lockTime || event.eventTime}
+                              eventTime={event.eventTime}
+                              status={event.status}
+                              className="text-[10px]"
+                            />
                           </div>
                           {event.isJackpot && (
                             <div className="text-right">
-                              <p className="text-[10px] text-text-muted">Pool</p>
-                              <p className="text-xs font-bold text-positive-600">${(event.totalPool || 0).toLocaleString()}</p>
+                              <p className="text-[10px] text-text-muted dark:text-gray-400">Pool</p>
+                              <p className="text-xs font-bold text-positive-600 dark:text-positive-400">${(event.totalPool || 0).toLocaleString()}</p>
                             </div>
                           )}
                         </div>
