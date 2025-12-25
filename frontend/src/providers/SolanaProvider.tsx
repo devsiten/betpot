@@ -25,8 +25,8 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
 
     return (
         <ConnectionProvider endpoint={endpoint}>
-            {/* autoConnect=false to prevent auto-connecting without user action */}
-            <WalletProvider wallets={wallets} autoConnect={false}>
+            {/* autoConnect=true to reconnect wallet on page refresh */}
+            <WalletProvider wallets={wallets} autoConnect={true}>
                 <WalletModalProvider>
                     {children}
                 </WalletModalProvider>

@@ -26,20 +26,16 @@ import toast from 'react-hot-toast';
 // Custom Connect Button - Only Phantom and Solflare
 function ConnectButton() {
   const [showModal, setShowModal] = useState(false);
-  const { wallets, select, connect, connecting, wallet } = useWallet();
+  const { wallets, select, connect, connecting, wallet, connected } = useWallet();
 
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
     w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
   );
 
-  // Check if any supported wallet is detected/installed
-  const detectedWallets = supportedWallets.filter(
-    w => w.readyState === 'Installed' || w.readyState === 'Loadable'
-  );
-
   const handleConnect = async (walletName: string) => {
     try {
+      console.log('Connecting to wallet:', walletName);
       select(walletName as any);
       setShowModal(false);
     } catch (error) {
@@ -50,12 +46,13 @@ function ConnectButton() {
 
   // After wallet is selected, trigger connect
   useEffect(() => {
-    if (wallet && !connecting) {
+    if (wallet && !connecting && !connected) {
+      console.log('Auto-connecting to:', wallet.adapter.name);
       connect().catch((err) => {
         console.error('Auto-connect failed:', err);
       });
     }
-  }, [wallet, connect, connecting]);
+  }, [wallet, connect, connecting, connected]);
 
   return (
     <>
@@ -83,9 +80,10 @@ function ConnectButton() {
             </div>
 
             <div className="space-y-3">
-              {detectedWallets.length > 0 ? (
-                // Show detected wallets
-                detectedWallets.map((walletOption) => (
+              {/* Always show both wallet options - let the adapter handle detection */}
+              {supportedWallets.map((walletOption) => {
+                const isDetected = walletOption.readyState === 'Installed' || walletOption.readyState === 'Loadable';
+                return (
                   <button
                     key={walletOption.adapter.name}
                     onClick={() => handleConnect(walletOption.adapter.name)}
@@ -98,36 +96,18 @@ function ConnectButton() {
                     />
                     <div className="flex-1 text-left">
                       <p className="text-text-primary dark:text-white font-medium">{walletOption.adapter.name}</p>
-                      <p className="text-text-muted dark:text-gray-400 text-sm">Detected</p>
+                      <p className="text-text-muted dark:text-gray-400 text-sm">
+                        {isDetected ? 'Detected' : 'Click to connect'}
+                      </p>
                     </div>
                   </button>
-                ))
-              ) : (
-                // No wallets detected - show all supported options
-                <>
-                  {supportedWallets.map((walletOption) => (
-                    <button
-                      key={walletOption.adapter.name}
-                      onClick={() => handleConnect(walletOption.adapter.name)}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary dark:bg-gray-800 hover:bg-border-light dark:hover:bg-gray-700 border border-border dark:border-gray-700 transition-all"
-                    >
-                      <img
-                        src={walletOption.adapter.icon}
-                        alt={walletOption.adapter.name}
-                        className="w-10 h-10 rounded-lg"
-                      />
-                      <div className="flex-1 text-left">
-                        <p className="text-text-primary dark:text-white font-medium">{walletOption.adapter.name}</p>
-                        <p className="text-text-muted dark:text-gray-400 text-sm">Click to connect</p>
-                      </div>
-                    </button>
-                  ))}
-                  {supportedWallets.length === 0 && (
-                    <p className="text-text-muted dark:text-gray-400 text-center py-4">
-                      Please install Phantom or Solflare wallet
-                    </p>
-                  )}
-                </>
+                );
+              })}
+
+              {supportedWallets.length === 0 && (
+                <p className="text-text-muted dark:text-gray-400 text-center py-4">
+                  Please install Phantom or Solflare wallet
+                </p>
               )}
             </div>
 
