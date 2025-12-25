@@ -23,28 +23,50 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Custom Connect Button - Only Phantom and Solflare
+// Connect Button using wallet adapter's built-in modal for better compatibility
 function ConnectButton() {
+  const { select, connect, connecting, wallet, connected, wallets } = useWallet();
   const [showModal, setShowModal] = useState(false);
-  const { wallets, select, connect, connecting, wallet, connected } = useWallet();
 
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
     w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
   );
 
-  const handleConnect = async (walletName: string) => {
+  const handleWalletSelect = async (walletName: string) => {
     try {
-      console.log('Connecting to wallet:', walletName);
-      select(walletName as any);
-      setShowModal(false);
+      console.log('Selecting wallet:', walletName);
+      const selectedWallet = supportedWallets.find(w => w.adapter.name === walletName);
+
+      if (selectedWallet) {
+        select(selectedWallet.adapter.name as any);
+        setShowModal(false);
+
+        // Give time for selection to register, then connect
+        setTimeout(async () => {
+          try {
+            await connect();
+            console.log('Connected successfully');
+          } catch (err) {
+            console.error('Connect failed:', err);
+            // For Solflare on mobile, try direct adapter connect
+            if (walletName === 'Solflare') {
+              try {
+                await selectedWallet.adapter.connect();
+              } catch (e) {
+                console.error('Direct adapter connect failed:', e);
+              }
+            }
+          }
+        }, 100);
+      }
     } catch (error) {
-      console.error('Connect error:', error);
+      console.error('Wallet select error:', error);
       toast.error('Failed to connect wallet');
     }
   };
 
-  // After wallet is selected, trigger connect
+  // Auto-connect after wallet selection
   useEffect(() => {
     if (wallet && !connecting && !connected) {
       console.log('Auto-connecting to:', wallet.adapter.name);
@@ -53,6 +75,10 @@ function ConnectButton() {
       });
     }
   }, [wallet, connect, connecting, connected]);
+
+  if (connected) {
+    return null; // Don't show button if already connected
+  }
 
   return (
     <>
@@ -65,10 +91,16 @@ function ConnectButton() {
         {connecting ? 'Connecting...' : 'Connect Wallet'}
       </button>
 
-      {/* Custom Wallet Modal */}
+      {/* Wallet Selection Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-background-card dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm border border-border dark:border-gray-700 shadow-elevated">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-background-card dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm border border-border dark:border-gray-700 shadow-elevated"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-text-primary dark:text-white">Connect Wallet</h3>
               <button
@@ -80,14 +112,14 @@ function ConnectButton() {
             </div>
 
             <div className="space-y-3">
-              {/* Always show both wallet options - let the adapter handle detection */}
               {supportedWallets.map((walletOption) => {
-                const isDetected = walletOption.readyState === 'Installed' || walletOption.readyState === 'Loadable';
+                const isReady = walletOption.readyState === 'Installed' || walletOption.readyState === 'Loadable';
                 return (
                   <button
                     key={walletOption.adapter.name}
-                    onClick={() => handleConnect(walletOption.adapter.name)}
-                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary dark:bg-gray-800 hover:bg-border-light dark:hover:bg-gray-700 border border-border dark:border-gray-700 transition-all"
+                    onClick={() => handleWalletSelect(walletOption.adapter.name)}
+                    disabled={connecting}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary dark:bg-gray-800 hover:bg-border-light dark:hover:bg-gray-700 border border-border dark:border-gray-700 transition-all disabled:opacity-50"
                   >
                     <img
                       src={walletOption.adapter.icon}
@@ -97,7 +129,7 @@ function ConnectButton() {
                     <div className="flex-1 text-left">
                       <p className="text-text-primary dark:text-white font-medium">{walletOption.adapter.name}</p>
                       <p className="text-text-muted dark:text-gray-400 text-sm">
-                        {isDetected ? 'Detected' : 'Click to connect'}
+                        {isReady ? 'Detected' : 'Tap to connect'}
                       </p>
                     </div>
                   </button>
@@ -106,7 +138,7 @@ function ConnectButton() {
 
               {supportedWallets.length === 0 && (
                 <p className="text-text-muted dark:text-gray-400 text-center py-4">
-                  Please install Phantom or Solflare wallet
+                  No wallets found. Please install Phantom or Solflare.
                 </p>
               )}
             </div>
