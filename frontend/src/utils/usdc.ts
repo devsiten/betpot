@@ -10,9 +10,9 @@ export const USDC_MINT = new PublicKey(
     import.meta.env.VITE_USDC_MINT || 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr'
 );
 
-// Platform Wallet Address (receives platform fees)
+// Platform Wallet Address
 export const PLATFORM_WALLET = new PublicKey(
-    import.meta.env.VITE_PLATFORM_WALLET || '9B7SLBvupwfUGxYfxmK1VRWx6BtbEinRrx5u973JquKj'
+    import.meta.env.VITE_PLATFORM_WALLET || '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2'
 );
 
 // USDC has 6 decimals
