@@ -111,21 +111,21 @@ export function AdminBets() {
           <p className="text-2xl font-bold text-text-primary dark:text-white">{pagination?.total || tickets.length || 0}</p>
           <p className="text-xs text-text-muted dark:text-gray-400">Total Bets</p>
         </div>
-        <div className="card p-4 bg-green-500/5 border-green-500/20">
-          <p className="text-2xl font-bold text-green-600">{stats.won}</p>
-          <p className="text-xs text-text-muted">Winners (page)</p>
+        <div className="card p-4 bg-green-500/5 dark:bg-green-900/20 border-green-500/20 dark:border-green-700">
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.won}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Winners (page)</p>
         </div>
-        <div className="card p-4 bg-red-500/5 border-red-500/20">
-          <p className="text-2xl font-bold text-red-600">{stats.lost}</p>
-          <p className="text-xs text-text-muted">Losers (page)</p>
+        <div className="card p-4 bg-red-500/5 dark:bg-red-900/20 border-red-500/20 dark:border-red-700">
+          <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.lost}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Losers (page)</p>
         </div>
-        <div className="card p-4 bg-yellow-500/5 border-yellow-500/20">
-          <p className="text-2xl font-bold text-yellow-600">{stats.unclaimed}</p>
-          <p className="text-xs text-text-muted">Unclaimed</p>
+        <div className="card p-4 bg-yellow-500/5 dark:bg-yellow-900/20 border-yellow-500/20 dark:border-yellow-700">
+          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.unclaimed}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Unclaimed</p>
         </div>
-        <div className="card p-4">
-          <p className="text-2xl font-bold text-text-primary">${stats.totalPayout.toLocaleString()}</p>
-          <p className="text-xs text-text-muted">Payout (page)</p>
+        <div className="card p-4 dark:bg-gray-900 dark:border-gray-800">
+          <p className="text-2xl font-bold text-text-primary dark:text-white">${stats.totalPayout.toLocaleString()}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Payout (page)</p>
         </div>
       </div>
 
