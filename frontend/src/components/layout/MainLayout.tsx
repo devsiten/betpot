@@ -28,46 +28,17 @@ function ConnectButton() {
   const [showModal, setShowModal] = useState(false);
   const { wallets, select, connect, connecting, wallet } = useWallet();
 
-  // Detect if user is on mobile
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
-  );
-
-  // Get current page URL for deep link redirect
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://betpot.pages.dev';
-
-  // Deep link URLs for mobile wallets
-  const getDeepLink = (walletName: string) => {
-    const encodedUrl = encodeURIComponent(currentUrl);
-
-    if (walletName === 'Phantom') {
-      // Phantom mobile deep link - opens the dApp browser inside Phantom
-      return `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
-    }
-    if (walletName === 'Solflare') {
-      // Solflare mobile deep link
-      return `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=${encodedUrl}`;
-    }
-    return null;
-  };
-
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
     w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
   );
 
-  const handleConnect = async (walletName: string) => {
-    // On mobile, use deep links to open wallet app
-    if (isMobile) {
-      const deepLink = getDeepLink(walletName);
-      if (deepLink) {
-        // Open the wallet app with the current page
-        window.location.href = deepLink;
-        return;
-      }
-    }
+  // Check if any supported wallet is detected/installed
+  const detectedWallets = supportedWallets.filter(
+    w => w.readyState === 'Installed' || w.readyState === 'Loadable'
+  );
 
-    // Desktop: use normal wallet adapter
+  const handleConnect = async (walletName: string) => {
     try {
       select(walletName as any);
       setShowModal(false);
@@ -86,93 +57,81 @@ function ConnectButton() {
     }
   }, [wallet, connect, connecting]);
 
-  // Mobile wallet options (always show these on mobile even if not "installed")
-  const mobileWallets = [
-    { name: 'Phantom', icon: 'https://phantom.app/img/phantom-icon-purple.png' },
-    { name: 'Solflare', icon: 'https://solflare.com/favicon.ico' },
-  ];
-
   return (
     <>
       <button
         onClick={() => setShowModal(true)}
         disabled={connecting}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-text-primary font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 shadow-card border border-border"
+        className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-text-primary dark:text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 shadow-card border border-border dark:border-gray-700"
       >
         <Wallet className="w-4 h-4" />
         {connecting ? 'Connecting...' : 'Connect Wallet'}
       </button>
 
-      {/* Custom Wallet Modal - Light theme */}
+      {/* Custom Wallet Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-background-card rounded-2xl p-6 w-full max-w-sm mx-4 border border-border shadow-elevated">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+          <div className="bg-background-card dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm border border-border dark:border-gray-700 shadow-elevated">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-text-primary">Connect Wallet</h3>
+              <h3 className="text-lg font-semibold text-text-primary dark:text-white">Connect Wallet</h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-lg hover:bg-background-secondary text-text-muted"
+                className="p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-muted dark:text-gray-400"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3">
-              {isMobile ? (
-                // Mobile: Show wallet options with deep links
+              {detectedWallets.length > 0 ? (
+                // Show detected wallets
+                detectedWallets.map((walletOption) => (
+                  <button
+                    key={walletOption.adapter.name}
+                    onClick={() => handleConnect(walletOption.adapter.name)}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary dark:bg-gray-800 hover:bg-border-light dark:hover:bg-gray-700 border border-border dark:border-gray-700 transition-all"
+                  >
+                    <img
+                      src={walletOption.adapter.icon}
+                      alt={walletOption.adapter.name}
+                      className="w-10 h-10 rounded-lg"
+                    />
+                    <div className="flex-1 text-left">
+                      <p className="text-text-primary dark:text-white font-medium">{walletOption.adapter.name}</p>
+                      <p className="text-text-muted dark:text-gray-400 text-sm">Detected</p>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                // No wallets detected - show all supported options
                 <>
-                  {mobileWallets.map((mobileWallet) => (
+                  {supportedWallets.map((walletOption) => (
                     <button
-                      key={mobileWallet.name}
-                      onClick={() => handleConnect(mobileWallet.name)}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary hover:bg-border-light border border-border transition-all"
+                      key={walletOption.adapter.name}
+                      onClick={() => handleConnect(walletOption.adapter.name)}
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary dark:bg-gray-800 hover:bg-border-light dark:hover:bg-gray-700 border border-border dark:border-gray-700 transition-all"
                     >
                       <img
-                        src={mobileWallet.icon}
-                        alt={mobileWallet.name}
+                        src={walletOption.adapter.icon}
+                        alt={walletOption.adapter.name}
                         className="w-10 h-10 rounded-lg"
                       />
                       <div className="flex-1 text-left">
-                        <p className="text-text-primary font-medium">{mobileWallet.name}</p>
-                        <p className="text-text-muted text-sm">Tap to open app</p>
+                        <p className="text-text-primary dark:text-white font-medium">{walletOption.adapter.name}</p>
+                        <p className="text-text-muted dark:text-gray-400 text-sm">Click to connect</p>
                       </div>
                     </button>
                   ))}
-                  <p className="text-text-muted text-xs text-center mt-2">
-                    You'll be redirected to your wallet app
-                  </p>
+                  {supportedWallets.length === 0 && (
+                    <p className="text-text-muted dark:text-gray-400 text-center py-4">
+                      Please install Phantom or Solflare wallet
+                    </p>
+                  )}
                 </>
-              ) : (
-                // Desktop: Show detected wallets
-                supportedWallets.length === 0 ? (
-                  <p className="text-text-muted text-center py-4">
-                    Please install Phantom or Solflare wallet
-                  </p>
-                ) : (
-                  supportedWallets.map((wallet) => (
-                    <button
-                      key={wallet.adapter.name}
-                      onClick={() => handleConnect(wallet.adapter.name)}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary hover:bg-border-light border border-border transition-all"
-                    >
-                      <img
-                        src={wallet.adapter.icon}
-                        alt={wallet.adapter.name}
-                        className="w-10 h-10 rounded-lg"
-                      />
-                      <div className="flex-1 text-left">
-                        <p className="text-text-primary font-medium">{wallet.adapter.name}</p>
-                        <p className="text-text-muted text-sm">
-                          {wallet.readyState === 'Installed' ? 'Detected' : 'Not installed'}
-                        </p>
-                      </div>
-                    </button>
-                  ))
-                )
               )}
             </div>
 
-            <p className="text-text-muted text-xs text-center mt-4">
+            <p className="text-text-muted dark:text-gray-400 text-xs text-center mt-4">
               Only Phantom and Solflare are supported
             </p>
           </div>
@@ -382,7 +341,7 @@ export function MainLayout() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-background-secondary text-text-primary"
+                className="md:hidden p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-primary dark:text-white"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -392,10 +351,10 @@ export function MainLayout() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border bg-background-card px-4 py-4 space-y-2">
+          <div className="md:hidden border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 px-4 py-4 space-y-2">
             {/* Wallet Connect for Mobile */}
             {!connected ? (
-              <div className="pb-4 border-b border-border">
+              <div className="pb-4 border-b border-border dark:border-gray-800">
                 <ConnectButton />
               </div>
             ) : !isAuthenticated ? (
@@ -422,8 +381,8 @@ export function MainLayout() {
                   clsx(
                     'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
                     isActive
-                      ? 'bg-brand-100 text-brand-700'
-                      : 'text-text-secondary hover:bg-background-secondary'
+                      ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400'
+                      : 'text-text-secondary dark:text-gray-400 hover:bg-background-secondary dark:hover:bg-gray-800 hover:text-text-primary dark:hover:text-white'
                   )
                 }
               >
@@ -434,7 +393,7 @@ export function MainLayout() {
 
             {/* Dashboard and Admin Links for Authenticated Users */}
             {connected && isAuthenticated && (
-              <div className="border-t border-border pt-4 mt-4 space-y-2">
+              <div className="border-t border-border dark:border-gray-800 pt-4 mt-4 space-y-2">
                 {/* My Bets Link */}
                 <NavLink
                   to="/dashboard"
@@ -443,8 +402,8 @@ export function MainLayout() {
                     clsx(
                       'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
                       isActive
-                        ? 'bg-brand-100 text-brand-700'
-                        : 'text-text-secondary hover:bg-background-secondary'
+                        ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400'
+                        : 'text-text-secondary dark:text-gray-400 hover:bg-background-secondary dark:hover:bg-gray-800 hover:text-text-primary dark:hover:text-white'
                     )
                   }
                 >
@@ -460,8 +419,8 @@ export function MainLayout() {
                     clsx(
                       'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
                       isActive
-                        ? 'bg-brand-100 text-brand-700'
-                        : 'text-text-secondary hover:bg-background-secondary'
+                        ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400'
+                        : 'text-text-secondary dark:text-gray-400 hover:bg-background-secondary dark:hover:bg-gray-800 hover:text-text-primary dark:hover:text-white'
                     )
                   }
                 >
@@ -482,13 +441,13 @@ export function MainLayout() {
 
             {/* Disconnect Button */}
             {connected && isAuthenticated && (
-              <div className="border-t border-border pt-4 mt-4">
+              <div className="border-t border-border dark:border-gray-800 pt-4 mt-4">
                 <button
                   onClick={() => {
                     handleDisconnect();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-negative-500 hover:bg-negative-50"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-negative-500 dark:text-negative-400 hover:bg-negative-50 dark:hover:bg-negative-900/30"
                 >
                   <LogOut className="w-4 h-4" />
                   Disconnect

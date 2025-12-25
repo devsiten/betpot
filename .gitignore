@@ -11,8 +11,8 @@ dist/
 .env.local
 .dev.vars
 
-# Backend - keep private, deploy to Cloudflare only
-backend/
+# Backend - temporarily allowing access for development
+# backend/
 
 # IDE
 .vscode/

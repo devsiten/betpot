@@ -403,10 +403,7 @@ export function EventDetailPage() {
           {!isAuthenticated ? (
             <div className="text-center py-6">
               <Wallet className="w-12 h-12 text-dark-600 dark:text-gray-400 mx-auto mb-4" />
-              <p className="text-text-muted dark:text-gray-400 mb-4">Connect your wallet to purchase tickets</p>
-              <Link to="/login" className="btn btn-primary">
-                Login / Register
-              </Link>
+              <p className="text-text-muted dark:text-gray-400">Connect your wallet to purchase tickets</p>
             </div>
           ) : !user?.walletAddress ? (
             <div className="text-center py-6">
