@@ -54,7 +54,7 @@ function ConnectButton() {
       <button
         onClick={() => setShowModal(true)}
         disabled={connecting}
-        className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 shadow-soft"
+        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-text-primary font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 shadow-card border border-border"
       >
         <Wallet className="w-4 h-4" />
         {connecting ? 'Connecting...' : 'Connect Wallet'}
