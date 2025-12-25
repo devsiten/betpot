@@ -57,14 +57,14 @@ export function JackpotPage() {
                     <Link
                         key={jackpot.id}
                         to={`/events/${jackpot.id}`}
-                        className="card p-6 hover:border-brand-300 transition-all group cursor-pointer bg-gradient-to-br from-brand-50 to-background-card shadow-card"
+                        className="card p-6 hover:border-brand-300 dark:hover:border-brand-600 transition-all group cursor-pointer bg-gradient-to-br from-brand-50 to-background-card dark:from-gray-800 dark:to-gray-900 shadow-card"
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-2">
-                                <Trophy className="w-5 h-5 text-brand-600" />
-                                <span className="text-xs text-brand-600 font-medium uppercase">Jackpot</span>
+                                <Trophy className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                                <span className="text-xs text-brand-600 dark:text-brand-400 font-medium uppercase">Jackpot</span>
                             </div>
-                            <span className="text-xs text-text-secondary font-medium">
+                            <span className="text-xs text-text-secondary dark:text-gray-400 font-medium">
                                 {jackpot.category}
                             </span>
                         </div>
