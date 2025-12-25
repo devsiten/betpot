@@ -212,7 +212,7 @@ export function MainLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header Navigation */}
       <header className="sticky top-0 z-50 bg-background-card border-b border-border shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
