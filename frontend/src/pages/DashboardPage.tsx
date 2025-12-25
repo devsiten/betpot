@@ -476,16 +476,16 @@ export function DashboardPage() {
                                             </div>
 
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-text-primary font-semibold truncate text-sm sm:text-base">
+                                                <p className="text-text-primary dark:text-white font-semibold truncate text-sm sm:text-base">
                                                     {ticket.event?.title || 'Unknown Event'}
                                                 </p>
-                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-secondary mt-1">
+                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-secondary dark:text-gray-400 mt-1">
                                                     <span className="flex items-center gap-1">
-                                                        <span className="text-text-muted">Pick:</span>
-                                                        <span className="text-text-primary font-medium">{ticket.optionLabel}</span>
+                                                        <span className="text-text-muted dark:text-gray-500">Pick:</span>
+                                                        <span className="text-text-primary dark:text-white font-medium">{ticket.optionLabel}</span>
                                                     </span>
-                                                    <span className="text-border-dark hidden sm:inline">•</span>
-                                                    <span className="text-text-muted">
+                                                    <span className="text-border-dark dark:text-gray-600 hidden sm:inline">•</span>
+                                                    <span className="text-text-muted dark:text-gray-500">
                                                         {format(new Date(ticket.createdAt), 'MMM dd, yyyy')}
                                                     </span>
                                                 </div>
@@ -496,10 +496,10 @@ export function DashboardPage() {
                                         <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
                                             <p className={clsx(
                                                 'text-lg sm:text-xl font-bold',
-                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600',
-                                                ticket.status === 'lost' && 'text-negative-500',
-                                                ticket.status === 'active' && 'text-text-primary',
-                                                ticket.status === 'refunded' && 'text-yellow-600'
+                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600 dark:text-positive-400',
+                                                ticket.status === 'lost' && 'text-negative-500 dark:text-negative-400',
+                                                ticket.status === 'active' && 'text-text-primary dark:text-white',
+                                                ticket.status === 'refunded' && 'text-yellow-600 dark:text-yellow-400'
                                             )}>
                                                 {(ticket.status === 'won' || ticket.status === 'claimed') && `+$${ticket.payoutAmount?.toFixed(2) || ticket.purchasePrice}`}
                                                 {ticket.status === 'lost' && `-$${ticket.purchasePrice.toFixed(2)}`}
