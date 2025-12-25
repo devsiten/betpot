@@ -137,23 +137,23 @@ export function JackpotPage() {
 
 
             {/* How it works */}
-            <div className="p-6 card">
-                <h3 className="text-lg font-semibold text-text-primary mb-4 text-center">How Jackpots Work</h3>
+            <div className="p-6 card dark:bg-gray-900 dark:border-gray-800">
+                <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-4 text-center">How Jackpots Work</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                     <div>
-                        <div className="w-10 h-10 rounded-full bg-positive-100 flex items-center justify-center mx-auto mb-3 text-positive-600 font-bold border border-positive-200">1</div>
-                        <p className="text-text-primary font-medium">Pick a Winner</p>
-                        <p className="text-text-muted text-sm">Choose which outcome will win</p>
+                        <div className="w-10 h-10 rounded-full bg-positive-100 dark:bg-positive-900/30 flex items-center justify-center mx-auto mb-3 text-positive-600 dark:text-positive-400 font-bold border border-positive-200 dark:border-positive-700">1</div>
+                        <p className="text-text-primary dark:text-white font-medium">Pick a Winner</p>
+                        <p className="text-text-muted dark:text-gray-400 text-sm">Choose which outcome will win</p>
                     </div>
                     <div>
-                        <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-3 text-brand-600 font-bold border border-brand-200">2</div>
-                        <p className="text-text-primary font-medium">Place Your Bet</p>
-                        <p className="text-text-muted text-sm">Pay with USDC from your wallet</p>
+                        <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center mx-auto mb-3 text-brand-600 dark:text-brand-400 font-bold border border-brand-200 dark:border-brand-700">2</div>
+                        <p className="text-text-primary dark:text-white font-medium">Place Your Bet</p>
+                        <p className="text-text-muted dark:text-gray-400 text-sm">Pay with USDC from your wallet</p>
                     </div>
                     <div>
-                        <div className="w-10 h-10 rounded-full bg-positive-100 flex items-center justify-center mx-auto mb-3 text-positive-600 font-bold border border-positive-200">3</div>
-                        <p className="text-text-primary font-medium">Win Big</p>
-                        <p className="text-text-muted text-sm">If you're right, split the prize pool!</p>
+                        <div className="w-10 h-10 rounded-full bg-positive-100 dark:bg-positive-900/30 flex items-center justify-center mx-auto mb-3 text-positive-600 dark:text-positive-400 font-bold border border-positive-200 dark:border-positive-700">3</div>
+                        <p className="text-text-primary dark:text-white font-medium">Win Big</p>
+                        <p className="text-text-muted dark:text-gray-400 text-sm">If you're right, split the prize pool!</p>
                     </div>
                 </div>
             </div>

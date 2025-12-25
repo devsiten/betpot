@@ -31,7 +31,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Dashboard Overview',
             icon: TrendingUp,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p>The dashboard shows key platform metrics:</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
                         <li><strong>Total Users</strong> - Registered users on the platform</li>
@@ -48,7 +48,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Creating Jackpots',
             icon: Trophy,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p><strong>Step 1:</strong> Go to <span className="text-brand-600 font-medium">Markets</span></p>
                     <p><strong>Step 2:</strong> Browse sports from The Odds API or prediction markets from Polymarket</p>
                     <p><strong>Step 3:</strong> Click <span className="bg-positive-100 text-positive-700 px-2 py-0.5 rounded font-medium">Set as Jackpot</span> on any event</p>
@@ -64,7 +64,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Managing Events',
             icon: Calendar,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p>In the <span className="text-brand-600 font-medium">Events</span> page you can:</p>
                     <ul className="list-disc list-inside space-y-2 ml-2">
                         <li><strong>View Events</strong> - See all jackpots with status (Open, Locked, Resolved)</li>
@@ -83,7 +83,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Resolving Events',
             icon: CheckCircle,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p><strong>Critical Admin Task!</strong> After an event ends:</p>
                     <ol className="list-decimal list-inside space-y-2 ml-2">
                         <li>Go to <span className="text-brand-600 font-medium">Events</span> → find the locked event</li>
@@ -104,7 +104,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Viewing Bets',
             icon: Ticket,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p>The <span className="text-brand-600 font-medium">Bets</span> page shows all tickets:</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
                         <li><strong>All Bets</strong> - Every ticket purchased</li>
@@ -121,7 +121,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Managing Users',
             icon: Users,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p>In <span className="text-brand-600 font-medium">Users</span> you can:</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
                         <li>View all registered users</li>
@@ -137,7 +137,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Payment Issues',
             icon: AlertTriangle,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p>The <span className="text-brand-600 font-medium">Payment Issues</span> page shows failed transactions:</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
                         <li><strong>Pending</strong> - User paid but ticket wasn't created</li>
@@ -155,7 +155,7 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             title: 'Platform Settings',
             icon: Settings,
             content: (
-                <div className="space-y-3 text-sm text-text-secondary">
+                <div className="space-y-3 text-sm text-text-secondary dark:text-gray-300">
                     <p>Configure global platform parameters:</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
                         <li><strong>Ticket Price</strong> - Default price for new events</li>
@@ -183,8 +183,8 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
                         <BookOpen className="w-5 h-5 text-brand-600" />
                     </div>
                     <div className="text-left">
-                        <h3 className="font-bold text-text-primary">Admin Guide</h3>
-                        <p className="text-sm text-text-muted">Click to view admin responsibilities & instructions</p>
+                        <h3 className="font-bold text-text-primary dark:text-white">Admin Guide</h3>
+                        <p className="text-sm text-text-muted dark:text-gray-400">Click to view admin responsibilities & instructions</p>
                     </div>
                 </div>
                 <ChevronDown className={clsx(
@@ -194,10 +194,10 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
             </button>
 
             {isOpen && (
-                <div className="card mt-2 p-4 space-y-2">
-                    <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-4">
-                        <h4 className="font-bold text-brand-700 mb-2">Your Main Responsibilities</h4>
-                        <ol className="list-decimal list-inside text-sm text-brand-600 space-y-1">
+                <div className="card dark:bg-gray-900 dark:border-gray-800 mt-2 p-4 space-y-2">
+                    <div className="bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-700 rounded-lg p-4 mb-4">
+                        <h4 className="font-bold text-brand-700 dark:text-brand-400 mb-2">Your Main Responsibilities</h4>
+                        <ol className="list-decimal list-inside text-sm text-brand-600 dark:text-brand-400 space-y-1">
                             <li>Create jackpots from Markets page</li>
                             <li>Monitor events and betting activity</li>
                             <li>Resolve events after they end (select winner)</li>
@@ -206,23 +206,23 @@ export function AdminGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
                     </div>
 
                     {sections.map((section) => (
-                        <div key={section.id} className="border border-border rounded-lg overflow-hidden">
+                        <div key={section.id} className="border border-border dark:border-gray-800 rounded-lg overflow-hidden">
                             <button
                                 onClick={() => toggleSection(section.id)}
-                                className="w-full p-3 flex items-center justify-between hover:bg-background-secondary transition-colors"
+                                className="w-full p-3 flex items-center justify-between hover:bg-background-secondary dark:hover:bg-gray-800 transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <section.icon className="w-5 h-5 text-brand-500" />
-                                    <span className="font-medium text-text-primary">{section.title}</span>
+                                    <section.icon className="w-5 h-5 text-brand-500 dark:text-brand-400" />
+                                    <span className="font-medium text-text-primary dark:text-white">{section.title}</span>
                                 </div>
                                 {expandedSection === section.id ? (
-                                    <ChevronDown className="w-4 h-4 text-text-muted" />
+                                    <ChevronDown className="w-4 h-4 text-text-muted dark:text-gray-400" />
                                 ) : (
-                                    <ChevronRight className="w-4 h-4 text-text-muted" />
+                                    <ChevronRight className="w-4 h-4 text-text-muted dark:text-gray-400" />
                                 )}
                             </button>
                             {expandedSection === section.id && (
-                                <div className="p-4 pt-0 border-t border-border bg-background-secondary">
+                                <div className="p-4 pt-0 border-t border-border dark:border-gray-800 bg-background-secondary dark:bg-gray-800">
                                     {section.content}
                                 </div>
                             )}
