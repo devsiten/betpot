@@ -8,9 +8,7 @@
     background-image: url('/pattern.svg');
     background-repeat: repeat;
     background-size: 400px 400px;
-    /* Removed background-attachment: fixed - causes rendering glitches on mobile */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    background-attachment: fixed;
   }
 
   h1,
@@ -38,9 +36,11 @@
 
 @layer components {
 
-  /* Cards - Light theme with subtle shadows */
+  /* Cards - Light theme with solid backgrounds above pattern */
   .card {
-    @apply bg-background-card border border-border rounded-xl transition-all duration-300 shadow-soft;
+    @apply bg-white border border-border rounded-xl transition-all duration-300 shadow-soft;
+    position: relative;
+    z-index: 1;
   }
 
   .card-hover {
