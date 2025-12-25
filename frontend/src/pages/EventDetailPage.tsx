@@ -397,12 +397,12 @@ export function EventDetailPage() {
 
       {/* Purchase Section */}
       {isOpen && (
-        <div className="card p-6 mb-6">
+        <div className="card p-6 mb-6 dark:bg-gray-900 dark:border-gray-800">
           <h2 className="text-lg font-semibold text-text-primary dark:text-white mb-4">Purchase Tickets</h2>
 
           {!isAuthenticated ? (
             <div className="text-center py-6">
-              <Wallet className="w-12 h-12 text-dark-600 mx-auto mb-4" />
+              <Wallet className="w-12 h-12 text-dark-600 dark:text-gray-400 mx-auto mb-4" />
               <p className="text-text-muted dark:text-gray-400 mb-4">Connect your wallet to purchase tickets</p>
               <Link to="/login" className="btn btn-primary">
                 Login / Register
@@ -410,7 +410,7 @@ export function EventDetailPage() {
             </div>
           ) : !user?.walletAddress ? (
             <div className="text-center py-6">
-              <Wallet className="w-12 h-12 text-dark-600 mx-auto mb-4" />
+              <Wallet className="w-12 h-12 text-dark-600 dark:text-gray-400 mx-auto mb-4" />
               <p className="text-text-muted dark:text-gray-400 mb-4">Please connect a wallet to your account</p>
             </div>
           ) : !selectedOption ? (
@@ -425,7 +425,7 @@ export function EventDetailPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-text-primary dark:text-white"
+                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-primary dark:text-white"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -436,7 +436,7 @@ export function EventDetailPage() {
                       const maxAvailable = selectedOpt ? (selectedOpt.ticketLimit - (selectedOpt.ticketsSold || 0)) : 1000;
                       setQuantity(q => Math.min(maxAvailable, q + 1));
                     }}
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-text-primary dark:text-white"
+                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-primary dark:text-white"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -444,7 +444,7 @@ export function EventDetailPage() {
               </div>
 
               {/* Total */}
-              <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
                 <span className="text-text-muted dark:text-gray-400">Total Cost</span>
                 <span className="text-2xl font-bold text-text-primary dark:text-white">
                   ${(event.ticketPrice * quantity).toFixed(2)}
