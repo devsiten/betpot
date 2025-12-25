@@ -374,23 +374,6 @@ export function MainLayout() {
             {/* Dashboard and Admin Links for Authenticated Users */}
             {connected && isAuthenticated && (
               <div className="border-t border-border dark:border-gray-800 pt-4 mt-4 space-y-2">
-                {/* My Bets Link */}
-                <NavLink
-                  to="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    clsx(
-                      'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium',
-                      isActive
-                        ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400'
-                        : 'text-text-secondary dark:text-gray-400 hover:bg-background-secondary dark:hover:bg-gray-800 hover:text-text-primary dark:hover:text-white'
-                    )
-                  }
-                >
-                  <Ticket className="w-4 h-4" />
-                  My Tickets
-                </NavLink>
-
                 {/* Dashboard/Admin Dashboard */}
                 <NavLink
                   to={isAdmin() ? '/admin' : '/dashboard'}
