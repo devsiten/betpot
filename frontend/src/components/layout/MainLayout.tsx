@@ -11,6 +11,8 @@ import {
   Wallet,
   Trophy,
   BookOpen,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
@@ -18,6 +20,7 @@ import bs58 from 'bs58';
 import { useAuthStore } from '@/stores/authStore';
 import { NotificationBell } from '@/components/NotificationBell';
 import { MyBetsDropdown } from '@/components/MyBetsDropdown';
+import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
 // Custom Connect Button - Only Phantom and Solflare
@@ -179,6 +182,24 @@ function ConnectButton() {
   );
 }
 
+// Theme Toggle Button
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-muted hover:text-text-primary transition-all"
+      title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+    >
+      {theme === 'light' ? (
+        <Moon className="w-5 h-5" />
+      ) : (
+        <Sun className="w-5 h-5" />
+      )}
+    </button>
+  );
+}
 
 // Admin wallet addresses (whitelist)
 const ADMIN_WALLETS = [
@@ -314,8 +335,11 @@ export function MainLayout() {
               ))}
             </nav>
 
-            {/* Right Side - Wallet */}
+            {/* Right Side - Theme Toggle & Wallet */}
             <div className="flex items-center gap-3">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Desktop Wallet Area */}
               <div className="hidden md:flex items-center gap-3">
                 {!connected ? (

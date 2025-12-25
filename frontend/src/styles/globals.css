@@ -11,6 +11,12 @@
     background-attachment: fixed;
   }
 
+  /* Dark mode body */
+  .dark body {
+    @apply bg-gray-900 text-white;
+    background-image: url('/pattern.svg');
+  }
+
   h1,
   h2,
   h3,
@@ -20,7 +26,16 @@
     @apply tracking-tight font-semibold text-text-primary;
   }
 
-  /* Custom scrollbar - Light theme */
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    @apply text-white;
+  }
+
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     @apply w-2;
   }
@@ -29,8 +44,16 @@
     @apply bg-background-secondary;
   }
 
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
   ::-webkit-scrollbar-thumb {
     @apply bg-border-dark rounded-full hover:bg-text-muted;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 hover:bg-gray-500;
   }
 }
 

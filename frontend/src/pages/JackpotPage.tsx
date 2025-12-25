@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, ArrowRight, Zap, Clock } from 'lucide-react';
+import { Trophy, ArrowRight, Zap } from 'lucide-react';
 import { api } from '@/services/api';
-import { format } from 'date-fns';
+import { EventCountdown } from '@/components/CountdownTimer';
 
 export function JackpotPage() {
     const { data: jackpotData, isLoading } = useQuery({
@@ -72,9 +72,14 @@ export function JackpotPage() {
                             {jackpot.title}
                         </h3>
 
-                        <div className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-4">
-                            <Clock className="w-4 h-4" />
-                            {format(new Date(jackpot.eventTime), 'MMM dd, HH:mm')}
+                        {/* Countdown Timer */}
+                        <div className="mb-4">
+                            <EventCountdown
+                                startTime={jackpot.startTime}
+                                lockTime={jackpot.lockTime}
+                                eventTime={jackpot.eventTime}
+                                status={jackpot.status}
+                            />
                         </div>
 
                         <div className="bg-background-secondary rounded-lg p-4 mb-4">

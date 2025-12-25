@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAuthStore } from '@/stores/authStore';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 // Layouts
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -164,17 +165,19 @@ function AppContent() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppContent />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            className: '!bg-white !text-gray-800 !border !border-gray-200 !shadow-lg',
-            duration: 4000,
-          }}
-        />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppContent />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              className: '!bg-white dark:!bg-gray-800 !text-gray-800 dark:!text-white !border !border-gray-200 dark:!border-gray-700 !shadow-lg',
+              duration: 4000,
+            }}
+          />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
