@@ -313,10 +313,10 @@ export function EventDetailPage() {
             const isNegative = lbl === 'no' || lbl === 'away';
 
             const labelColor = isPositive
-              ? 'border-green-400 bg-green-50'
+              ? 'border-green-400 bg-green-50 dark:bg-green-900/30 dark:border-green-700'
               : isNegative
-                ? 'border-red-400 bg-red-50'
-                : 'border-gray-300 bg-gray-100';
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/30 dark:border-red-700'
+                : 'border-gray-300 bg-gray-100 dark:bg-gray-800 dark:border-gray-700';
 
             console.log('Rendering option:', {
               label: option.label,

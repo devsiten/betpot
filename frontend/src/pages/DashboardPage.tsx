@@ -149,8 +149,8 @@ export function DashboardPage() {
                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-100 to-positive-100 flex items-center justify-center mx-auto mb-6">
                     <Wallet className="w-10 h-10 text-brand-600" />
                 </div>
-                <h1 className="text-2xl font-bold text-text-primary mb-2">Connect Your Wallet</h1>
-                <p className="text-text-secondary">Connect and sign in to view your dashboard</p>
+                <h1 className="text-2xl font-bold text-text-primary dark:text-white mb-2">Connect Your Wallet</h1>
+                <p className="text-text-secondary dark:text-gray-300">Connect and sign in to view your dashboard</p>
             </div>
         );
     }
@@ -160,8 +160,8 @@ export function DashboardPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Dashboard</h1>
-                    <p className="text-text-secondary text-sm sm:text-base">Manage your bets and track winnings</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">Dashboard</h1>
+                    <p className="text-text-secondary dark:text-gray-300 text-sm sm:text-base">Manage your bets and track winnings</p>
                 </div>
 
                 {/* Sign Out Button */}
@@ -187,9 +187,9 @@ export function DashboardPage() {
                                 <Wallet className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                             </div>
                             <div>
-                                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Connected Wallet</p>
+                                <p className="text-xs text-text-muted dark:text-gray-400 uppercase tracking-wider mb-1">Connected Wallet</p>
                                 <div className="flex items-center gap-2">
-                                    <p className="text-lg sm:text-xl font-mono text-text-primary font-medium">
+                                    <p className="text-lg sm:text-xl font-mono text-text-primary dark:text-white font-medium">
                                         {formatAddress(publicKey?.toBase58() || '')}
                                     </p>
                                     <button
@@ -249,7 +249,7 @@ export function DashboardPage() {
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2">
-                                        <p className="text-text-primary font-medium">{username || 'Not set'}</p>
+                                        <p className="text-text-primary dark:text-white font-medium">{username || 'Not set'}</p>
                                         <button
                                             onClick={() => setEditingUsername(true)}
                                             className="p-1.5 rounded-lg hover:bg-background-secondary text-text-muted hover:text-text-primary transition-colors"
@@ -350,7 +350,7 @@ export function DashboardPage() {
                         <Zap className="w-4 h-4 text-positive-600" />
                         <p className="text-xs text-positive-700 uppercase tracking-wider font-medium">Total Bets</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-text-primary">{stats?.totalTickets || 0}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">{stats?.totalTickets || 0}</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-positive-100 to-positive-50 rounded-xl p-4 sm:p-5 border border-positive-200">
@@ -384,7 +384,7 @@ export function DashboardPage() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
                         <div className="flex items-center gap-2">
                             <Ticket className="w-5 h-5 text-brand-600" />
-                            <h2 className="text-lg font-bold text-text-primary">Ticket History</h2>
+                            <h2 className="text-lg font-bold text-text-primary dark:text-white">Ticket History</h2>
                         </div>
                         <span className="text-xs text-text-muted bg-background-secondary px-2 py-1 rounded-full">
                             {filteredTickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''}
