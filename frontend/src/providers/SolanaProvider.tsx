@@ -14,11 +14,11 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
     // Helius RPC endpoint for Devnet - better reliability than public RPC
     const endpoint = 'https://devnet.helius-rpc.com/?api-key=e495db18-fb79-4c7b-9750-5bf08d316aaf';
 
-    // Initialize wallets - ONLY Phantom and Solflare (no auto-detection of other wallets)
+    // Initialize wallets - ONLY Phantom and Solflare
     const wallets = useMemo(
         () => [
             new PhantomWalletAdapter(),
-            new SolflareWalletAdapter(),
+            new SolflareWalletAdapter({ network: 'devnet' as any }),
         ],
         []
     );
