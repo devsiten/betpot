@@ -25,12 +25,46 @@ function ConnectButton() {
   const [showModal, setShowModal] = useState(false);
   const { wallets, select, connect, connecting, wallet } = useWallet();
 
+  // Detect if user is on mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    typeof navigator !== 'undefined' ? navigator.userAgent : ''
+  );
+
+  // Get current page URL for deep link redirect
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://betpot.pages.dev';
+
+  // Deep link URLs for mobile wallets
+  const getDeepLink = (walletName: string) => {
+    const encodedUrl = encodeURIComponent(currentUrl);
+
+    if (walletName === 'Phantom') {
+      // Phantom mobile deep link - opens the dApp browser inside Phantom
+      return `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
+    }
+    if (walletName === 'Solflare') {
+      // Solflare mobile deep link
+      return `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=${encodedUrl}`;
+    }
+    return null;
+  };
+
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
     w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
   );
 
   const handleConnect = async (walletName: string) => {
+    // On mobile, use deep links to open wallet app
+    if (isMobile) {
+      const deepLink = getDeepLink(walletName);
+      if (deepLink) {
+        // Open the wallet app with the current page
+        window.location.href = deepLink;
+        return;
+      }
+    }
+
+    // Desktop: use normal wallet adapter
     try {
       select(walletName as any);
       setShowModal(false);
@@ -48,6 +82,12 @@ function ConnectButton() {
       });
     }
   }, [wallet, connect, connecting]);
+
+  // Mobile wallet options (always show these on mobile even if not "installed")
+  const mobileWallets = [
+    { name: 'Phantom', icon: 'https://phantom.app/img/phantom-icon-purple.png' },
+    { name: 'Solflare', icon: 'https://solflare.com/favicon.ico' },
+  ];
 
   return (
     <>
@@ -75,30 +115,57 @@ function ConnectButton() {
             </div>
 
             <div className="space-y-3">
-              {supportedWallets.length === 0 ? (
-                <p className="text-text-muted text-center py-4">
-                  Please install Phantom or Solflare wallet
-                </p>
+              {isMobile ? (
+                // Mobile: Show wallet options with deep links
+                <>
+                  {mobileWallets.map((mobileWallet) => (
+                    <button
+                      key={mobileWallet.name}
+                      onClick={() => handleConnect(mobileWallet.name)}
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary hover:bg-border-light border border-border transition-all"
+                    >
+                      <img
+                        src={mobileWallet.icon}
+                        alt={mobileWallet.name}
+                        className="w-10 h-10 rounded-lg"
+                      />
+                      <div className="flex-1 text-left">
+                        <p className="text-text-primary font-medium">{mobileWallet.name}</p>
+                        <p className="text-text-muted text-sm">Tap to open app</p>
+                      </div>
+                    </button>
+                  ))}
+                  <p className="text-text-muted text-xs text-center mt-2">
+                    You'll be redirected to your wallet app
+                  </p>
+                </>
               ) : (
-                supportedWallets.map((wallet) => (
-                  <button
-                    key={wallet.adapter.name}
-                    onClick={() => handleConnect(wallet.adapter.name)}
-                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary hover:bg-border-light border border-border transition-all"
-                  >
-                    <img
-                      src={wallet.adapter.icon}
-                      alt={wallet.adapter.name}
-                      className="w-10 h-10 rounded-lg"
-                    />
-                    <div className="flex-1 text-left">
-                      <p className="text-text-primary font-medium">{wallet.adapter.name}</p>
-                      <p className="text-text-muted text-sm">
-                        {wallet.readyState === 'Installed' ? 'Detected' : 'Not installed'}
-                      </p>
-                    </div>
-                  </button>
-                ))
+                // Desktop: Show detected wallets
+                supportedWallets.length === 0 ? (
+                  <p className="text-text-muted text-center py-4">
+                    Please install Phantom or Solflare wallet
+                  </p>
+                ) : (
+                  supportedWallets.map((wallet) => (
+                    <button
+                      key={wallet.adapter.name}
+                      onClick={() => handleConnect(wallet.adapter.name)}
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary hover:bg-border-light border border-border transition-all"
+                    >
+                      <img
+                        src={wallet.adapter.icon}
+                        alt={wallet.adapter.name}
+                        className="w-10 h-10 rounded-lg"
+                      />
+                      <div className="flex-1 text-left">
+                        <p className="text-text-primary font-medium">{wallet.adapter.name}</p>
+                        <p className="text-text-muted text-sm">
+                          {wallet.readyState === 'Installed' ? 'Detected' : 'Not installed'}
+                        </p>
+                      </div>
+                    </button>
+                  ))
+                )
               )}
             </div>
 
@@ -111,6 +178,7 @@ function ConnectButton() {
     </>
   );
 }
+
 
 // Admin wallet addresses (whitelist)
 const ADMIN_WALLETS = [
