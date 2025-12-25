@@ -65,11 +65,11 @@ function StatCard({
       </div>
       <div className="mt-4">
         {loading ? (
-          <div className="h-8 w-24 bg-background-secondary animate-pulse rounded" />
+          <div className="h-8 w-24 bg-background-secondary dark:bg-gray-800 animate-pulse rounded" />
         ) : (
-          <p className="text-3xl font-bold text-text-primary">{value}</p>
+          <p className="text-3xl font-bold text-text-primary dark:text-white">{value}</p>
         )}
-        <p className="text-sm text-text-muted mt-1">{label}</p>
+        <p className="text-sm text-text-muted dark:text-gray-400 mt-1">{label}</p>
       </div>
     </div>
   );
@@ -95,8 +95,8 @@ export function AdminDashboard() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-negative-500 mx-auto mb-4" />
-          <p className="text-text-primary font-semibold mb-2">Failed to load dashboard data</p>
-          <p className="text-text-muted text-sm">Please try refreshing the page</p>
+          <p className="text-text-primary dark:text-white font-semibold mb-2">Failed to load dashboard data</p>
+          <p className="text-text-muted dark:text-gray-400 text-sm">Please try refreshing the page</p>
         </div>
       </div>
     );
@@ -106,8 +106,8 @@ export function AdminDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
-        <p className="text-text-secondary mt-1">Overview of your platform performance</p>
+        <h1 className="text-2xl font-bold text-text-primary dark:text-white">Dashboard</h1>
+        <p className="text-text-secondary dark:text-gray-300 mt-1">Overview of your platform performance</p>
       </div>
 
       {/* Stats Grid */}
