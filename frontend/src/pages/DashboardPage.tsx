@@ -175,10 +175,10 @@ export function DashboardPage() {
             </div>
 
             {/* Wallet Card - Light theme fintech style */}
-            <div className="bg-gradient-to-br from-background-card to-background-secondary rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8 border border-border shadow-card relative overflow-hidden">
+            <div className="bg-gradient-to-br from-background-card to-background-secondary dark:from-gray-900 dark:to-gray-800 rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8 border border-border dark:border-gray-700 shadow-card relative overflow-hidden">
                 {/* Subtle gradient decoration */}
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-100 rounded-full blur-3xl opacity-30" />
-                <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-positive-100 rounded-full blur-3xl opacity-20" />
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-100 dark:bg-brand-900/30 rounded-full blur-3xl opacity-30" />
+                <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-positive-100 dark:bg-positive-900/30 rounded-full blur-3xl opacity-20" />
 
                 <div className="relative">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -345,41 +345,41 @@ export function DashboardPage() {
 
             {/* Stats Grid - Light theme cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div className="bg-gradient-to-br from-positive-100 to-positive-50 rounded-xl p-4 sm:p-5 border border-positive-200">
+                <div className="bg-gradient-to-br from-positive-100 to-positive-50 dark:from-positive-900/30 dark:to-positive-800/30 rounded-xl p-4 sm:p-5 border border-positive-200 dark:border-positive-800">
                     <div className="flex items-center gap-2 mb-2">
-                        <Zap className="w-4 h-4 text-positive-600" />
-                        <p className="text-xs text-positive-700 uppercase tracking-wider font-medium">Total Bets</p>
+                        <Zap className="w-4 h-4 text-positive-600 dark:text-positive-400" />
+                        <p className="text-xs text-positive-700 dark:text-positive-300 uppercase tracking-wider font-medium">Total Bets</p>
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">{stats?.totalTickets || 0}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-positive-100 to-positive-50 rounded-xl p-4 sm:p-5 border border-positive-200">
+                <div className="bg-gradient-to-br from-positive-100 to-positive-50 dark:from-positive-900/30 dark:to-positive-800/30 rounded-xl p-4 sm:p-5 border border-positive-200 dark:border-positive-800">
                     <div className="flex items-center gap-2 mb-2">
-                        <Trophy className="w-4 h-4 text-positive-600" />
-                        <p className="text-xs text-positive-700 uppercase tracking-wider font-medium">Wins</p>
+                        <Trophy className="w-4 h-4 text-positive-600 dark:text-positive-400" />
+                        <p className="text-xs text-positive-700 dark:text-positive-300 uppercase tracking-wider font-medium">Wins</p>
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-positive-600">{stats?.wonTickets || 0}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-negative-100 to-negative-50 rounded-xl p-4 sm:p-5 border border-negative-200">
+                <div className="bg-gradient-to-br from-negative-100 to-negative-50 dark:from-negative-900/30 dark:to-negative-800/30 rounded-xl p-4 sm:p-5 border border-negative-200 dark:border-negative-800">
                     <div className="flex items-center gap-2 mb-2">
-                        <XCircle className="w-4 h-4 text-negative-500" />
-                        <p className="text-xs text-negative-600 uppercase tracking-wider font-medium">Losses</p>
+                        <XCircle className="w-4 h-4 text-negative-500 dark:text-negative-400" />
+                        <p className="text-xs text-negative-600 dark:text-negative-300 uppercase tracking-wider font-medium">Losses</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-negative-500">{stats?.lostTickets || 0}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-negative-500 dark:text-negative-400">{stats?.lostTickets || 0}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-brand-100 to-brand-50 rounded-xl p-4 sm:p-5 border border-brand-200">
+                <div className="bg-gradient-to-br from-brand-100 to-brand-50 dark:from-brand-900/30 dark:to-brand-800/30 rounded-xl p-4 sm:p-5 border border-brand-200 dark:border-brand-800">
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="w-4 h-4 text-brand-600" />
-                        <p className="text-xs text-brand-700 uppercase tracking-wider font-medium">Earnings</p>
+                        <TrendingUp className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+                        <p className="text-xs text-brand-700 dark:text-brand-300 uppercase tracking-wider font-medium">Earnings</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-brand-600">${stats?.totalWinnings?.toFixed(2) || '0.00'}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">${stats?.totalWinnings?.toFixed(2) || '0.00'}</p>
                 </div>
             </div>
 
             {/* Bet History - Light theme table */}
-            <div className="bg-background-card rounded-2xl border border-border overflow-hidden shadow-card">
+            <div className="bg-background-card dark:bg-gray-900 rounded-2xl border border-border dark:border-gray-800 overflow-hidden shadow-card">
                 <div className="p-4 sm:p-5 border-b border-border">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
                         <div className="flex items-center gap-2">

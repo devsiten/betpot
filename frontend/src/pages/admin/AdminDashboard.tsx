@@ -174,8 +174,8 @@ export function AdminDashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Ticket Sales Chart */}
-        <div className="card p-6">
-          <h3 className="text-lg font-semibold text-text-primary mb-4">Ticket Sales (7 Days)</h3>
+        <div className="card p-6 dark:bg-gray-900 dark:border-gray-800">
+          <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-4">Ticket Sales (7 Days)</h3>
           <div className="h-64">
             {isLoading ? (
               <div className="h-full bg-background-secondary animate-pulse rounded-lg" />
@@ -244,8 +244,8 @@ export function AdminDashboard() {
       {/* Recent Activity & Top Events */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <div className="card p-6">
-          <h3 className="text-lg font-semibold text-text-primary mb-4">Recent Admin Activity</h3>
+        <div className="card p-6 dark:bg-gray-900 dark:border-gray-800">
+          <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-4">Recent Admin Activity</h3>
           <div className="space-y-4">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -259,17 +259,17 @@ export function AdminDashboard() {
               ))
             ) : dashboard?.recentActivity?.length ? (
               dashboard.recentActivity.map((log) => (
-                <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-background-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0 border border-brand-200">
-                    <Calendar className="w-5 h-5 text-brand-600" />
+                <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0 border border-brand-200 dark:border-brand-700">
+                    <Calendar className="w-5 h-5 text-brand-600 dark:text-brand-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-text-primary">
+                    <p className="text-sm text-text-primary dark:text-white">
                       <span className="font-medium">{log.admin?.email || 'Unknown'}</span>
                       {' '}
-                      <span className="text-text-secondary">{log.action.replace(/_/g, ' ').toLowerCase()}</span>
+                      <span className="text-text-secondary dark:text-gray-400">{log.action.replace(/_/g, ' ').toLowerCase()}</span>
                     </p>
-                    <p className="text-xs text-text-muted mt-1">
+                    <p className="text-xs text-text-muted dark:text-gray-500 mt-1">
                       {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
                     </p>
                   </div>
@@ -282,8 +282,8 @@ export function AdminDashboard() {
         </div>
 
         {/* Top Events */}
-        <div className="card p-6">
-          <h3 className="text-lg font-semibold text-text-primary mb-4">Active Events</h3>
+        <div className="card p-6 dark:bg-gray-900 dark:border-gray-800">
+          <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-4">Active Events</h3>
           <div className="space-y-4">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -295,10 +295,10 @@ export function AdminDashboard() {
               dashboard.topEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-background-secondary transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-text-primary truncate">{event.title}</p>
+                    <p className="text-sm font-medium text-text-primary dark:text-white truncate">{event.title}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={clsx(
                         'badge text-xs',
@@ -308,16 +308,16 @@ export function AdminDashboard() {
                       )}>
                         {event.status}
                       </span>
-                      <span className="text-xs text-text-muted">
+                      <span className="text-xs text-text-muted dark:text-gray-400">
                         {event.ticketCount || 0} tickets
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-text-primary">
+                    <p className="text-sm font-medium text-text-primary dark:text-white">
                       ${(event.totalPool || 0).toLocaleString()}
                     </p>
-                    <p className="text-xs text-text-muted">pool</p>
+                    <p className="text-xs text-text-muted dark:text-gray-400">pool</p>
                   </div>
                 </div>
               ))
@@ -329,20 +329,20 @@ export function AdminDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="card p-6">
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Ticket Stats</h3>
+      <div className="card p-6 dark:bg-gray-900 dark:border-gray-800">
+        <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-4">Ticket Stats</h3>
         <div className="grid grid-cols-3 gap-6">
           <div className="text-center">
-            <p className="text-3xl font-bold text-text-primary">{dashboard?.ticketStats.today || 0}</p>
-            <p className="text-sm text-text-muted mt-1">Today</p>
+            <p className="text-3xl font-bold text-text-primary dark:text-white">{dashboard?.ticketStats.today || 0}</p>
+            <p className="text-sm text-text-muted dark:text-gray-400 mt-1">Today</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl font-bold text-text-primary">{dashboard?.ticketStats.week || 0}</p>
-            <p className="text-sm text-text-muted mt-1">This Week</p>
+            <p className="text-3xl font-bold text-text-primary dark:text-white">{dashboard?.ticketStats.week || 0}</p>
+            <p className="text-sm text-text-muted dark:text-gray-400 mt-1">This Week</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl font-bold text-text-primary">{dashboard?.ticketStats.month || 0}</p>
-            <p className="text-sm text-text-muted mt-1">This Month</p>
+            <p className="text-3xl font-bold text-text-primary dark:text-white">{dashboard?.ticketStats.month || 0}</p>
+            <p className="text-sm text-text-muted dark:text-gray-400 mt-1">This Month</p>
           </div>
         </div>
       </div>

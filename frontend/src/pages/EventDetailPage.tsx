@@ -466,7 +466,7 @@ export function EventDetailPage() {
 
       {/* User's Tickets */}
       {userTickets.length > 0 && (
-        <div className="card p-6">
+        <div className="card p-6 dark:bg-gray-900 dark:border-gray-800">
           <h2 className="text-lg font-semibold text-text-primary dark:text-white mb-4">Your Tickets</h2>
           <div className="space-y-3">
             {userTickets.map((ticket) => (
@@ -474,9 +474,9 @@ export function EventDetailPage() {
                 key={ticket.id}
                 className={clsx(
                   'p-4 rounded-lg border',
-                  ticket.status === 'won' && 'bg-green-500/10 border-green-500/50',
-                  ticket.status === 'lost' && 'bg-red-500/10 border-red-500/50',
-                  ticket.status === 'active' && 'bg-gray-100 border-gray-300'
+                  ticket.status === 'won' && 'bg-green-500/10 dark:bg-green-900/30 border-green-500/50 dark:border-green-700',
+                  ticket.status === 'lost' && 'bg-red-500/10 dark:bg-red-900/30 border-red-500/50 dark:border-red-700',
+                  ticket.status === 'active' && 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700'
                 )}
               >
                 <div className="flex items-center justify-between">
