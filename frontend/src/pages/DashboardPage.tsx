@@ -218,10 +218,10 @@ export function DashboardPage() {
                     </div>
 
                     {/* Username Section */}
-                    <div className="mt-6 pt-6 border-t border-border">
+                    <div className="mt-6 pt-6 border-t border-border dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div className="flex-1">
-                                <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Display Name</p>
+                                <p className="text-xs text-text-muted dark:text-gray-400 uppercase tracking-wider mb-2">Display Name</p>
                                 {editingUsername ? (
                                     <div className="flex items-center gap-2">
                                         <input
@@ -229,7 +229,7 @@ export function DashboardPage() {
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value)}
                                             placeholder="Enter display name"
-                                            className="bg-background-secondary border border-border rounded-lg px-3 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 w-full max-w-xs text-sm"
+                                            className="bg-background-secondary dark:bg-gray-800 border border-border dark:border-gray-700 rounded-lg px-3 py-2 text-text-primary dark:text-white placeholder-text-muted dark:placeholder-gray-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 w-full max-w-xs text-sm"
                                         />
                                         <button
                                             onClick={() => {
@@ -252,7 +252,7 @@ export function DashboardPage() {
                                         <p className="text-text-primary dark:text-white font-medium">{username || 'Not set'}</p>
                                         <button
                                             onClick={() => setEditingUsername(true)}
-                                            className="p-1.5 rounded-lg hover:bg-background-secondary text-text-muted hover:text-text-primary transition-colors"
+                                            className="p-1.5 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-700 text-text-muted dark:text-gray-400 hover:text-text-primary dark:hover:text-white transition-colors"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </button>
