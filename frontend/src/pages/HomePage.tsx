@@ -44,7 +44,7 @@ export function HomePage() {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             {/* Left - Hero Text */}
             <div className="flex-1 max-w-xl">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary leading-tight mb-6 uppercase">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary dark:text-white leading-tight mb-6 uppercase">
                 <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-positive-500 bg-clip-text text-transparent drop-shadow-lg">
                   BET ON WHAT
                 </span>
@@ -53,7 +53,7 @@ export function HomePage() {
                   YOU BELIEVE IN
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl text-text-secondary mb-8 font-medium backdrop-blur-sm bg-background-card/30 p-4 rounded-xl border border-border/50 shadow-soft">
+              <p className="text-lg sm:text-xl text-text-secondary dark:text-gray-300 mb-8 font-medium backdrop-blur-sm bg-background-card/30 dark:bg-gray-800/50 p-4 rounded-xl border border-border/50 dark:border-gray-700/50 shadow-soft">
                 The decentralized jackpot platform. Browse live markets, discuss events with the community, and place your bets on featured jackpots.
               </p>
 
@@ -70,10 +70,10 @@ export function HomePage() {
 
             {/* Right - Ending Soon */}
             <div className="flex-1 max-w-md">
-              <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 shadow-elevated">
+              <div className="bg-gradient-to-br from-background-card/80 to-background-secondary/80 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-border/50 dark:border-gray-700/50 shadow-elevated">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-base font-black text-brand-600 uppercase tracking-wider drop-shadow-sm flex items-center gap-2"><Zap className="w-4 h-4" /> Ending Soon</h3>
-                  <Link to="/jackpot" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+                  <h3 className="text-base font-black text-brand-600 dark:text-brand-400 uppercase tracking-wider drop-shadow-sm flex items-center gap-2"><Zap className="w-4 h-4" /> Ending Soon</h3>
+                  <Link to="/jackpot" className="text-xs text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 font-medium">
                     View All →
                   </Link>
                 </div>

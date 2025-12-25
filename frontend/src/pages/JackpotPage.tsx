@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, ArrowRight, Zap } from 'lucide-react';
+import { Trophy, ArrowRight, Zap, Clock } from 'lucide-react';
 import { api } from '@/services/api';
+import { format } from 'date-fns';
 import { EventCountdown } from '@/components/CountdownTimer';
 
 export function JackpotPage() {
@@ -68,9 +69,15 @@ export function JackpotPage() {
                             </span>
                         </div>
 
-                        <h3 className="text-lg font-bold text-black group-hover:text-brand-600 transition-colors mb-3 line-clamp-2">
+                        <h3 className="text-lg font-bold text-text-primary dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors mb-3 line-clamp-2">
                             {jackpot.title}
                         </h3>
+
+                        {/* Event Time */}
+                        <div className="flex items-center gap-2 text-text-secondary dark:text-gray-300 text-sm font-medium mb-2">
+                            <Clock className="w-4 h-4" />
+                            {format(new Date(jackpot.eventTime), 'MMM dd, yyyy HH:mm')}
+                        </div>
 
                         {/* Countdown Timer */}
                         <div className="mb-4">
@@ -82,12 +89,12 @@ export function JackpotPage() {
                             />
                         </div>
 
-                        <div className="bg-background-secondary rounded-lg p-4 mb-4">
-                            <p className="text-xs text-gray-600 font-medium mb-1">Prize Pool</p>
-                            <p className="text-2xl font-bold text-black">
+                        <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-4 mb-4">
+                            <p className="text-xs text-text-muted dark:text-gray-400 font-medium mb-1">Prize Pool</p>
+                            <p className="text-2xl font-bold text-text-primary dark:text-white">
                                 ${(jackpot.totalPool || 0).toLocaleString()}
                             </p>
-                            <p className="text-xs text-gray-600 font-medium mt-1">
+                            <p className="text-xs text-text-muted dark:text-gray-400 font-medium mt-1">
                                 {jackpot.ticketCount || 0} bets
                             </p>
                         </div>
@@ -106,7 +113,7 @@ export function JackpotPage() {
                                         ? 'bg-positive-100 border-positive-300'
                                         : 'bg-negative-100 border-negative-300';
                                 const textColor = isDraw
-                                    ? 'text-gray-700'
+                                    ? 'text-text-secondary dark:text-gray-300'
                                     : isPositive
                                         ? 'text-positive-700'
                                         : 'text-negative-700';
@@ -114,7 +121,7 @@ export function JackpotPage() {
                                 return (
                                     <div key={option.id} className={`rounded-lg p-2 text-center border ${bgColor}`}>
                                         <p className={`text-sm font-medium truncate ${textColor}`}>{option.label}</p>
-                                        <p className="text-xs text-gray-600">{option.ticketsSold || 0} bets</p>
+                                        <p className="text-xs text-text-muted dark:text-gray-400">{option.ticketsSold || 0} bets</p>
                                     </div>
                                 );
                             })}

@@ -507,7 +507,7 @@ export function AdminMarkets() {
                             <button
                                 onClick={confirmJackpot}
                                 disabled={createJackpotMutation.isPending}
-                                className="btn flex-1 bg-gradient-to-r from-yellow-500 to-orange-600 text-black font-bold"
+                                className="btn flex-1 bg-gradient-to-r from-yellow-500 to-orange-600 text-text-primary dark:text-white font-bold"
                             >
                                 {createJackpotMutation.isPending ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />

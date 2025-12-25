@@ -507,13 +507,13 @@ export function MainLayout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-background-card py-6">
+      <footer className="border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-text-muted font-medium">
+            <p className="text-xs text-text-muted dark:text-gray-400 font-medium">
               © {new Date().getFullYear()} BETPOT PROTOCOL
             </p>
-            <span className="text-xs text-brand-500 font-medium px-2 py-1 bg-brand-50 rounded">DEVNET</span>
+            <span className="text-xs text-brand-500 dark:text-brand-400 font-medium px-2 py-1 bg-brand-50 dark:bg-brand-900/30 rounded">DEVNET</span>
           </div>
         </div>
       </footer>
