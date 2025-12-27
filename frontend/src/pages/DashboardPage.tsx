@@ -26,23 +26,26 @@ export function DashboardPage() {
 
     // Fetch user stats - works with just wallet connection
     const { data: statsData } = useQuery({
-        queryKey: ['user-stats'],
+        queryKey: ['user-stats', publicKey?.toBase58()],
         queryFn: () => api.getMyStats(),
-        enabled: connected,
+        enabled: connected && !!publicKey,
+        retry: 2,
     });
 
     // Fetch user tickets (bet history)
     const { data: ticketsData, isLoading } = useQuery({
-        queryKey: ['user-tickets'],
+        queryKey: ['user-tickets', publicKey?.toBase58()],
         queryFn: () => api.getMyTickets({ limit: 50 }),
-        enabled: connected,
+        enabled: connected && !!publicKey,
+        retry: 2,
     });
 
     // Fetch claimable tickets
     const { data: claimableData, refetch: refetchClaimable } = useQuery({
-        queryKey: ['claimable-tickets'],
+        queryKey: ['claimable-tickets', publicKey?.toBase58()],
         queryFn: () => api.getClaimableTickets(),
-        enabled: connected,
+        enabled: connected && !!publicKey,
+        retry: 2,
     });
 
     const stats = statsData?.data;
@@ -374,7 +377,7 @@ export function DashboardPage() {
                         <DollarSign className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                         <p className="text-xs text-brand-700 dark:text-brand-300 uppercase tracking-wider font-medium">Total Volume</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">${stats?.totalSpent?.toFixed(2) || '0.00'}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">${(Number(stats?.totalSpent) || 0).toFixed(2)}</p>
                 </div>
             </div>
 
