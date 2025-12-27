@@ -23,66 +23,83 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Connect Button using wallet adapter's built-in modal for better compatibility
+// Connect Button with simplified wallet connection
 function ConnectButton() {
-  const { select, connect, connecting, wallet, connected, wallets } = useWallet();
+  const { select, connect, connecting, connected, wallets, wallet } = useWallet();
   const [showModal, setShowModal] = useState(false);
-
 
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
     w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
   );
 
-  // Track if user explicitly selected a wallet
-  const [userSelectedWallet, setUserSelectedWallet] = useState(false);
-
   const handleWalletSelect = async (walletName: string) => {
     try {
       console.log('Selecting wallet:', walletName);
       const selectedWallet = supportedWallets.find(w => w.adapter.name === walletName);
 
-      if (selectedWallet) {
-        // First select the wallet
-        select(selectedWallet.adapter.name as any);
-        setShowModal(false);
-        setUserSelectedWallet(true);
-
-        // Try direct adapter connect immediately (this triggers the popup)
-        try {
-          console.log('Attempting direct adapter connect...');
-          await selectedWallet.adapter.connect();
-          console.log('Direct connect successful');
-        } catch (directErr) {
-          console.log('Direct connect failed, trying standard connect...', directErr);
-          // Fallback to standard connect with longer delay
-          setTimeout(async () => {
-            try {
-              await connect();
-              console.log('Standard connect successful');
-            } catch (err) {
-              console.error('Standard connect failed:', err);
-              toast.error('Failed to open wallet. Please try clicking the wallet extension icon directly.');
-            }
-          }, 300);
-        }
+      if (!selectedWallet) {
+        toast.error('Wallet not found. Please install it first.');
+        return;
       }
-    } catch (error) {
+
+      // Check if wallet is installed
+      if (selectedWallet.readyState !== 'Installed') {
+        toast.error(`${walletName} is not installed. Please install it first.`);
+        window.open(
+          walletName === 'Phantom' ? 'https://phantom.app/' : 'https://solflare.com/',
+          '_blank'
+        );
+        return;
+      }
+
+      setShowModal(false);
+
+      // Simple approach: just select and connect
+      select(selectedWallet.adapter.name as any);
+
+      // Wait a bit for selection to register, then connect
+      setTimeout(async () => {
+        try {
+          await connect();
+          console.log('Wallet connected successfully');
+        } catch (err: any) {
+          // User likely rejected, don't show error for that
+          if (!err.message?.includes('rejected')) {
+            console.error('Connect error:', err);
+          }
+        }
+      }, 100);
+
+    } catch (error: any) {
       console.error('Wallet select error:', error);
-      toast.error('Failed to connect wallet. Please try again.');
+      // Only show error if it's not a user rejection
+      if (!error.message?.includes('rejected')) {
+        toast.error('Failed to connect wallet. Please try again.');
+      }
     }
   };
 
-  // Only auto-connect if user explicitly selected a wallet in this session
+  // Auto-connect if wallet was previously selected and is ready
   useEffect(() => {
-    if (wallet && !connecting && !connected && userSelectedWallet) {
-      console.log('Auto-connecting to:', wallet.adapter.name);
-      connect().catch((err) => {
-        console.error('Auto-connect failed:', err);
-        setUserSelectedWallet(false); // Reset on failure
-      });
+    if (wallet && !connecting && !connected && wallet.readyState === 'Installed') {
+      // Only auto-connect if local storage says we were connected before
+      const wasConnected = localStorage.getItem('walletConnected') === 'true';
+      if (wasConnected) {
+        connect().catch(() => {
+          // Silent fail - user can manually reconnect
+          localStorage.removeItem('walletConnected');
+        });
+      }
     }
-  }, [wallet, connect, connecting, connected, userSelectedWallet]);
+  }, [wallet, connect, connecting, connected]);
+
+  // Track connection state in localStorage
+  useEffect(() => {
+    if (connected) {
+      localStorage.setItem('walletConnected', 'true');
+    }
+  }, [connected]);
 
   if (connected) {
     return null; // Don't show button if already connected
