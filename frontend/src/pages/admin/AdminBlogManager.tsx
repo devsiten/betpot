@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Image, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Image, Save, X, Upload, Loader2 } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -23,6 +23,8 @@ export function AdminBlogManager() {
     const queryClient = useQueryClient();
     const [showModal, setShowModal] = useState(false);
     const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -250,23 +252,62 @@ export function AdminBlogManager() {
 
                             <div>
                                 <label className="block text-sm font-medium text-text-secondary dark:text-gray-400 mb-2">
-                                    Image URL (optional)
+                                    Image (optional)
                                 </label>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 items-center">
                                     <input
-                                        type="url"
-                                        value={formData.imageUrl}
-                                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                                        className="input flex-1"
-                                        placeholder="https://example.com/image.jpg"
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+
+                                            setUploading(true);
+                                            try {
+                                                const result = await api.uploadImage(file);
+                                                if (result.success && result.data) {
+                                                    setFormData({ ...formData, imageUrl: result.data.url });
+                                                    toast.success('Image uploaded!');
+                                                } else {
+                                                    toast.error('Upload failed');
+                                                }
+                                            } catch (err) {
+                                                toast.error('Upload failed');
+                                            } finally {
+                                                setUploading(false);
+                                            }
+                                        }}
                                     />
-                                    <div className="w-12 h-10 rounded border border-border dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploading}
+                                        className="btn btn-ghost flex items-center gap-2"
+                                    >
+                                        {uploading ? (
+                                            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
+                                        ) : (
+                                            <><Upload className="w-4 h-4" /> Upload Image</>
+                                        )}
+                                    </button>
+                                    <div className="w-16 h-12 rounded border border-border dark:border-gray-700 flex items-center justify-center overflow-hidden">
                                         {formData.imageUrl ? (
                                             <img src={formData.imageUrl} alt="" className="w-full h-full object-cover" />
                                         ) : (
-                                            <Image className="w-4 h-4 text-text-muted" />
+                                            <Image className="w-5 h-5 text-text-muted" />
                                         )}
                                     </div>
+                                    {formData.imageUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                                            className="text-negative-500 text-sm"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

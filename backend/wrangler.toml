@@ -16,6 +16,10 @@ binding = "DB"
 database_name = "betpot-db"
 database_id = "a9cdb106-90ba-4f21-a9e8-d9b9eeca65cf"
 
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "betpot-images"
+
 [[durable_objects.bindings]]
 name = "EVENTS_DO"
 class_name = "EventsDurableObject"

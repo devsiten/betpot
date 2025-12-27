@@ -7,6 +7,9 @@ export interface Env {
   // KV Namespace
   CACHE: KVNamespace;
 
+  // R2 Bucket for images
+  IMAGES: R2Bucket;
+
   // Durable Objects
   EVENTS_DO: DurableObjectNamespace;
 

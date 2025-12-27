@@ -17,6 +17,7 @@ import { chatRoutes } from './routes/chat';
 import { notificationsRoutes } from './routes/notifications';
 import { blogRoutes } from './routes/blog';
 import { newsRoutes } from './routes/news';
+import { uploadRoutes } from './routes/upload';
 
 const app = new Hono<AppContext>();
 
@@ -82,6 +83,7 @@ app.route('/api/chat', chatRoutes);
 app.route('/api/notifications', notificationsRoutes);
 app.route('/api/blog', blogRoutes);
 app.route('/api/news', newsRoutes);
+app.route('/api/upload', uploadRoutes);
 
 // ============================================================================
 // ERROR HANDLING

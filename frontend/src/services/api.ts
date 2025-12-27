@@ -640,6 +640,22 @@ class ApiService {
     const { data } = await this.client.delete<ApiResponse<any>>(`/blog/admin/${id}`);
     return data;
   }
+
+  // ============================================================================
+  // IMAGE UPLOAD
+  // ============================================================================
+
+  async uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const { data } = await this.client.post<ApiResponse<{ url: string; filename: string }>>(`/upload/image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  }
 }
 
 export const api = new ApiService();
