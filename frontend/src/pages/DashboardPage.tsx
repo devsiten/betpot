@@ -356,25 +356,25 @@ export function DashboardPage() {
                 <div className="bg-gradient-to-br from-positive-100 to-positive-50 dark:from-positive-900/30 dark:to-positive-800/30 rounded-xl p-4 sm:p-5 border border-positive-200 dark:border-positive-800">
                     <div className="flex items-center gap-2 mb-2">
                         <Trophy className="w-4 h-4 text-positive-600 dark:text-positive-400" />
-                        <p className="text-xs text-positive-700 dark:text-positive-300 uppercase tracking-wider font-medium">Wins</p>
+                        <p className="text-xs text-positive-700 dark:text-positive-300 uppercase tracking-wider font-medium">Total Wins</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-positive-600">{stats?.wonTickets || 0}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-positive-600">{(stats?.wonTickets || 0) + (stats?.claimedTickets || 0)}</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-negative-100 to-negative-50 dark:from-negative-900/30 dark:to-negative-800/30 rounded-xl p-4 sm:p-5 border border-negative-200 dark:border-negative-800">
                     <div className="flex items-center gap-2 mb-2">
                         <XCircle className="w-4 h-4 text-negative-500 dark:text-negative-400" />
-                        <p className="text-xs text-negative-600 dark:text-negative-300 uppercase tracking-wider font-medium">Losses</p>
+                        <p className="text-xs text-negative-600 dark:text-negative-300 uppercase tracking-wider font-medium">Total Losses</p>
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-negative-500 dark:text-negative-400">{stats?.lostTickets || 0}</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-brand-100 to-brand-50 dark:from-brand-900/30 dark:to-brand-800/30 rounded-xl p-4 sm:p-5 border border-brand-200 dark:border-brand-800">
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-                        <p className="text-xs text-brand-700 dark:text-brand-300 uppercase tracking-wider font-medium">Earnings</p>
+                        <DollarSign className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+                        <p className="text-xs text-brand-700 dark:text-brand-300 uppercase tracking-wider font-medium">Total Volume</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">${stats?.totalWinnings?.toFixed(2) || '0.00'}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">${stats?.totalSpent?.toFixed(2) || '0.00'}</p>
                 </div>
             </div>
 

@@ -315,6 +315,11 @@ ticketsRoutes.get('/my-stats', async (c) => {
   const db = c.get('db');
   const user = c.get('user')!;
 
+  // Query by userId OR walletAddress (handles both auth methods)
+  const userCondition = user.walletAddress
+    ? or(eq(tickets.userId, user.id), eq(tickets.walletAddress, user.walletAddress))
+    : eq(tickets.userId, user.id);
+
   const stats = await db.select({
     totalTickets: count(),
     totalSpent: sum(tickets.purchasePrice),
@@ -324,7 +329,7 @@ ticketsRoutes.get('/my-stats', async (c) => {
     claimedTickets: sql<number>`SUM(CASE WHEN ${tickets.status} = 'claimed' THEN 1 ELSE 0 END)`,
     totalWinnings: sql<number>`SUM(CASE WHEN ${tickets.status} IN ('won', 'claimed') THEN ${tickets.payoutAmount} ELSE 0 END)`,
     unclaimedWinnings: sql<number>`SUM(CASE WHEN ${tickets.status} = 'won' AND ${tickets.claimedAt} IS NULL THEN ${tickets.payoutAmount} ELSE 0 END)`,
-  }).from(tickets).where(eq(tickets.userId, user.id));
+  }).from(tickets).where(userCondition);
 
   return c.json({ success: true, data: stats[0] });
 });
