@@ -11,8 +11,8 @@ dist/
 .env.local
 .dev.vars
 
-# Backend - temporarily allowing access for development
-# backend/
+# Backend - DO NOT PUSH TO GITHUB
+backend/
 
 # IDE
 .vscode/
