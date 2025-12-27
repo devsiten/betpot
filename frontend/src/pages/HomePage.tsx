@@ -149,7 +149,7 @@ export function HomePage() {
     </div>
   );
 
-  // Render prediction card (Yes/No format) - same as old trending
+  // Render prediction card (Yes/No button format)
   const renderPredictionCard = (event: any) => {
     // Get options - handle both array and nested formats
     let options = event.options || [];
@@ -199,22 +199,30 @@ export function HomePage() {
             {event.title}
           </h4>
 
-          {/* Options */}
+          {/* Yes/No Button Format (instead of progress bars) */}
           {options.length > 0 && (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {options.slice(0, 2).map((opt: any, idx: number) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <div className="flex-1 bg-background-secondary rounded-full h-2 overflow-hidden">
-                    <div
-                      className={clsx(
-                        'h-full rounded-full',
-                        idx === 0 ? 'bg-positive-500' : 'bg-negative-400'
-                      )}
-                      style={{ width: `${opt.percentage}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-text-primary w-12 text-right">
-                    {opt.label === 'Yes' ? '✓' : opt.label === 'No' ? '✗' : ''} {opt.percentage}%
+                <div
+                  key={idx}
+                  className={clsx(
+                    'p-3 rounded-lg border text-center transition-all hover:scale-[1.02]',
+                    idx === 0
+                      ? 'bg-positive-50 dark:bg-positive-900/30 border-positive-300 dark:border-positive-700'
+                      : 'bg-negative-50 dark:bg-negative-900/30 border-negative-300 dark:border-negative-700'
+                  )}
+                >
+                  <span className={clsx(
+                    'block text-xs font-bold uppercase mb-1',
+                    idx === 0 ? 'text-positive-700 dark:text-positive-400' : 'text-negative-600 dark:text-negative-400'
+                  )}>
+                    {opt.label === 'Yes' ? '✓ Yes' : opt.label === 'No' ? '✗ No' : opt.label}
+                  </span>
+                  <span className={clsx(
+                    'block text-lg font-black',
+                    idx === 0 ? 'text-positive-600 dark:text-positive-300' : 'text-negative-500 dark:text-negative-300'
+                  )}>
+                    {opt.percentage}%
                   </span>
                 </div>
               ))}
@@ -224,6 +232,7 @@ export function HomePage() {
       </div>
     );
   };
+
 
   // Render LIVE match card (with scores)
   const renderLiveCard = (event: any) => (
