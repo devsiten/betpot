@@ -15,7 +15,7 @@ export function DashboardPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { publicKey, connected, disconnect, signMessage } = useWallet();
-    const { logout, isAuthenticated } = useAuthStore();
+    const { logout } = useAuthStore();
     const [editingUsername, setEditingUsername] = useState(false);
     const [username, setUsername] = useState('');
     const [copied, setCopied] = useState(false);
