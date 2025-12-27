@@ -37,6 +37,7 @@ export function DashboardPage() {
     const [searchTicketId, setSearchTicketId] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [isClaiming, setIsClaiming] = useState(false);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'won' | 'lost' | 'claimed' | 'refunded'>('all');
 
     // Fetch user stats - works with just wallet connection
     const { data: statsData } = useQuery({
@@ -108,10 +109,12 @@ export function DashboardPage() {
         }
     };
 
-    // Filter tickets by search
-    const filteredTickets = searchTicketId.trim()
-        ? tickets.filter(ticket => ticket.id.toLowerCase().includes(searchTicketId.toLowerCase()))
-        : tickets;
+    // Filter tickets by search and status
+    const filteredTickets = tickets.filter(ticket => {
+        const matchesSearch = !searchTicketId.trim() || ticket.id.toLowerCase().includes(searchTicketId.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
     // Pagination
     const totalPages = Math.ceil(filteredTickets.length / TICKETS_PER_PAGE);
@@ -451,6 +454,42 @@ export function DashboardPage() {
                         <span className="text-xs text-text-muted bg-background-secondary px-2 py-1 rounded-full">
                             {filteredTickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''}
                         </span>
+                    </div>
+
+                    {/* Status Filter Tabs */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {[
+                            { value: 'all', label: 'All', color: 'bg-gray-500' },
+                            { value: 'active', label: 'Active', color: 'bg-blue-500' },
+                            { value: 'won', label: 'Won', color: 'bg-positive-500' },
+                            { value: 'lost', label: 'Lost', color: 'bg-negative-500' },
+                            { value: 'claimed', label: 'Claimed', color: 'bg-purple-500' },
+                            { value: 'refunded', label: 'Refunded', color: 'bg-yellow-500' },
+                        ].map(tab => {
+                            const count = tab.value === 'all'
+                                ? tickets.length
+                                : tickets.filter(t => t.status === tab.value).length;
+                            return (
+                                <button
+                                    key={tab.value}
+                                    onClick={() => { setStatusFilter(tab.value as any); setCurrentPage(1); }}
+                                    className={clsx(
+                                        'px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5',
+                                        statusFilter === tab.value
+                                            ? `${tab.color} text-white shadow-md`
+                                            : 'bg-background-secondary text-text-muted hover:text-text-primary border border-border'
+                                    )}
+                                >
+                                    {tab.label}
+                                    <span className={clsx(
+                                        'px-1.5 py-0.5 rounded-full text-xs',
+                                        statusFilter === tab.value ? 'bg-white/20' : 'bg-background-tertiary'
+                                    )}>
+                                        {count}
+                                    </span>
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Search Input */}
