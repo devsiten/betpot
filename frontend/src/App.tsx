@@ -17,6 +17,7 @@ import { EventsPage } from '@/pages/EventsPage';
 import { EventDetailPage } from '@/pages/EventDetailPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { JackpotPage } from '@/pages/JackpotPage';
+import { JackpotResultsPage } from '@/pages/JackpotResultsPage';
 import { TestnetGuidePage } from '@/pages/TestnetGuidePage';
 import { EventChatPage } from '@/pages/EventChatPage';
 import { HowItWorksPage } from '@/pages/HowItWorksPage';
@@ -131,6 +132,7 @@ function AppContent() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/jackpot" element={<JackpotPage />} />
+        <Route path="/jackpot/results" element={<JackpotResultsPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
         <Route path="/dashboard" element={<AdminDashboardWrapper />} />

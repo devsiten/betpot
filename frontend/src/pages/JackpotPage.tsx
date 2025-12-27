@@ -48,7 +48,15 @@ export function JackpotPage() {
                     Featured Jackpots ({jackpots.length})
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2">Active Jackpots</h1>
-                <p className="text-text-secondary">Pick your winner and join the prize pool</p>
+                <p className="text-text-secondary mb-4">Pick your winner and join the prize pool</p>
+                <Link
+                    to="/jackpot/results"
+                    className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium text-sm"
+                >
+                    <Trophy className="w-4 h-4" />
+                    View Recent Results
+                    <ArrowRight className="w-4 h-4" />
+                </Link>
             </div>
 
             {/* Jackpots Grid */}

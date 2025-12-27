@@ -130,6 +130,11 @@ class ApiService {
     return data;
   }
 
+  async getJackpotResults() {
+    const { data } = await this.client.get<ApiResponse<any[]>>('/events/jackpot/results');
+    return data;
+  }
+
   // ========== EXTERNAL SPORTS API ==========
 
   async getExternalSports() {
