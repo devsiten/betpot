@@ -6,11 +6,16 @@ import { api } from '@/services/api';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-// Sports categories from The Odds API
+// Sports categories from The Odds API - updated with UEFA leagues
 const sportCategories = [
     { key: 'soccer_epl', label: 'Premier League' },
     { key: 'soccer_uefa_champs_league', label: 'Champions League' },
+    { key: 'soccer_uefa_europa_league', label: 'Europa League' },
+    { key: 'soccer_uefa_europa_conference_league', label: 'Conference League' },
     { key: 'soccer_spain_la_liga', label: 'La Liga' },
+    { key: 'soccer_germany_bundesliga', label: 'Bundesliga' },
+    { key: 'soccer_italy_serie_a', label: 'Serie A' },
+    { key: 'soccer_france_ligue_one', label: 'Ligue 1' },
     { key: 'basketball_nba', label: 'NBA' },
     { key: 'americanfootball_nfl', label: 'NFL' },
     { key: 'mma_mixed_martial_arts', label: 'MMA/UFC' },
