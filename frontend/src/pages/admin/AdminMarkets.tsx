@@ -374,10 +374,10 @@ export function AdminMarkets() {
 
             {/* Events Grid */}
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="card p-6">
-                            <div className="h-40 bg-white/5 animate-pulse rounded-lg" />
+                            <div className="h-40 bg-gray-200 dark:bg-white/5 animate-pulse rounded-lg" />
                         </div>
                     ))}
                 </div>
@@ -388,7 +388,7 @@ export function AdminMarkets() {
                     <p className="text-text-secondary text-sm mt-1 font-mono">Try selecting a different sport</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {externalEvents.slice(0, 24).map((event: any) => (
                         <div
                             key={event.id}
