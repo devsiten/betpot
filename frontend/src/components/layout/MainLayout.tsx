@@ -23,158 +23,29 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Connect Button with simplified wallet connection
+// Use the official Solana wallet adapter button for maximum stability
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+
+// Styled wrapper for the wallet button to match our design
 function ConnectButton() {
-  const { select, connect, connecting, connected, wallets, wallet } = useWallet();
-  const [showModal, setShowModal] = useState(false);
-
-  // Filter to only Phantom and Solflare
-  const supportedWallets = wallets.filter(
-    w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
-  );
-
-  const handleWalletSelect = async (walletName: string) => {
-    try {
-      console.log('Selecting wallet:', walletName);
-      const selectedWallet = supportedWallets.find(w => w.adapter.name === walletName);
-
-      if (!selectedWallet) {
-        toast.error('Wallet not found. Please install it first.');
-        return;
-      }
-
-      // Check if wallet is installed
-      if (selectedWallet.readyState !== 'Installed') {
-        toast.error(`${walletName} is not installed. Please install it first.`);
-        window.open(
-          walletName === 'Phantom' ? 'https://phantom.app/' : 'https://solflare.com/',
-          '_blank'
-        );
-        return;
-      }
-
-      setShowModal(false);
-
-      // Simple approach: just select and connect
-      select(selectedWallet.adapter.name as any);
-
-      // Wait a bit for selection to register, then connect
-      setTimeout(async () => {
-        try {
-          await connect();
-          console.log('Wallet connected successfully');
-        } catch (err: any) {
-          // User likely rejected, don't show error for that
-          if (!err.message?.includes('rejected')) {
-            console.error('Connect error:', err);
-          }
-        }
-      }, 100);
-
-    } catch (error: any) {
-      console.error('Wallet select error:', error);
-      // Only show error if it's not a user rejection
-      if (!error.message?.includes('rejected')) {
-        toast.error('Failed to connect wallet. Please try again.');
-      }
-    }
-  };
-
-  // Auto-connect if wallet was previously selected and is ready
-  useEffect(() => {
-    if (wallet && !connecting && !connected && wallet.readyState === 'Installed') {
-      // Only auto-connect if local storage says we were connected before
-      const wasConnected = localStorage.getItem('walletConnected') === 'true';
-      if (wasConnected) {
-        connect().catch(() => {
-          // Silent fail - user can manually reconnect
-          localStorage.removeItem('walletConnected');
-        });
-      }
-    }
-  }, [wallet, connect, connecting, connected]);
-
-  // Track connection state in localStorage
-  useEffect(() => {
-    if (connected) {
-      localStorage.setItem('walletConnected', 'true');
-    }
-  }, [connected]);
+  const { connected } = useWallet();
 
   if (connected) {
-    return null; // Don't show button if already connected
+    return null; // Don't show if connected - we handle connected state elsewhere
   }
 
   return (
-    <>
-      <button
-        onClick={() => setShowModal(true)}
-        disabled={connecting}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-text-primary dark:text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 shadow-card border border-border dark:border-gray-700"
-      >
-        <Wallet className="w-4 h-4" />
-        {connecting ? 'Connecting...' : 'Connect Wallet'}
-      </button>
-
-      {/* Wallet Selection Modal */}
-      {showModal && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="bg-background-card dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm border border-border dark:border-gray-700 shadow-elevated"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-text-primary dark:text-white">Connect Wallet</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-muted dark:text-gray-400"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {supportedWallets.map((walletOption) => {
-                const isReady = walletOption.readyState === 'Installed' || walletOption.readyState === 'Loadable';
-                return (
-                  <button
-                    key={walletOption.adapter.name}
-                    onClick={() => handleWalletSelect(walletOption.adapter.name)}
-                    disabled={connecting}
-                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-background-secondary dark:bg-gray-800 hover:bg-border-light dark:hover:bg-gray-700 border border-border dark:border-gray-700 transition-all disabled:opacity-50"
-                  >
-                    <img
-                      src={walletOption.adapter.icon}
-                      alt={walletOption.adapter.name}
-                      className="w-10 h-10 rounded-lg"
-                    />
-                    <div className="flex-1 text-left">
-                      <p className="text-text-primary dark:text-white font-medium">{walletOption.adapter.name}</p>
-                      <p className="text-text-muted dark:text-gray-400 text-sm">
-                        {isReady ? 'Detected' : 'Tap to connect'}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-
-              {supportedWallets.length === 0 && (
-                <p className="text-text-muted dark:text-gray-400 text-center py-4">
-                  No wallets found. Please install Phantom or Solflare.
-                </p>
-              )}
-            </div>
-
-            <p className="text-text-muted dark:text-gray-400 text-xs text-center mt-4">
-              Only Phantom and Solflare are supported
-            </p>
-          </div>
-        </div>
-      )}
-    </>
+    <WalletMultiButton
+      style={{
+        backgroundColor: 'transparent',
+        border: '1px solid #e5e7eb',
+        borderRadius: '0.5rem',
+        padding: '0.625rem 1.25rem',
+        fontSize: '0.875rem',
+        fontWeight: '600',
+        height: 'auto',
+      }}
+    />
   );
 }
 
