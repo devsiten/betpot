@@ -251,8 +251,8 @@ export function AdminMarkets() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text-primary uppercase tracking-wider">Jackpot Manager</h1>
-                <p className="text-text-secondary mt-1 font-mono text-sm">Select events to feature as Jackpot</p>
+                <h1 className="text-3xl font-bold text-text-primary dark:text-white uppercase tracking-wider">Jackpot Manager</h1>
+                <p className="text-text-secondary dark:text-gray-400 mt-1 font-mono text-sm">Select events to feature as Jackpot</p>
             </div>
 
             {/* Current Jackpot */}
@@ -398,14 +398,14 @@ export function AdminMarkets() {
                             )}
 
                             {/* Event Header */}
-                            <div className="p-5 border-b border-white/5 bg-white/[0.02]">
+                            <div className="p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
                                 <div className="flex items-start justify-between mb-3">
                                     <span className="badge badge-success">{eventSource === 'polymarket' ? 'Live' : 'Upcoming'}</span>
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded">
+                                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-gray-200 dark:bg-white/5 px-2 py-1 rounded">
                                         {event.sport || event.category || selectedPolyCategory}
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-text-primary leading-tight line-clamp-2">
+                                <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
                                     {event.title}
                                 </h3>
                                 <div className="flex items-center gap-4 mt-2">
@@ -423,8 +423,8 @@ export function AdminMarkets() {
                             </div>
 
                             {/* Options with Percentages */}
-                            <div className="p-5">
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Betting Options</p>
+                            <div className="p-5 bg-white dark:bg-gray-900/50">
+                                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Betting Options</p>
                                 <div className="space-y-2">
                                     {event.options?.slice(0, 3).map((option: any, idx: number) => (
                                         <div
@@ -433,10 +433,10 @@ export function AdminMarkets() {
                                                 'p-3 rounded-lg border flex items-center justify-between',
                                                 option.percentage !== undefined && option.percentage > 50
                                                     ? 'bg-green-500/10 border-green-500/30'
-                                                    : 'bg-black/40 border-white/10'
+                                                    : 'bg-gray-100 dark:bg-black/40 border-gray-300 dark:border-white/10'
                                             )}
                                         >
-                                            <span className="text-sm font-medium text-text-primary truncate flex-1">
+                                            <span className="text-sm font-medium text-text-primary dark:text-white truncate flex-1">
                                                 {option.label}
                                             </span>
                                             {option.percentage !== undefined ? (
