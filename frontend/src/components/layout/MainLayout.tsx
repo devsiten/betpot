@@ -28,10 +28,14 @@ function ConnectButton() {
   const { select, connect, connecting, wallet, connected, wallets } = useWallet();
   const [showModal, setShowModal] = useState(false);
 
+
   // Filter to only Phantom and Solflare
   const supportedWallets = wallets.filter(
     w => w.adapter.name === 'Phantom' || w.adapter.name === 'Solflare'
   );
+
+  // Track if user explicitly selected a wallet
+  const [userSelectedWallet, setUserSelectedWallet] = useState(false);
 
   const handleWalletSelect = async (walletName: string) => {
     try {
@@ -42,6 +46,7 @@ function ConnectButton() {
         // First select the wallet
         select(selectedWallet.adapter.name as any);
         setShowModal(false);
+        setUserSelectedWallet(true);
 
         // Try direct adapter connect immediately (this triggers the popup)
         try {
@@ -68,15 +73,16 @@ function ConnectButton() {
     }
   };
 
-  // Auto-connect after wallet selection
+  // Only auto-connect if user explicitly selected a wallet in this session
   useEffect(() => {
-    if (wallet && !connecting && !connected) {
+    if (wallet && !connecting && !connected && userSelectedWallet) {
       console.log('Auto-connecting to:', wallet.adapter.name);
       connect().catch((err) => {
         console.error('Auto-connect failed:', err);
+        setUserSelectedWallet(false); // Reset on failure
       });
     }
-  }, [wallet, connect, connecting, connected]);
+  }, [wallet, connect, connecting, connected, userSelectedWallet]);
 
   if (connected) {
     return null; // Don't show button if already connected
