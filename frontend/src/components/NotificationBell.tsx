@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Check, X, Trophy, AlertCircle, Clock, Ticket, DollarSign } from 'lucide-react';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -31,6 +32,7 @@ export function NotificationBell() {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { isAuthenticated } = useAuthStore();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -74,6 +76,29 @@ export function NotificationBell() {
     const handleMarkRead = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         markReadMutation.mutate(id);
+    };
+
+    // Handle notification click - navigate to relevant page
+    const handleNotificationClick = (notification: Notification) => {
+        // Mark as read immediately
+        if (!notification.isRead) {
+            markReadMutation.mutate(notification.id);
+        }
+
+        // Close dropdown
+        setIsOpen(false);
+
+        // Navigate based on notification type
+        if (notification.type === 'ticket_won' || notification.type === 'ticket_lost' || notification.type === 'payout_ready') {
+            // Win/Loss/Payout notifications -> Dashboard
+            navigate('/dashboard');
+        } else if (notification.type === 'jackpot_new' || notification.type === 'event_ending') {
+            // New jackpot or event notifications -> Jackpot page
+            navigate('/jackpot');
+        } else {
+            // Default -> Home
+            navigate('/');
+        }
     };
 
     if (!isAuthenticated) {
@@ -131,6 +156,7 @@ export function NotificationBell() {
                                 return (
                                     <div
                                         key={notification.id}
+                                        onClick={() => handleNotificationClick(notification)}
                                         className={clsx(
                                             'px-4 py-3 border-b border-border last:border-0 hover:bg-background-secondary transition-colors cursor-pointer',
                                             !notification.isRead && 'bg-brand-500/5'
