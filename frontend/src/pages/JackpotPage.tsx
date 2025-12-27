@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, ArrowRight, Zap, Clock } from 'lucide-react';
+import { Trophy, ArrowRight, Zap, Clock, Lock } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
+import clsx from 'clsx';
 import { EventCountdown } from '@/components/CountdownTimer';
 
 export function JackpotPage() {
@@ -135,10 +136,24 @@ export function JackpotPage() {
                             })}
                         </div>
 
-                        <button className="w-full mt-4 py-2 bg-brand-100 text-brand-700 rounded-lg font-medium text-sm group-hover:bg-brand-200 transition-colors flex items-center justify-center gap-2">
-                            <Zap className="w-4 h-4" />
-                            Place Bet
-                        </button>
+                        <div className={clsx(
+                            'w-full mt-4 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors',
+                            jackpot.status === 'open'
+                                ? 'bg-brand-100 text-brand-700 group-hover:bg-brand-200'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                        )}>
+                            {jackpot.status === 'open' ? (
+                                <>
+                                    <Zap className="w-4 h-4" />
+                                    Place Bet
+                                </>
+                            ) : (
+                                <>
+                                    <Lock className="w-4 h-4" />
+                                    Betting Closed
+                                </>
+                            )}
+                        </div>
                     </Link>
                 ))}
             </div>
