@@ -90,6 +90,76 @@ export function AdminEvents() {
         </button>
       </div>
 
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button
+          onClick={() => setFilters({ ...filters, status: 'open', page: 1 })}
+          className={clsx(
+            'card p-4 text-left transition-all border-2',
+            filters.status === 'open' ? 'border-positive-500' : 'border-transparent hover:border-positive-500/50'
+          )}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-3 h-3 bg-positive-500 rounded-full"></span>
+            <span className="text-positive-400 font-bold">Open</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'open').length}</p>
+          <p className="text-xs text-dark-400">Accepting bets</p>
+        </button>
+        <button
+          onClick={() => setFilters({ ...filters, status: 'locked', page: 1 })}
+          className={clsx(
+            'card p-4 text-left transition-all border-2',
+            filters.status === 'locked' ? 'border-yellow-500' : 'border-transparent hover:border-yellow-500/50'
+          )}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Lock className="w-4 h-4 text-yellow-400" />
+            <span className="text-yellow-400 font-bold">Locked</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'locked').length}</p>
+          <p className="text-xs text-dark-400">Waiting for result</p>
+        </button>
+        <button
+          onClick={() => setFilters({ ...filters, status: 'resolved', page: 1 })}
+          className={clsx(
+            'card p-4 text-left transition-all border-2',
+            filters.status === 'resolved' ? 'border-purple-500' : 'border-transparent hover:border-purple-500/50'
+          )}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Trophy className="w-4 h-4 text-purple-400" />
+            <span className="text-purple-400 font-bold">Resolved</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'resolved').length}</p>
+          <p className="text-xs text-dark-400">Winners paid</p>
+        </button>
+        <button
+          onClick={() => setFilters({ ...filters, status: 'cancelled', page: 1 })}
+          className={clsx(
+            'card p-4 text-left transition-all border-2',
+            filters.status === 'cancelled' ? 'border-red-500' : 'border-transparent hover:border-red-500/50'
+          )}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <XCircle className="w-4 h-4 text-red-400" />
+            <span className="text-red-400 font-bold">Cancelled</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'cancelled').length}</p>
+          <p className="text-xs text-dark-400">Refunded</p>
+        </button>
+      </div>
+
+      {/* Clear Filter Button */}
+      {filters.status && (
+        <button
+          onClick={() => setFilters({ ...filters, status: '', page: 1 })}
+          className="text-sm text-primary-400 hover:text-primary-300"
+        >
+          ← Show all events
+        </button>
+      )}
+
       {/* Filters */}
       <div className="card p-4">
         <div className="flex flex-col md:flex-row gap-4">
