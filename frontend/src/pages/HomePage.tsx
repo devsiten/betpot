@@ -147,20 +147,20 @@ export function HomePage() {
 
     return (
       <div key={event.id} className="card p-0 overflow-hidden">
-        <div className="p-4 border-b border-border bg-background-secondary">
+        <div className="p-4 border-b border-border dark:border-gray-700 bg-background-secondary dark:bg-gray-800">
           <div className="flex items-center justify-between mb-2">
-            <span className="badge badge-success text-[9px]">{event.league || 'Football'}</span>
+            <span className="badge badge-success text-[9px] bg-positive-100 dark:bg-positive-900 text-positive-700 dark:text-positive-300">{event.league || 'Football'}</span>
             {event.startTime && (
-              <span className="text-[10px] text-text-muted font-mono">
+              <span className="text-[10px] text-text-muted dark:text-gray-400 font-mono">
                 {format(new Date(event.startTime), 'MMM dd HH:mm')}
               </span>
             )}
           </div>
-          <h4 className="text-sm font-bold text-text-primary line-clamp-2">
+          <h4 className="text-sm font-bold text-text-primary dark:text-white line-clamp-2">
             {homeTeam || 'TBD'} vs {awayTeam || 'TBD'}
           </h4>
         </div>
-        <div className="p-4">
+        <div className="p-4 dark:bg-gray-900">
           {event.options && event.options.length > 0 ? (
             <div className="grid grid-cols-3 gap-2">
               {event.options.slice(0, 3).map((opt: any, idx: number) => (
@@ -168,24 +168,24 @@ export function HomePage() {
                   key={idx}
                   className={clsx(
                     'p-2 rounded-lg border text-center',
-                    idx === 0 && 'bg-positive-50 border-positive-200',
-                    idx === 1 && 'bg-gray-50 border-gray-200',
-                    idx === 2 && 'bg-negative-50 border-negative-200'
+                    idx === 0 && 'bg-positive-50 dark:bg-positive-900/30 border-positive-200 dark:border-positive-700',
+                    idx === 1 && 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600',
+                    idx === 2 && 'bg-negative-50 dark:bg-negative-900/30 border-negative-200 dark:border-negative-700'
                   )}
                 >
                   <span className={clsx(
                     'block text-[10px] font-bold uppercase',
-                    idx === 0 && 'text-positive-700',
-                    idx === 1 && 'text-gray-600',
-                    idx === 2 && 'text-negative-600'
+                    idx === 0 && 'text-positive-700 dark:text-positive-400',
+                    idx === 1 && 'text-gray-600 dark:text-gray-300',
+                    idx === 2 && 'text-negative-600 dark:text-negative-400'
                   )}>
                     {idx === 0 ? 'Home' : idx === 1 ? 'Draw' : 'Away'}
                   </span>
                   <span className={clsx(
                     'block text-sm font-bold',
-                    idx === 0 && 'text-positive-700',
-                    idx === 1 && 'text-gray-600',
-                    idx === 2 && 'text-negative-600'
+                    idx === 0 && 'text-positive-700 dark:text-positive-300',
+                    idx === 1 && 'text-gray-600 dark:text-gray-200',
+                    idx === 2 && 'text-negative-600 dark:text-negative-300'
                   )}>
                     {opt.percentage}%
                   </span>
@@ -193,7 +193,7 @@ export function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center text-xs text-text-muted py-2">No odds available</div>
+            <div className="text-center text-xs text-text-muted dark:text-gray-500 py-2">No odds available</div>
           )}
         </div>
       </div>
@@ -235,19 +235,19 @@ export function HomePage() {
           </div>
         )}
 
-        <div className="p-4">
+        <div className="p-4 dark:bg-gray-900">
           <div className="flex items-center justify-between mb-2">
             {event.tags?.[0] && (
-              <span className="badge badge-primary text-[9px]">{event.tags[0]}</span>
+              <span className="badge badge-primary text-[9px] bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">{event.tags[0]}</span>
             )}
             {event.endTime && (
-              <span className="text-[10px] text-text-muted font-mono">
+              <span className="text-[10px] text-text-muted dark:text-gray-400 font-mono">
                 Ends {format(new Date(event.endTime), 'MMM dd')}
               </span>
             )}
           </div>
 
-          <h4 className="text-sm font-bold text-text-primary line-clamp-2 mb-3">
+          <h4 className="text-sm font-bold text-text-primary dark:text-white line-clamp-2 mb-3">
             {event.title}
           </h4>
 
@@ -296,18 +296,18 @@ export function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
-            <span className="text-xs font-bold text-red-600">
+            <span className="text-xs font-bold text-red-600 dark:text-red-400">
               {event.elapsed ? `${event.elapsed}'` : 'LIVE'}
             </span>
           </div>
-          <span className="text-[10px] text-text-muted font-mono">{event.league}</span>
+          <span className="text-[10px] text-text-muted dark:text-gray-400 font-mono">{event.league}</span>
         </div>
-        <h4 className="text-sm font-bold text-text-primary">
+        <h4 className="text-sm font-bold text-text-primary dark:text-white">
           {event.homeTeam} vs {event.awayTeam}
         </h4>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 dark:bg-gray-900/50">
         {/* Score display */}
         <div className="flex items-center justify-center gap-4">
           <div className="text-center flex-1">
@@ -316,17 +316,17 @@ export function HomePage() {
             )}
             <span className={clsx(
               'block text-xs font-bold truncate',
-              event.homeWinning ? 'text-positive-600' : 'text-text-primary'
+              event.homeWinning ? 'text-positive-600 dark:text-positive-400' : 'text-text-primary dark:text-white'
             )}>
               {event.homeTeam}
             </span>
           </div>
 
           <div className="text-center">
-            <span className="text-3xl font-black text-text-primary">
+            <span className="text-3xl font-black text-text-primary dark:text-white">
               {event.homeScore ?? 0} - {event.awayScore ?? 0}
             </span>
-            <span className="block text-[10px] text-red-500 font-mono mt-1">
+            <span className="block text-[10px] text-red-500 dark:text-red-400 font-mono mt-1">
               {event.status}
             </span>
           </div>
@@ -337,7 +337,7 @@ export function HomePage() {
             )}
             <span className={clsx(
               'block text-xs font-bold truncate',
-              event.awayWinning ? 'text-positive-600' : 'text-text-primary'
+              event.awayWinning ? 'text-positive-600 dark:text-positive-400' : 'text-text-primary dark:text-white'
             )}>
               {event.awayTeam}
             </span>
