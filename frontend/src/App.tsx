@@ -34,6 +34,7 @@ import { AdminSettings } from '@/pages/admin/AdminSettings';
 import { AdminMarkets } from '@/pages/admin/AdminMarkets';
 import { AdminPaymentIssues } from '@/pages/admin/AdminPaymentIssues';
 import { AdminGuidePage } from '@/pages/admin/AdminGuidePage';
+import { AdminBlogManager } from '@/pages/admin/AdminBlogManager';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -161,6 +162,7 @@ function AppContent() {
         <Route path="users" element={<AdminUsers />} />
         <Route path="winnings" element={<DashboardPage />} />
         <Route path="guide" element={<AdminGuidePage />} />
+        <Route path="blog" element={<AdminBlogManager />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
 

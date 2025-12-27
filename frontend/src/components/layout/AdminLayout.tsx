@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
-import { AlertTriangle, BookOpen } from 'lucide-react';
+import { AlertTriangle, BookOpen, Edit2 } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -24,6 +24,7 @@ const navItems = [
   { path: '/admin/events', icon: Calendar, label: 'Events' },
   { path: '/admin/bets', icon: Ticket, label: 'Bets & Winners' },
   { path: '/admin/payment-issues', icon: AlertTriangle, label: 'Payment Issues' },
+  { path: '/admin/blog', icon: Edit2, label: 'Blog Manager' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/winnings', icon: Gift, label: 'My Winnings' },
   { path: '/admin/guide', icon: BookOpen, label: 'Admin Guide' },

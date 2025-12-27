@@ -13,7 +13,6 @@ import {
   BookOpen,
   Sun,
   Moon,
-  Newspaper,
 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
@@ -270,8 +269,6 @@ export function MainLayout() {
     { to: '/', label: 'Home', icon: Home },
     { to: '/jackpot', label: 'Jackpot', icon: Trophy },
     { to: '/events', label: 'Markets', icon: Calendar },
-    { to: '/news', label: 'News', icon: Newspaper },
-    { to: '/betpot-news', label: 'BetPot News/Blog', icon: BookOpen },
     { to: '/how-it-works', label: 'How it Works', icon: BookOpen },
   ];
 

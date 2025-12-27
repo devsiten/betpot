@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Zap, Clock, TrendingUp } from 'lucide-react';
+import { Trophy, Zap, Clock, TrendingUp, Newspaper, Edit2 } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { EventCountdown } from '@/components/CountdownTimer';
 
 // Tab types
-type TabType = 'sports' | 'predictions' | 'live';
+type TabType = 'sports' | 'predictions' | 'live' | 'news' | 'betpot-news';
 
 export function HomePage() {
   // Active tab state
@@ -55,6 +55,22 @@ export function HomePage() {
     staleTime: 30 * 1000,
   });
 
+  // ============ NEWS - External News ============
+  const { data: newsData, isLoading: loadingNews } = useQuery({
+    queryKey: ['external-news'],
+    queryFn: () => api.getNews('sports'),
+    staleTime: 5 * 60 * 1000,
+    enabled: activeTab === 'news',
+  });
+
+  // ============ BETPOT NEWS - Internal Blog ============
+  const { data: blogData, isLoading: loadingBlog } = useQuery({
+    queryKey: ['betpot-blog'],
+    queryFn: () => api.getBlogPosts(),
+    staleTime: 60 * 1000,
+    enabled: activeTab === 'betpot-news',
+  });
+
   // Get data based on active tab
   const getCurrentData = () => {
     switch (activeTab) {
@@ -64,6 +80,10 @@ export function HomePage() {
         return predictionsData?.data || [];
       case 'live':
         return liveData?.data || [];
+      case 'news':
+        return newsData?.data || [];
+      case 'betpot-news':
+        return blogData?.data || [];
       default:
         return [];
     }
@@ -71,7 +91,9 @@ export function HomePage() {
 
   const isLoading = activeTab === 'sports' ? loadingSports
     : activeTab === 'predictions' ? loadingPredictions
-      : loadingLive;
+      : activeTab === 'live' ? loadingLive
+        : activeTab === 'news' ? loadingNews
+          : loadingBlog;
 
   // Get raw events and apply FRONTEND DEDUPLICATION for sports
   const rawEvents = getCurrentData();
@@ -491,6 +513,28 @@ export function HomePage() {
               </span>
               Live
             </button>
+            <button
+              onClick={() => handleTabChange('news')}
+              className={clsx(
+                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                activeTab === 'news'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-soft'
+                  : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
+              )}
+            >
+              <Newspaper className="w-4 h-4" /> News
+            </button>
+            <button
+              onClick={() => handleTabChange('betpot-news')}
+              className={clsx(
+                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                activeTab === 'betpot-news'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-400 text-white shadow-soft'
+                  : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
+              )}
+            >
+              <Edit2 className="w-4 h-4" /> BetPot News
+            </button>
           </div>
           <Link to="/events" className="btn btn-ghost text-sm">
             View All →
@@ -528,6 +572,56 @@ export function HomePage() {
             <p className="text-text-muted text-sm mt-1">
               {activeTab === 'live' && 'Check back during match times!'}
             </p>
+          </div>
+        ) : activeTab === 'news' || activeTab === 'betpot-news' ? (
+          /* News/Blog Grid */
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {displayedEvents.length === 0 ? (
+              <div className="col-span-full text-center py-16 card">
+                <Newspaper className="w-12 h-12 mx-auto mb-4 text-text-muted dark:text-gray-600" />
+                <p className="text-text-secondary text-lg font-bold">
+                  {activeTab === 'news' ? 'No news available' : 'No blog posts yet'}
+                </p>
+              </div>
+            ) : (
+              displayedEvents.map((item: any, idx: number) => (
+                <Link
+                  key={item.id || idx}
+                  to={activeTab === 'betpot-news' ? `/betpot-news/${item.id}` : `/news`}
+                  onClick={(e) => {
+                    if (activeTab === 'news') {
+                      e.preventDefault();
+                      window.open(item.url, '_blank');
+                    }
+                  }}
+                  className="card overflow-hidden hover:border-brand-300 dark:hover:border-brand-600 transition-all group"
+                >
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="w-full h-32 object-cover" />
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] text-brand-600 dark:text-brand-400 font-medium uppercase">
+                        {item.source || item.category || 'News'}
+                      </span>
+                      {item.publishedAt && (
+                        <span className="text-[10px] text-text-muted dark:text-gray-500">
+                          {format(new Date(item.publishedAt || item.createdAt), 'MMM dd')}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-sm font-bold text-text-primary dark:text-white line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400">
+                      {item.title}
+                    </h4>
+                    {(item.description || item.excerpt) && (
+                      <p className="text-xs text-text-secondary dark:text-gray-400 line-clamp-2 mt-2">
+                        {item.description || item.excerpt}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         ) : (
           /* Events Grid - Responsive for all devices */
