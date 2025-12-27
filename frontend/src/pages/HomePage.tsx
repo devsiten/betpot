@@ -475,11 +475,11 @@ export function HomePage() {
       <section className="max-w-7xl mx-auto pb-16">
         {/* Tab Buttons */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mb-2 scrollbar-hide">
             <button
               onClick={() => handleTabChange('sports')}
               className={clsx(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
                 activeTab === 'sports'
                   ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
@@ -490,7 +490,7 @@ export function HomePage() {
             <button
               onClick={() => handleTabChange('predictions')}
               className={clsx(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
                 activeTab === 'predictions'
                   ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
@@ -501,7 +501,7 @@ export function HomePage() {
             <button
               onClick={() => handleTabChange('live')}
               className={clsx(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
                 activeTab === 'live'
                   ? 'bg-gradient-to-r from-positive-500 to-green-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
@@ -516,7 +516,7 @@ export function HomePage() {
             <button
               onClick={() => handleTabChange('news')}
               className={clsx(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
                 activeTab === 'news'
                   ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
@@ -527,7 +527,7 @@ export function HomePage() {
             <button
               onClick={() => handleTabChange('betpot-news')}
               className={clsx(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
                 activeTab === 'betpot-news'
                   ? 'bg-gradient-to-r from-purple-500 to-purple-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
