@@ -17,8 +17,6 @@ import {
 import { useWallet } from '@solana/wallet-adapter-react';
 import clsx from 'clsx';
 import { AlertTriangle, BookOpen } from 'lucide-react';
-import { NotificationBell } from '@/components/NotificationBell';
-import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
