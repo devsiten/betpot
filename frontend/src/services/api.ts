@@ -181,6 +181,111 @@ class ApiService {
     return data;
   }
 
+  // ========== POLYMARKET SPORTS API - Football & Other Sports ==========
+
+  // Get all available sports leagues
+  async getPolymarketSportsLeagues() {
+    const { data } = await this.client.get<ApiResponse<{
+      football: Array<{ id: string; name: string; code: string; country: string; priority: number }>;
+      other: Array<{ id: string; name: string; code: string; type: string }>;
+    }>>('/sports/polymarket/sports/leagues');
+    return data;
+  }
+
+  // Get events for a specific league
+  async getPolymarketSportsEvents(seriesId: string, limit?: number) {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      source: string;
+      title: string;
+      homeTeam: string;
+      awayTeam: string;
+      startTime: string;
+      endTime: string;
+      league: string;
+      volume: number;
+      liquidity: number;
+      options: Array<{ label: string; type: string; price: number; percentage: number; marketId: string }>;
+      spreads?: Array<{ label: string; price: number; line: number }>;
+      totals?: Array<{ label: string; price: number; line: number }>;
+    }>>>(`/sports/polymarket/sports/league/${seriesId}`, { params: { limit } });
+    return data;
+  }
+
+  // Get all football events across top leagues
+  async getAllFootballEvents(limit?: number) {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      source: string;
+      title: string;
+      homeTeam: string;
+      awayTeam: string;
+      startTime: string;
+      league: string;
+      volume: number;
+      options: Array<{ label: string; type: string; price: number; percentage: number }>;
+    }>>>('/sports/polymarket/sports/football/all', { params: { limit } });
+    return data;
+  }
+
+  // Get trending sports events (for home page)
+  async getTrendingSports(limit?: number) {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      source: string;
+      title: string;
+      homeTeam: string;
+      awayTeam: string;
+      startTime: string;
+      league: string;
+      volume: number;
+      options: Array<{ label: string; type: string; price: number; percentage: number }>;
+    }>>>('/sports/polymarket/sports/trending', { params: { limit } });
+    return data;
+  }
+
+  // Get other sports events (NBA, NFL, UFC, etc.)
+  async getOtherSportsEvents(sportCode: string, limit?: number) {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      source: string;
+      title: string;
+      homeTeam: string;
+      awayTeam: string;
+      startTime: string;
+      options: Array<{ label: string; type: string; price: number; percentage: number }>;
+    }>>>(`/sports/polymarket/sports/other/${sportCode}`, { params: { limit } });
+    return data;
+  }
+
+  // Get LIVE matches (currently in progress) from API-Sports
+  async getLiveMatches(limit?: number) {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      source: string;
+      title: string;
+      sport: string;
+      league: string;
+      leagueLogo: string;
+      country: string;
+      countryFlag: string;
+      homeTeam: string;
+      homeTeamLogo: string;
+      awayTeam: string;
+      awayTeamLogo: string;
+      startTime: string;
+      isLive: boolean;
+      status: string;
+      statusShort: string;
+      elapsed: number | null; // Current minute
+      homeScore: number | null;
+      awayScore: number | null;
+      homeWinning: boolean | null;
+      awayWinning: boolean | null;
+    }>>>('/sports/api-sports/live', { params: { limit } });
+    return data;
+  }
+
   async searchExternalEvents(query?: string, sport?: string) {
     const { data } = await this.client.get<ApiResponse<Array<{
       id: string;

@@ -15,20 +15,73 @@ const mainCategories = [
   { key: 'finance', label: 'Finance', icon: TrendingUp },
 ];
 
-// Available sports leagues for the Odds API
+// Football leagues from Polymarket Sports API - organized by region
+const footballLeagues = [
+  // Featured (Top Priority)
+  { key: '10188', label: 'Premier League', region: 'featured', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { key: '10204', label: 'Champions League', region: 'featured', icon: '🏆' },
+  { key: '10193', label: 'La Liga', region: 'featured', icon: '🇪🇸' },
+  { key: '10203', label: 'Serie A', region: 'featured', icon: '🇮🇹' },
+  { key: '10194', label: 'Bundesliga', region: 'featured', icon: '🇩🇪' },
+  { key: '10195', label: 'Ligue 1', region: 'featured', icon: '🇫🇷' },
+  // Europe
+  { key: '10209', label: 'Europa League', region: 'europe', icon: '🏆' },
+  { key: '10437', label: 'Conference League', region: 'europe', icon: '🏆' },
+  { key: '10286', label: 'Eredivisie', region: 'europe', icon: '🇳🇱' },
+  { key: '10330', label: 'Liga Portugal', region: 'europe', icon: '🇵🇹' },
+  { key: '10292', label: 'Süper Lig', region: 'europe', icon: '🇹🇷' },
+  // Domestic Cups
+  { key: '10307', label: 'FA Cup', region: 'cups', icon: '🏆' },
+  { key: '10230', label: 'EFL Cup', region: 'cups', icon: '🏆' },
+  { key: '10316', label: 'Copa del Rey', region: 'cups', icon: '🏆' },
+  { key: '10317', label: 'DFB-Pokal', region: 'cups', icon: '🏆' },
+  // Africa
+  { key: '10786', label: 'AFCON', region: 'africa', icon: '🌍' },
+  { key: '10240', label: 'CAF', region: 'africa', icon: '🌍' },
+  // Americas
+  { key: '10189', label: 'MLS', region: 'americas', icon: '🇺🇸' },
+  { key: '10290', label: 'Liga MX', region: 'americas', icon: '🇲🇽' },
+  { key: '10285', label: 'Argentina', region: 'americas', icon: '🇦🇷' },
+  { key: '10359', label: 'Brasileirão', region: 'americas', icon: '🇧🇷' },
+  { key: '10289', label: 'Libertadores', region: 'americas', icon: '🏆' },
+  // Asia
+  { key: '10360', label: 'J-League', region: 'asia', icon: '🇯🇵' },
+  { key: '10361', label: 'Saudi Pro', region: 'asia', icon: '🇸🇦' },
+  { key: '10444', label: 'K League', region: 'asia', icon: '🇰🇷' },
+  { key: '10438', label: 'A-League', region: 'oceania', icon: '🇦🇺' },
+];
+
+// Other sports - use actual Polymarket series IDs
+const otherSports = [
+  { key: '10345', label: 'NBA', icon: '🏀' },
+  { key: '10187', label: 'NFL', icon: '🏈' },
+  { key: '10346', label: 'NHL', icon: '🏒' },
+  { key: '10500', label: 'UFC/MMA', icon: '🥊' },
+  { key: '10365', label: 'Tennis ATP', icon: '🎾' },
+  { key: '10470', label: 'NCAA Basketball', icon: '🏀' },
+];
+
+// Combine all sports options
 const sportsLeagues = [
-  { key: 'soccer_epl', label: 'Premier League' },
-  { key: 'soccer_spain_la_liga', label: 'La Liga' },
-  { key: 'soccer_germany_bundesliga', label: 'Bundesliga' },
-  { key: 'soccer_italy_serie_a', label: 'Serie A' },
-  { key: 'soccer_uefa_champs_league', label: 'Champions League' },
-  { key: 'basketball_nba', label: 'NBA' },
-  { key: 'americanfootball_nfl', label: 'NFL' },
+  { key: 'all', label: '⚽ All Football', isSpecial: true },
+  ...footballLeagues.filter(l => l.region === 'featured'),
+  { key: 'divider1', label: '── Europe ──', isDivider: true },
+  ...footballLeagues.filter(l => l.region === 'europe'),
+  { key: 'divider2', label: '── Cups ──', isDivider: true },
+  ...footballLeagues.filter(l => l.region === 'cups'),
+  { key: 'divider3', label: '── Africa ──', isDivider: true },
+  ...footballLeagues.filter(l => l.region === 'africa'),
+  { key: 'divider4', label: '── Americas ──', isDivider: true },
+  ...footballLeagues.filter(l => l.region === 'americas'),
+  { key: 'divider5', label: '── Asia/Oceania ──', isDivider: true },
+  ...footballLeagues.filter(l => ['asia', 'oceania'].includes(l.region)),
+  { key: 'divider6', label: '── Other Sports ──', isDivider: true },
+  ...otherSports,
 ];
 
 export function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState('sports');
-  const [selectedLeague, setSelectedLeague] = useState('soccer_epl');
+  const [selectedLeague, setSelectedLeague] = useState('10188'); // Default to Premier League
   const [displayCount, setDisplayCount] = useState(24);
 
   // Reset displayCount when category changes
@@ -37,10 +90,18 @@ export function EventsPage() {
     setDisplayCount(24);
   };
 
-  // Fetch SPORTS from Odds API (real sports with Home/Draw/Win)
+
+  // Fetch SPORTS from Polymarket Sports API - all use series IDs now
   const { data: sportsData, isLoading: loadingSports, refetch: refetchSports } = useQuery({
-    queryKey: ['odds-api-events', selectedLeague],
-    queryFn: () => api.getExternalEvents(selectedLeague),
+    queryKey: ['polymarket-sports', selectedLeague],
+    queryFn: async () => {
+      if (selectedLeague === 'all') {
+        return api.getAllFootballEvents(50);
+      } else {
+        // Both football leagues AND other sports now use the same endpoint (series IDs)
+        return api.getPolymarketSportsEvents(selectedLeague, 50);
+      }
+    },
     staleTime: 60 * 1000,
     refetchInterval: 60 * 1000,
     enabled: selectedCategory === 'sports',
@@ -340,21 +401,37 @@ export function EventsPage() {
 
       {/* Sports League Selector (only for sports) */}
       {selectedCategory === 'sports' && (
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-          {sportsLeagues.map((league) => (
-            <button
-              key={league.key}
-              onClick={() => setSelectedLeague(league.key)}
-              className={clsx(
-                'px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap',
-                selectedLeague === league.key
-                  ? 'bg-background-secondary text-text-primary border border-border-dark'
-                  : 'bg-background-secondary text-text-muted hover:text-text-primary hover:border-border-dark border border-border'
-              )}
-            >
-              {league.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+          {sportsLeagues.map((league: any) => {
+            // Render divider as non-clickable header
+            if (league.isDivider) {
+              return (
+                <span
+                  key={league.key}
+                  className="px-2 py-1 text-[10px] text-text-muted font-mono uppercase tracking-wider whitespace-nowrap"
+                >
+                  {league.label}
+                </span>
+              );
+            }
+
+            return (
+              <button
+                key={league.key}
+                onClick={() => setSelectedLeague(league.key)}
+                className={clsx(
+                  'px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5',
+                  selectedLeague === league.key
+                    ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
+                    : 'bg-background-secondary text-text-muted hover:text-text-primary hover:border-border-dark border border-border',
+                  league.isSpecial && 'bg-positive-100 border-positive-200 text-positive-700'
+                )}
+              >
+                {league.icon && <span>{league.icon}</span>}
+                {league.label}
+              </button>
+            );
+          })}
         </div>
       )}
 
