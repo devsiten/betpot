@@ -238,6 +238,16 @@ export function AdminMarkets() {
             ? (polymarketData?.data || [])
             : internalEventsFormatted;
     const currentJackpot = jackpotData?.data;
+    // Get all current jackpots for duplicate check (API returns jackpots array)
+    const allJackpots = (jackpotData as any)?.jackpots || (currentJackpot ? [currentJackpot] : []);
+
+    // Check if event is already a jackpot (by title or externalId match)
+    const isAlreadyJackpot = (event: ExternalEvent) => {
+        return allJackpots.some((jp: any) =>
+            jp.title === event.title ||
+            (jp.externalId && jp.externalId === event.id)
+        );
+    };
 
     const handleRefresh = () => {
         if (eventSource === 'sports') {
@@ -250,6 +260,11 @@ export function AdminMarkets() {
     };
 
     const handleSetJackpot = (event: ExternalEvent) => {
+        // Check if already a jackpot
+        if (isAlreadyJackpot(event)) {
+            toast.error('This event is already a Jackpot!');
+            return;
+        }
         setSelectedEvent(event);
     };
 
@@ -389,109 +404,117 @@ export function AdminMarkets() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {externalEvents.slice(0, 24).map((event: any) => (
-                        <div
-                            key={event.id}
-                            className={clsx(
-                                'card p-0 overflow-hidden transition-all',
-                                selectedEvent?.id === event.id && 'ring-2 ring-yellow-500'
-                            )}
-                        >
-                            {/* Event Image (Polymarket) */}
-                            {event.image && (
-                                <div className="h-24 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden">
-                                    <img
-                                        src={event.image}
-                                        alt={event.title}
-                                        className="w-full h-full object-cover opacity-80"
-                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                    />
-                                </div>
-                            )}
+                    {externalEvents.slice(0, 24).map((event: any) => {
+                        const alreadyJackpot = isAlreadyJackpot(event);
+                        return (
+                            <div
+                                key={event.id}
+                                className={clsx(
+                                    'card p-0 overflow-hidden transition-all',
+                                    selectedEvent?.id === event.id && 'ring-2 ring-yellow-500',
+                                    alreadyJackpot && 'ring-2 ring-green-500 opacity-60'
+                                )}
+                            >
+                                {/* Event Image (Polymarket) */}
+                                {event.image && (
+                                    <div className="h-24 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden">
+                                        <img
+                                            src={event.image}
+                                            alt={event.title}
+                                            className="w-full h-full object-cover opacity-80"
+                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                        />
+                                    </div>
+                                )}
 
-                            {/* Event Header */}
-                            <div className="p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
-                                <div className="flex items-start justify-between mb-3">
-                                    <span className="badge badge-success">{eventSource === 'polymarket' ? 'Live' : 'Upcoming'}</span>
-                                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-gray-200 dark:bg-white/5 px-2 py-1 rounded">
-                                        {event.sport || event.category || selectedPolyCategory}
-                                    </span>
+                                {/* Event Header */}
+                                <div className="p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
+                                    <div className="flex items-start justify-between mb-3">
+                                        {alreadyJackpot ? (
+                                            <span className="badge bg-green-500/20 text-green-400 border border-green-500/40">✓ Already Jackpot</span>
+                                        ) : (
+                                            <span className="badge badge-success">{eventSource === 'polymarket' ? 'Live' : 'Upcoming'}</span>
+                                        )}
+                                        <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-gray-200 dark:bg-white/5 px-2 py-1 rounded">
+                                            {event.sport || event.category || selectedPolyCategory}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
+                                        {event.title}
+                                    </h3>
+                                    <div className="flex items-center gap-4 mt-2">
+                                        {event.startTime && (
+                                            <p className="text-xs text-gray-500 font-mono">
+                                                {format(new Date(event.startTime), 'MMM dd, yyyy')}
+                                            </p>
+                                        )}
+                                        {event.volume && (
+                                            <p className="text-xs text-cyan-400 font-mono">
+                                                Vol: ${(event.volume / 1000000).toFixed(1)}M
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
-                                    {event.title}
-                                </h3>
-                                <div className="flex items-center gap-4 mt-2">
-                                    {event.startTime && (
-                                        <p className="text-xs text-gray-500 font-mono">
-                                            {format(new Date(event.startTime), 'MMM dd, yyyy')}
-                                        </p>
-                                    )}
-                                    {event.volume && (
-                                        <p className="text-xs text-cyan-400 font-mono">
-                                            Vol: ${(event.volume / 1000000).toFixed(1)}M
-                                        </p>
-                                    )}
+
+                                {/* Options with Percentages */}
+                                <div className="p-5 bg-white dark:bg-gray-900/50">
+                                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Betting Options</p>
+                                    <div className="space-y-2">
+                                        {event.options?.slice(0, 3).map((option: any, idx: number) => (
+                                            <div
+                                                key={idx}
+                                                className={clsx(
+                                                    'p-3 rounded-lg border flex items-center justify-between',
+                                                    option.percentage !== undefined && option.percentage > 50
+                                                        ? 'bg-green-500/10 border-green-500/30'
+                                                        : 'bg-gray-100 dark:bg-black/40 border-gray-300 dark:border-white/10'
+                                                )}
+                                            >
+                                                <span className="text-sm font-medium text-text-primary dark:text-white truncate flex-1">
+                                                    {option.label}
+                                                </span>
+                                                {option.percentage !== undefined ? (
+                                                    <span className={clsx(
+                                                        'text-lg font-bold ml-2',
+                                                        option.percentage > 50 ? 'text-green-400' : 'text-gray-400'
+                                                    )}>
+                                                        {option.percentage}%
+                                                    </span>
+                                                ) : option.type && (
+                                                    <span className="text-xs text-gray-500 uppercase ml-2">
+                                                        {option.type === 'home' ? 'Home' : option.type === 'away' ? 'Away' : 'Draw'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Set as Jackpot Button */}
+                                    <button
+                                        onClick={() => handleSetJackpot(event)}
+                                        className={clsx(
+                                            'mt-4 w-full py-3 rounded-xl font-bold uppercase text-sm tracking-wider transition-all flex items-center justify-center gap-2',
+                                            selectedEvent?.id === event.id
+                                                ? 'bg-green-600 text-white shadow-lg shadow-green-500/50'
+                                                : 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
+                                        )}
+                                    >
+                                        {selectedEvent?.id === event.id ? (
+                                            <>
+                                                <Check className="w-4 h-4" />
+                                                Selected
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trophy className="w-4 h-4" />
+                                                Set as Jackpot
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
-
-                            {/* Options with Percentages */}
-                            <div className="p-5 bg-white dark:bg-gray-900/50">
-                                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Betting Options</p>
-                                <div className="space-y-2">
-                                    {event.options?.slice(0, 3).map((option: any, idx: number) => (
-                                        <div
-                                            key={idx}
-                                            className={clsx(
-                                                'p-3 rounded-lg border flex items-center justify-between',
-                                                option.percentage !== undefined && option.percentage > 50
-                                                    ? 'bg-green-500/10 border-green-500/30'
-                                                    : 'bg-gray-100 dark:bg-black/40 border-gray-300 dark:border-white/10'
-                                            )}
-                                        >
-                                            <span className="text-sm font-medium text-text-primary dark:text-white truncate flex-1">
-                                                {option.label}
-                                            </span>
-                                            {option.percentage !== undefined ? (
-                                                <span className={clsx(
-                                                    'text-lg font-bold ml-2',
-                                                    option.percentage > 50 ? 'text-green-400' : 'text-gray-400'
-                                                )}>
-                                                    {option.percentage}%
-                                                </span>
-                                            ) : option.type && (
-                                                <span className="text-xs text-gray-500 uppercase ml-2">
-                                                    {option.type === 'home' ? 'Home' : option.type === 'away' ? 'Away' : 'Draw'}
-                                                </span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Set as Jackpot Button */}
-                                <button
-                                    onClick={() => handleSetJackpot(event)}
-                                    className={clsx(
-                                        'mt-4 w-full py-3 rounded-xl font-bold uppercase text-sm tracking-wider transition-all flex items-center justify-center gap-2',
-                                        selectedEvent?.id === event.id
-                                            ? 'bg-green-600 text-white shadow-lg shadow-green-500/50'
-                                            : 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
-                                    )}
-                                >
-                                    {selectedEvent?.id === event.id ? (
-                                        <>
-                                            <Check className="w-4 h-4" />
-                                            Selected
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Trophy className="w-4 h-4" />
-                                            Set as Jackpot
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
