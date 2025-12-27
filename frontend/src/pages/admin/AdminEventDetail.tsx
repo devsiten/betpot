@@ -612,10 +612,10 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white lg:bg-dark-900 border border-gray-200 lg:border-dark-800 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="p-6 border-b border-gray-200 lg:border-dark-800">
-          <h2 className="text-xl font-bold text-gray-900 lg:text-white">Resolve Event</h2>
-          <p className="text-gray-500 lg:text-dark-400 mt-1">Select the winning option</p>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Resolve Event</h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Select the winning option</p>
         </div>
 
         <div className="p-6 space-y-4">
@@ -626,29 +626,29 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
               className={clsx(
                 'w-full p-4 rounded-lg border text-left transition-all',
                 selectedOption === option.optionId
-                  ? 'bg-green-100 lg:bg-green-500/10 border-green-500'
-                  : 'bg-gray-50 lg:bg-dark-800/50 border-gray-200 lg:border-dark-700 hover:border-gray-300 lg:hover:border-dark-600'
+                  ? 'bg-green-100 dark:bg-green-500/20 border-green-500 dark:border-green-400'
+                  : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               )}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-lg bg-gray-200 lg:bg-dark-700 flex items-center justify-center font-bold text-gray-900 lg:text-white">
+                  <span className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-900 dark:text-white">
                     {option.optionId}
                   </span>
                   <div>
-                    <p className="font-medium text-gray-900 lg:text-white">{option.label}</p>
-                    <p className="text-sm text-gray-500 lg:text-dark-400">{option.ticketsSold} tickets</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{option.label}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{option.ticketsSold} tickets</p>
                   </div>
                 </div>
                 {selectedOption === option.optionId && (
-                  <CheckCircle className="w-6 h-6 text-green-400" />
+                  <CheckCircle className="w-6 h-6 text-green-500 dark:text-green-400" />
                 )}
               </div>
             </button>
           ))}
         </div>
 
-        <div className="p-6 border-t border-gray-200 lg:border-dark-800 flex justify-end gap-3">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
           <button onClick={onClose} className="btn btn-secondary">
             Cancel
           </button>
@@ -685,24 +685,24 @@ function CancelEventModal({ eventId, onClose }: { eventId: string; onClose: () =
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-900 border border-dark-800 rounded-2xl w-full max-w-md">
-        <div className="p-6 border-b border-dark-800">
-          <h2 className="text-xl font-bold text-red-400">Cancel Event</h2>
-          <p className="text-dark-400 mt-1">This will refund all ticket holders</p>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-red-600 dark:text-red-400">Cancel Event</h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">This will refund all ticket holders</p>
         </div>
 
         <div className="p-6">
-          <label className="label">Cancellation Reason</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cancellation Reason</label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="input min-h-[100px]"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
             placeholder="Enter reason for cancellation..."
             required
           />
         </div>
 
-        <div className="p-6 border-t border-dark-800 flex justify-end gap-3">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
           <button onClick={onClose} className="btn btn-secondary">
             Go Back
           </button>

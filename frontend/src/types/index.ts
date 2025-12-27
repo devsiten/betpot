@@ -98,6 +98,7 @@ export interface DashboardOverview {
   pendingResolution: number;
   totalVolume: number;
   totalWinners: number;
+  totalLosers: number;
   totalPayouts: number;
 }
 
