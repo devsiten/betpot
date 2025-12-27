@@ -104,7 +104,7 @@ export function MainLayout() {
 
       await walletLogin(walletAddress, signature, message);
       localStorage.setItem('betpot_wallet', walletAddress);
-      toast.success('Signed in successfully!');
+      // No success toast needed - user can see they're signed in
     } catch (error: unknown) {
       console.error('Sign/login failed:', error);
       if (error instanceof Error && error.message?.includes('User rejected')) {
