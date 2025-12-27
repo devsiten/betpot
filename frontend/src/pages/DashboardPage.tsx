@@ -24,25 +24,25 @@ export function DashboardPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [isClaiming, setIsClaiming] = useState(false);
 
-    // Fetch user stats
+    // Fetch user stats - works with just wallet connection
     const { data: statsData } = useQuery({
         queryKey: ['user-stats'],
         queryFn: () => api.getMyStats(),
-        enabled: connected && isAuthenticated,
+        enabled: connected,
     });
 
     // Fetch user tickets (bet history)
     const { data: ticketsData, isLoading } = useQuery({
         queryKey: ['user-tickets'],
         queryFn: () => api.getMyTickets({ limit: 50 }),
-        enabled: connected && isAuthenticated,
+        enabled: connected,
     });
 
     // Fetch claimable tickets
     const { data: claimableData, refetch: refetchClaimable } = useQuery({
         queryKey: ['claimable-tickets'],
         queryFn: () => api.getClaimableTickets(),
-        enabled: connected && isAuthenticated,
+        enabled: connected,
     });
 
     const stats = statsData?.data;
