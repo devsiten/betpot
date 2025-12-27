@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Trophy, XCircle, Clock, Check, Edit2, X, LogOut, ExternalLink, Copy, Zap, Search, Ticket, ChevronLeft, ChevronRight, Hash, Gift, DollarSign, Loader2 } from 'lucide-react';
@@ -17,7 +17,21 @@ export function DashboardPage() {
     const { publicKey, connected, disconnect, signMessage } = useWallet();
     const { logout } = useAuthStore();
     const [editingUsername, setEditingUsername] = useState(false);
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState(() => {
+        // Load from localStorage on mount
+        if (publicKey) {
+            return localStorage.getItem(`betpot_username_${publicKey.toBase58()}`) || '';
+        }
+        return '';
+    });
+
+    // Load username when wallet changes
+    useEffect(() => {
+        if (publicKey) {
+            const saved = localStorage.getItem(`betpot_username_${publicKey.toBase58()}`);
+            if (saved) setUsername(saved);
+        }
+    }, [publicKey]);
     const [copied, setCopied] = useState(false);
     const [copiedTicketId, setCopiedTicketId] = useState<string | null>(null);
     const [searchTicketId, setSearchTicketId] = useState('');
@@ -236,7 +250,10 @@ export function DashboardPage() {
                                         />
                                         <button
                                             onClick={() => {
-                                                toast.success('Display name saved!');
+                                                if (publicKey && username.trim()) {
+                                                    localStorage.setItem(`betpot_username_${publicKey.toBase58()}`, username.trim());
+                                                    toast.success('Display name saved!');
+                                                }
                                                 setEditingUsername(false);
                                             }}
                                             className="p-2 bg-positive-500 text-white rounded-lg hover:bg-positive-600 transition-colors"

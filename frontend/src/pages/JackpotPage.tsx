@@ -150,7 +150,7 @@ export function JackpotPage() {
                             ) : (
                                 <>
                                     <Lock className="w-4 h-4" />
-                                    Betting Closed
+                                    Locked
                                 </>
                             )}
                         </div>
