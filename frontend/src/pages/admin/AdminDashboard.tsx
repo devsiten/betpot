@@ -142,11 +142,17 @@ export function AdminDashboard() {
       </div>
 
       {/* Secondary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard
           icon={Trophy}
           label="Total Winners"
           value={dashboard?.overview.totalWinners?.toLocaleString() || 0}
+          loading={isLoading}
+        />
+        <StatCard
+          icon={AlertCircle}
+          label="Total Losers"
+          value={dashboard?.overview.totalLosers?.toLocaleString() || 0}
           loading={isLoading}
         />
         <StatCard
