@@ -295,13 +295,13 @@ export function AdminEvents() {
                               className="fixed inset-0 z-10"
                               onClick={() => setActionMenu(null)}
                             />
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-20 py-1">
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 py-1">
                               <button
                                 onClick={() => {
                                   navigate(`/admin/events/${event.id}`);
                                   setActionMenu(null);
                                 }}
-                                className="w-full px-4 py-2 text-left text-sm text-white hover:bg-dark-700 flex items-center gap-2"
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                               >
                                 <Eye className="w-4 h-4" />
                                 View Details
@@ -313,7 +313,7 @@ export function AdminEvents() {
                                     navigate(`/admin/events/${event.id}?edit=true`);
                                     setActionMenu(null);
                                   }}
-                                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-dark-700 flex items-center gap-2"
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                 >
                                   <Edit className="w-4 h-4" />
                                   Edit Event
@@ -326,7 +326,7 @@ export function AdminEvents() {
                                     lockMutation.mutate(event.id);
                                     setActionMenu(null);
                                   }}
-                                  className="w-full px-4 py-2 text-left text-sm text-yellow-400 hover:bg-dark-700 flex items-center gap-2"
+                                  className="w-full px-4 py-2 text-left text-sm text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                 >
                                   <Lock className="w-4 h-4" />
                                   Lock Event
@@ -339,7 +339,7 @@ export function AdminEvents() {
                                     navigate(`/admin/events/${event.id}?resolve=true`);
                                     setActionMenu(null);
                                   }}
-                                  className="w-full px-4 py-2 text-left text-sm text-green-400 hover:bg-dark-700 flex items-center gap-2"
+                                  className="w-full px-4 py-2 text-left text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                 >
                                   <Trophy className="w-4 h-4" />
                                   Resolve Event
@@ -352,7 +352,7 @@ export function AdminEvents() {
                                     navigate(`/admin/events/${event.id}?cancel=true`);
                                     setActionMenu(null);
                                   }}
-                                  className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-dark-700 flex items-center gap-2"
+                                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                 >
                                   <XCircle className="w-4 h-4" />
                                   Cancel Event
