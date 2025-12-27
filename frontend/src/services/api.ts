@@ -463,7 +463,17 @@ class ApiService {
   }
 
   async getAdminBets(filters?: BetFilters) {
-    const { data } = await this.client.get<ApiResponse<Ticket[]> & { pagination: Pagination }>('/admin/bets', {
+    const { data } = await this.client.get<ApiResponse<Ticket[]> & {
+      pagination: Pagination;
+      stats?: {
+        totalTickets: number;
+        totalWon: number;
+        totalLost: number;
+        totalClaimed: number;
+        totalUnclaimed: number;
+        totalPayout: number;
+      };
+    }>('/admin/bets', {
       params: filters,
     });
     return data;
