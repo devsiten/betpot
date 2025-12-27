@@ -61,15 +61,7 @@ export function AdminBets() {
 
   const tickets = data?.data || [];
   const pagination = data?.pagination;
-
-  // Calculate summary stats
-  const stats = {
-    total: tickets.length,
-    won: tickets.filter(t => t.status === 'won').length,
-    lost: tickets.filter(t => t.status === 'lost').length,
-    unclaimed: tickets.filter(t => t.status === 'won' && !t.claimedAt).length,
-    totalPayout: tickets.filter(t => t.status === 'won').reduce((sum, t) => sum + (t.payoutAmount || 0), 0),
-  };
+  const allTimeStats = data?.stats || { totalTickets: 0, totalWon: 0, totalLost: 0, totalClaimed: 0, totalUnclaimed: 0, totalPayout: 0 };
 
   const handleQuickFilter = (value: string) => {
     setFilters({
@@ -105,27 +97,27 @@ export function AdminBets() {
         </button>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - ALL TIME */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="card p-4 dark:bg-gray-900 dark:border-gray-800">
-          <p className="text-2xl font-bold text-text-primary dark:text-white">{pagination?.total || tickets.length || 0}</p>
+          <p className="text-2xl font-bold text-text-primary dark:text-white">{allTimeStats.totalTickets || 0}</p>
           <p className="text-xs text-text-muted dark:text-gray-400">Total Bets</p>
         </div>
         <div className="card p-4 bg-green-500/5 dark:bg-green-900/20 border-green-500/20 dark:border-green-700">
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.won}</p>
-          <p className="text-xs text-text-muted dark:text-gray-400">Winners (page)</p>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{allTimeStats.totalWon || 0}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Winners (All-time)</p>
         </div>
         <div className="card p-4 bg-red-500/5 dark:bg-red-900/20 border-red-500/20 dark:border-red-700">
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.lost}</p>
-          <p className="text-xs text-text-muted dark:text-gray-400">Losers (page)</p>
+          <p className="text-2xl font-bold text-red-600 dark:text-red-400">{allTimeStats.totalLost || 0}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Losers (All-time)</p>
         </div>
         <div className="card p-4 bg-yellow-500/5 dark:bg-yellow-900/20 border-yellow-500/20 dark:border-yellow-700">
-          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.unclaimed}</p>
+          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{allTimeStats.totalUnclaimed || 0}</p>
           <p className="text-xs text-text-muted dark:text-gray-400">Unclaimed</p>
         </div>
         <div className="card p-4 dark:bg-gray-900 dark:border-gray-800">
-          <p className="text-2xl font-bold text-text-primary dark:text-white">${stats.totalPayout.toLocaleString()}</p>
-          <p className="text-xs text-text-muted dark:text-gray-400">Payout (page)</p>
+          <p className="text-2xl font-bold text-text-primary dark:text-white">${(allTimeStats.totalPayout || 0).toLocaleString()}</p>
+          <p className="text-xs text-text-muted dark:text-gray-400">Total Payout</p>
         </div>
       </div>
 
