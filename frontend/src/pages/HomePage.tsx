@@ -73,7 +73,38 @@ export function HomePage() {
     : activeTab === 'predictions' ? loadingPredictions
       : loadingLive;
 
-  const allEvents = getCurrentData();
+  // Get raw events and apply FRONTEND DEDUPLICATION for sports
+  const rawEvents = getCurrentData();
+  const seenMatches = new Set<string>();
+  const allEvents = activeTab === 'sports'
+    ? rawEvents.filter((event: any) => {
+      // Skip events with "More Markets" in title
+      if (event.title?.includes('More Markets')) return false;
+
+      // Get team names from event or parse from title
+      let homeTeam = event.homeTeam || '';
+      let awayTeam = event.awayTeam || '';
+
+      if ((!homeTeam || !awayTeam) && event.title) {
+        const vsMatch = event.title.match(/^(.+?)\s+vs\.?\s+(.+?)(?:\s+-\s+|$)/i);
+        if (vsMatch) {
+          homeTeam = vsMatch[1].trim();
+          awayTeam = vsMatch[2].trim();
+        }
+      }
+
+      // Normalize and deduplicate
+      const home = homeTeam.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const away = awayTeam.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (home && away) {
+        const matchKey = [home, away].sort().join('_vs_');
+        if (seenMatches.has(matchKey)) return false;
+        seenMatches.add(matchKey);
+      }
+      return true;
+    })
+    : rawEvents;
+
   const displayedEvents = allEvents.slice(0, displayCount);
   const hasMore = allEvents.length > displayCount;
 
