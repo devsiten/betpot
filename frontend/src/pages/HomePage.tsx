@@ -95,59 +95,80 @@ export function HomePage() {
   };
 
   // Render sports card (H/D/A format)
-  const renderSportsCard = (event: any) => (
-    <div key={event.id} className="card p-0 overflow-hidden">
-      <div className="p-4 border-b border-border bg-background-secondary">
-        <div className="flex items-center justify-between mb-2">
-          <span className="badge badge-success text-[9px]">{event.league || 'Football'}</span>
-          {event.startTime && (
-            <span className="text-[10px] text-text-muted font-mono">
-              {format(new Date(event.startTime), 'MMM dd HH:mm')}
-            </span>
+  const renderSportsCard = (event: any) => {
+    // Extract team names - fallback to parsing from title if missing
+    let homeTeam = event.homeTeam;
+    let awayTeam = event.awayTeam;
+
+    // If team names missing, try parsing from title "Team A vs Team B"
+    if ((!homeTeam || !awayTeam) && event.title) {
+      const vsMatch = event.title.match(/^(.+?)\s+vs\.?\s+(.+?)(?:\s+-\s+|$)/i);
+      if (vsMatch) {
+        homeTeam = vsMatch[1].trim();
+        awayTeam = vsMatch[2].trim();
+      }
+    }
+
+    // Skip card if still no team names
+    if (!homeTeam && !awayTeam) {
+      return null;
+    }
+
+    return (
+      <div key={event.id} className="card p-0 overflow-hidden">
+        <div className="p-4 border-b border-border bg-background-secondary">
+          <div className="flex items-center justify-between mb-2">
+            <span className="badge badge-success text-[9px]">{event.league || 'Football'}</span>
+            {event.startTime && (
+              <span className="text-[10px] text-text-muted font-mono">
+                {format(new Date(event.startTime), 'MMM dd HH:mm')}
+              </span>
+            )}
+          </div>
+          <h4 className="text-sm font-bold text-text-primary line-clamp-2">
+            {homeTeam || 'TBD'} vs {awayTeam || 'TBD'}
+          </h4>
+        </div>
+        <div className="p-4">
+          {event.options && event.options.length > 0 ? (
+            <div className="grid grid-cols-3 gap-2">
+              {event.options.slice(0, 3).map((opt: any, idx: number) => (
+                <div
+                  key={idx}
+                  className={clsx(
+                    'p-2 rounded-lg border text-center',
+                    idx === 0 && 'bg-positive-50 border-positive-200',
+                    idx === 1 && 'bg-gray-50 border-gray-200',
+                    idx === 2 && 'bg-negative-50 border-negative-200'
+                  )}
+                >
+                  <span className={clsx(
+                    'block text-[10px] font-bold uppercase',
+                    idx === 0 && 'text-positive-700',
+                    idx === 1 && 'text-gray-600',
+                    idx === 2 && 'text-negative-600'
+                  )}>
+                    {idx === 0 ? 'Home' : idx === 1 ? 'Draw' : 'Away'}
+                  </span>
+                  <span className={clsx(
+                    'block text-sm font-bold',
+                    idx === 0 && 'text-positive-700',
+                    idx === 1 && 'text-gray-600',
+                    idx === 2 && 'text-negative-600'
+                  )}>
+                    {opt.percentage}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-xs text-text-muted py-2">No odds available</div>
           )}
         </div>
-        <h4 className="text-sm font-bold text-text-primary line-clamp-2">
-          {event.homeTeam} vs {event.awayTeam}
-        </h4>
       </div>
-      <div className="p-4">
-        {event.options && event.options.length > 0 ? (
-          <div className="grid grid-cols-3 gap-2">
-            {event.options.slice(0, 3).map((opt: any, idx: number) => (
-              <div
-                key={idx}
-                className={clsx(
-                  'p-2 rounded-lg border text-center',
-                  idx === 0 && 'bg-positive-50 border-positive-200',
-                  idx === 1 && 'bg-gray-50 border-gray-200',
-                  idx === 2 && 'bg-negative-50 border-negative-200'
-                )}
-              >
-                <span className={clsx(
-                  'block text-[10px] font-bold uppercase',
-                  idx === 0 && 'text-positive-700',
-                  idx === 1 && 'text-gray-600',
-                  idx === 2 && 'text-negative-600'
-                )}>
-                  {idx === 0 ? 'Home' : idx === 1 ? 'Draw' : 'Away'}
-                </span>
-                <span className={clsx(
-                  'block text-sm font-bold',
-                  idx === 0 && 'text-positive-700',
-                  idx === 1 && 'text-gray-600',
-                  idx === 2 && 'text-negative-600'
-                )}>
-                  {opt.percentage}%
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center text-xs text-text-muted py-2">No odds available</div>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
+
 
   // Render prediction card (Yes/No button format)
   const renderPredictionCard = (event: any) => {
