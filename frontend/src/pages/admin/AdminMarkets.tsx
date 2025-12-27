@@ -194,9 +194,21 @@ export function AdminMarkets() {
             setSelectedEvent(null);
         },
         onError: (error: any) => {
-            // Show the actual error from the API
-            const errorMessage = error?.response?.data?.error || error?.message || 'Failed to create jackpot';
+            // Show the actual error from the API - ensure it's a string, not an object
             console.error('Jackpot creation error:', error?.response?.data || error);
+
+            let errorMessage = 'Failed to create jackpot';
+            const apiError = error?.response?.data?.error;
+
+            if (typeof apiError === 'string') {
+                errorMessage = apiError;
+            } else if (apiError?.issues) {
+                // Zod validation error - extract first issue
+                errorMessage = apiError.issues[0]?.message || 'Validation error';
+            } else if (typeof error?.message === 'string') {
+                errorMessage = error.message;
+            }
+
             toast.error(errorMessage);
         },
     });
