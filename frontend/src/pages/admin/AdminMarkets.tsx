@@ -189,8 +189,11 @@ export function AdminMarkets() {
         },
         onSuccess: () => {
             toast.success('Jackpot created successfully!');
-            queryClient.invalidateQueries({ queryKey: ['admin-jackpot'] });
-            queryClient.invalidateQueries({ queryKey: ['jackpot'] });
+            // Force immediate refresh of jackpot data
+            queryClient.refetchQueries({ queryKey: ['admin-jackpot'] });
+            queryClient.refetchQueries({ queryKey: ['jackpot'] });
+            // Also refetch sports data so badge shows immediately
+            queryClient.refetchQueries({ queryKey: ['admin-sports-events'] });
             setSelectedEvent(null);
         },
         onError: (error: any) => {
