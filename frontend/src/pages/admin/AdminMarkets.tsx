@@ -6,22 +6,49 @@ import { api } from '@/services/api';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-// Football leagues - same as Browse Markets page (Polymarket series IDs)
+// Football leagues - COMPLETE list matching Browse Markets page
 const sportCategories = [
+    // All Football option
+    { key: 'all', label: '⚽ All Football' },
     // Featured
     { key: '10188', label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League' },
     { key: '10204', label: '🏆 Champions League' },
+    { key: '10193', label: '🇪🇸 La Liga' },
+    { key: '10203', label: '🇮🇹 Serie A' },
+    { key: '10194', label: '🇩🇪 Bundesliga' },
+    { key: '10195', label: '🇫🇷 Ligue 1' },
+    // Europe
     { key: '10209', label: '🏆 Europa League' },
     { key: '10437', label: '🏆 Conference League' },
-    { key: '10193', label: '🇪🇸 La Liga' },
-    { key: '10194', label: '🇩🇪 Bundesliga' },
-    { key: '10203', label: '🇮🇹 Serie A' },
-    { key: '10195', label: '🇫🇷 Ligue 1' },
+    { key: '10286', label: '🇳🇱 Eredivisie' },
+    { key: '10330', label: '🇵🇹 Liga Portugal' },
+    { key: '10292', label: '🇹🇷 Süper Lig' },
+    // Cups
+    { key: '10307', label: '🏆 FA Cup' },
+    { key: '10230', label: '🏆 EFL Cup' },
+    { key: '10316', label: '🏆 Copa del Rey' },
+    { key: '10317', label: '🏆 DFB-Pokal' },
+    // Africa
+    { key: '10786', label: '🌍 AFCON' },
+    { key: '10240', label: '🌍 CAF' },
+    // Americas
+    { key: '10189', label: '🇺🇸 MLS' },
+    { key: '10290', label: '🇲🇽 Liga MX' },
+    { key: '10285', label: '🇦🇷 Argentina' },
+    { key: '10359', label: '🇧🇷 Brasileirão' },
+    { key: '10289', label: '🏆 Libertadores' },
+    // Asia
+    { key: '10360', label: '🇯🇵 J-League' },
+    { key: '10361', label: '🇸🇦 Saudi Pro' },
+    { key: '10444', label: '🇰🇷 K League' },
+    { key: '10438', label: '🇦🇺 A-League' },
     // Other Sports
     { key: '10345', label: '🏀 NBA' },
     { key: '10187', label: '🏈 NFL' },
     { key: '10346', label: '🏒 NHL' },
     { key: '10500', label: '🥊 UFC/MMA' },
+    { key: '10365', label: '🎾 Tennis ATP' },
+    { key: '10470', label: '🏀 NCAA Basketball' },
 ];
 
 // Polymarket categories
@@ -63,7 +90,9 @@ export function AdminMarkets() {
     // Fetch sports events from Polymarket (same source as Browse Markets)
     const { data: sportsData, isLoading: loadingSports, refetch: refetchSports } = useQuery({
         queryKey: ['admin-sports-events', selectedSport],
-        queryFn: () => api.getPolymarketSportsEvents(selectedSport),
+        queryFn: () => selectedSport === 'all'
+            ? api.getAllFootballEvents()
+            : api.getPolymarketSportsEvents(selectedSport),
         staleTime: 5 * 60 * 1000,
         enabled: eventSource === 'sports',
     });
