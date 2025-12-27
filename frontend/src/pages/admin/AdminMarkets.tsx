@@ -6,19 +6,22 @@ import { api } from '@/services/api';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-// Sports categories from The Odds API - updated with UEFA leagues
+// Football leagues - same as Browse Markets page (Polymarket series IDs)
 const sportCategories = [
-    { key: 'soccer_epl', label: 'Premier League' },
-    { key: 'soccer_uefa_champs_league', label: 'Champions League' },
-    { key: 'soccer_uefa_europa_league', label: 'Europa League' },
-    { key: 'soccer_uefa_europa_conference_league', label: 'Conference League' },
-    { key: 'soccer_spain_la_liga', label: 'La Liga' },
-    { key: 'soccer_germany_bundesliga', label: 'Bundesliga' },
-    { key: 'soccer_italy_serie_a', label: 'Serie A' },
-    { key: 'soccer_france_ligue_one', label: 'Ligue 1' },
-    { key: 'basketball_nba', label: 'NBA' },
-    { key: 'americanfootball_nfl', label: 'NFL' },
-    { key: 'mma_mixed_martial_arts', label: 'MMA/UFC' },
+    // Featured
+    { key: '10188', label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League' },
+    { key: '10204', label: '🏆 Champions League' },
+    { key: '10209', label: '🏆 Europa League' },
+    { key: '10437', label: '🏆 Conference League' },
+    { key: '10193', label: '🇪🇸 La Liga' },
+    { key: '10194', label: '🇩🇪 Bundesliga' },
+    { key: '10203', label: '🇮🇹 Serie A' },
+    { key: '10195', label: '🇫🇷 Ligue 1' },
+    // Other Sports
+    { key: '10345', label: '🏀 NBA' },
+    { key: '10187', label: '🏈 NFL' },
+    { key: '10346', label: '🏒 NHL' },
+    { key: '10500', label: '🥊 UFC/MMA' },
 ];
 
 // Polymarket categories
@@ -50,17 +53,17 @@ interface ExternalEvent {
 
 export function AdminMarkets() {
     const [eventSource, setEventSource] = useState<'sports' | 'polymarket' | 'myevents'>('sports');
-    const [selectedSport, setSelectedSport] = useState('soccer_epl');
+    const [selectedSport, setSelectedSport] = useState('10188'); // Premier League as default
     const [selectedPolyCategory, setSelectedPolyCategory] = useState('crypto');
     const [selectedEvent, setSelectedEvent] = useState<ExternalEvent | null>(null);
     const [ticketPrice, setTicketPrice] = useState('10');
     const [ticketLimit, setTicketLimit] = useState('1000');
     const queryClient = useQueryClient();
 
-    // Fetch sports events from Odds API
+    // Fetch sports events from Polymarket (same source as Browse Markets)
     const { data: sportsData, isLoading: loadingSports, refetch: refetchSports } = useQuery({
-        queryKey: ['admin-external-events', selectedSport],
-        queryFn: () => api.getExternalEvents(selectedSport),
+        queryKey: ['admin-sports-events', selectedSport],
+        queryFn: () => api.getPolymarketSportsEvents(selectedSport),
         staleTime: 5 * 60 * 1000,
         enabled: eventSource === 'sports',
     });
