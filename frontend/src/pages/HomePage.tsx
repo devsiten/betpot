@@ -533,7 +533,7 @@ export function HomePage() {
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
-              <Edit2 className="w-4 h-4" /> BetPot News
+              <Edit2 className="w-4 h-4" /> BetPot News/Blog
             </button>
           </div>
           <Link to="/events" className="btn btn-ghost text-sm">

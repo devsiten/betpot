@@ -270,6 +270,7 @@ export function MainLayout() {
     { to: '/jackpot', label: 'Jackpot', icon: Trophy },
     { to: '/events', label: 'Markets', icon: Calendar },
     { to: '/how-it-works', label: 'How it Works', icon: BookOpen },
+    { to: '/testnet-guide', label: 'Testnet Guide', icon: BookOpen },
   ];
 
   return (

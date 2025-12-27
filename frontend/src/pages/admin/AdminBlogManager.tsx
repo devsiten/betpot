@@ -17,7 +17,7 @@ interface BlogPost {
     createdAt: string;
 }
 
-const categories = ['announcement', 'tips', 'crypto', 'sports', 'updates'];
+const categories = ['announcement', 'news', 'tips', 'crypto', 'sports', 'updates'];
 
 export function AdminBlogManager() {
     const queryClient = useQueryClient();

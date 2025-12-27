@@ -3,7 +3,8 @@ import type { AppContext } from '../types';
 
 export const newsRoutes = new Hono<AppContext>();
 
-const NEWSAPI_KEY = '8zH-dNtY3Vx-c4FE6rAzNuupNOQXje5gMaCwgHwkmBBfoQOq';
+// GNews API is free and works from servers (unlike NewsAPI)
+const GNEWS_API_KEY = '4a6c1c2be5d40d28e2a83acdf419d0e0';
 const CRYPTOPANIC_TOKEN = 'afb6de40dc334fdd5296285f13a421fd8887524d';
 
 interface NewsArticle {
@@ -36,9 +37,9 @@ newsRoutes.get('/', async (c) => {
                 articles = data.results.slice(0, 20).map((item: any, index: number) => ({
                     id: item.id?.toString() || `crypto-${index}`,
                     title: item.title || '',
-                    description: item.title || '', // CryptoPanic doesn't have descriptions
+                    description: item.title || '',
                     content: item.title || '',
-                    imageUrl: null, // CryptoPanic doesn't provide images
+                    imageUrl: null,
                     source: item.source?.title || 'CryptoPanic',
                     category: 'crypto',
                     publishedAt: item.published_at || new Date().toISOString(),
@@ -46,10 +47,10 @@ newsRoutes.get('/', async (c) => {
                 }));
             }
         } else {
-            // Use NewsAPI for other categories
+            // Use GNews for other categories (works from servers)
             const categoryMap: Record<string, string> = {
                 sports: 'sports',
-                politics: 'politics',
+                politics: 'nation',
                 entertainment: 'entertainment',
                 general: 'general',
             };
@@ -57,9 +58,11 @@ newsRoutes.get('/', async (c) => {
             const newsCategory = categoryMap[category] || 'general';
 
             const response = await fetch(
-                `https://newsapi.org/v2/top-headlines?category=${newsCategory}&language=en&pageSize=20&apiKey=${NEWSAPI_KEY}`
+                `https://gnews.io/api/v4/top-headlines?category=${newsCategory}&lang=en&max=20&apikey=${GNEWS_API_KEY}`
             );
             const data: any = await response.json();
+
+            console.log('GNews response:', JSON.stringify(data).substring(0, 500));
 
             if (data.articles) {
                 articles = data.articles.map((item: any, index: number) => ({
@@ -67,7 +70,7 @@ newsRoutes.get('/', async (c) => {
                     title: item.title || '',
                     description: item.description || '',
                     content: item.content || item.description || '',
-                    imageUrl: item.urlToImage || null,
+                    imageUrl: item.image || null,
                     source: item.source?.name || 'News',
                     category: category,
                     publishedAt: item.publishedAt || new Date().toISOString(),
@@ -88,8 +91,6 @@ newsRoutes.get('/:id', async (c) => {
     const { id } = c.req.param();
     const url = c.req.query('url');
 
-    // For external news, we just return the URL info
-    // The frontend will display whatever data was passed
     return c.json({
         success: true,
         data: { id, url },
