@@ -307,25 +307,6 @@ export function EventDetailPage() {
               : 0;
             const isWinner = 'isWinner' in option && option.isWinner;
 
-            // Color based on option label
-            const lbl = option.label?.toLowerCase() || '';
-            const isPositive = lbl === 'yes' || lbl === 'home';
-            const isNegative = lbl === 'no' || lbl === 'away';
-
-            const labelColor = isPositive
-              ? 'border-green-400 bg-green-50 dark:bg-green-900/30 dark:border-green-700'
-              : isNegative
-                ? 'border-red-400 bg-red-50 dark:bg-red-900/30 dark:border-red-700'
-                : 'border-gray-300 bg-gray-100 dark:bg-gray-800 dark:border-gray-700';
-
-            console.log('Rendering option:', {
-              label: option.label,
-              optId,
-              isOpen,
-              disabled: !isOpen,
-              isSelected
-            });
-
             return (
               <button
                 key={optId}
@@ -346,10 +327,10 @@ export function EventDetailPage() {
                 disabled={!isOpen}
                 className={clsx(
                   'w-full p-4 rounded-xl border-2 text-left transition-all relative overflow-hidden',
-                  isOpen && 'cursor-pointer hover:border-dark-600',
+                  isOpen && 'cursor-pointer hover:border-brand-400',
                   isSelected && 'border-positive-500 bg-positive-500/10',
                   isWinner && 'border-green-500 bg-green-500/10',
-                  !isSelected && !isWinner && labelColor
+                  !isSelected && !isWinner && 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
                 )}
               >
                 <div className="relative z-10 flex items-center justify-between">
