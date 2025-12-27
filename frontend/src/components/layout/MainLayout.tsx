@@ -39,30 +39,32 @@ function ConnectButton() {
       const selectedWallet = supportedWallets.find(w => w.adapter.name === walletName);
 
       if (selectedWallet) {
+        // First select the wallet
         select(selectedWallet.adapter.name as any);
         setShowModal(false);
 
-        // Give time for selection to register, then connect
-        setTimeout(async () => {
-          try {
-            await connect();
-            console.log('Connected successfully');
-          } catch (err) {
-            console.error('Connect failed:', err);
-            // For Solflare on mobile, try direct adapter connect
-            if (walletName === 'Solflare') {
-              try {
-                await selectedWallet.adapter.connect();
-              } catch (e) {
-                console.error('Direct adapter connect failed:', e);
-              }
+        // Try direct adapter connect immediately (this triggers the popup)
+        try {
+          console.log('Attempting direct adapter connect...');
+          await selectedWallet.adapter.connect();
+          console.log('Direct connect successful');
+        } catch (directErr) {
+          console.log('Direct connect failed, trying standard connect...', directErr);
+          // Fallback to standard connect with longer delay
+          setTimeout(async () => {
+            try {
+              await connect();
+              console.log('Standard connect successful');
+            } catch (err) {
+              console.error('Standard connect failed:', err);
+              toast.error('Failed to open wallet. Please try clicking the wallet extension icon directly.');
             }
-          }
-        }, 100);
+          }, 300);
+        }
       }
     } catch (error) {
       console.error('Wallet select error:', error);
-      toast.error('Failed to connect wallet');
+      toast.error('Failed to connect wallet. Please try again.');
     }
   };
 
