@@ -119,10 +119,27 @@ export function EventsPage() {
   const isLoading = selectedCategory === 'sports' ? loadingSports : loadingPolymarket;
   const refetch = selectedCategory === 'sports' ? refetchSports : refetchPolymarket;
 
-  // Get events based on category
-  const allEvents = selectedCategory === 'sports'
+  // Get events based on category with FRONTEND DEDUPLICATION
+  const rawEvents = selectedCategory === 'sports'
     ? (sportsData?.data || [])
     : (polymarketData?.data || []);
+
+  // Deduplicate: remove events with same teams (catch "More Markets" variants)
+  const seenMatches = new Set<string>();
+  const allEvents = rawEvents.filter((event: any) => {
+    // Skip events with "More Markets" in title - they're duplicates
+    if (event.title?.includes('More Markets')) return false;
+
+    // Normalize team names for matching
+    const homeTeam = (event.homeTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const awayTeam = (event.awayTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (homeTeam && awayTeam) {
+      const matchKey = [homeTeam, awayTeam].sort().join('_vs_');
+      if (seenMatches.has(matchKey)) return false;
+      seenMatches.add(matchKey);
+    }
+    return true;
+  });
 
   const events = allEvents.slice(0, displayCount);
   const hasMore = allEvents.length > displayCount;
@@ -186,24 +203,21 @@ export function EventsPage() {
           {event.options && event.options.length > 0 ? (
             <div className="grid grid-cols-3 gap-2">
               {event.options.slice(0, 3).map((option: any, idx: number) => {
-                // Determine the display label and color
-                let displayLabel = option.label;
+                // Show ACTUAL TEAM NAMES, not generic Home/Draw/Away
+                let displayLabel = option.label || (idx === 0 ? event.homeTeam : idx === 2 ? event.awayTeam : 'Draw');
+                let typeLabel = idx === 0 ? 'HOME' : idx === 1 ? 'DRAW' : 'AWAY';
                 let bgColor = 'bg-positive-100';
                 let borderColor = 'border-positive-200';
                 let textColor = 'text-positive-700';
 
-                if (option.type === 'home' || idx === 0) {
-                  displayLabel = 'Home';
-                  bgColor = 'bg-positive-100';
-                  borderColor = 'border-positive-200';
-                  textColor = 'text-positive-700';
-                } else if (option.type === 'draw' || option.label === 'Draw') {
+                if (option.type === 'draw' || option.label === 'Draw' || idx === 1) {
+                  typeLabel = 'DRAW';
                   displayLabel = 'Draw';
                   bgColor = 'bg-background-secondary';
                   borderColor = 'border-border-dark';
                   textColor = 'text-text-secondary';
                 } else if (option.type === 'away' || idx === 2) {
-                  displayLabel = 'Away';
+                  typeLabel = 'AWAY';
                   bgColor = 'bg-negative-100';
                   borderColor = 'border-negative-200';
                   textColor = 'text-negative-600';
@@ -218,10 +232,10 @@ export function EventsPage() {
                     )}
                   >
                     <span className={clsx('block text-xs font-bold uppercase tracking-wider mb-1', textColor)}>
-                      {displayLabel}
+                      {typeLabel}
                     </span>
-                    <span className={clsx('block text-sm font-medium', textColor)}>
-                      {option.label}
+                    <span className={clsx('block text-sm font-medium line-clamp-2', textColor)}>
+                      {displayLabel}
                     </span>
                   </div>
                 );
