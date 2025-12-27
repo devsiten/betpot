@@ -310,15 +310,15 @@ export function HomePage() {
 
   // Render LIVE match card (with scores)
   const renderLiveCard = (event: any) => (
-    <div key={event.id} className="card p-0 overflow-hidden bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-200 dark:border-red-800">
-      <div className="p-4 border-b border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/30">
+    <div key={event.id} className="card p-0 overflow-hidden bg-gradient-to-br from-positive-50 to-green-50 dark:from-positive-900/20 dark:to-green-900/20 border-positive-200 dark:border-positive-800">
+      <div className="p-4 border-b border-positive-200 dark:border-positive-800 bg-positive-50/50 dark:bg-positive-900/30">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-positive-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-positive-500"></span>
             </span>
-            <span className="text-xs font-bold text-red-600 dark:text-red-400">
+            <span className="text-xs font-bold text-positive-600 dark:text-positive-400">
               {event.elapsed ? `${event.elapsed}'` : 'LIVE'}
             </span>
           </div>
@@ -503,13 +503,13 @@ export function HomePage() {
               className={clsx(
                 'flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase text-sm tracking-wider transition-all',
                 activeTab === 'live'
-                  ? 'bg-gradient-to-r from-red-500 to-red-400 text-white shadow-soft'
+                  ? 'bg-gradient-to-r from-positive-500 to-green-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-positive-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-positive-500"></span>
               </span>
               Live
             </button>
