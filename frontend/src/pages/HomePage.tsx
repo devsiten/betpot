@@ -348,7 +348,7 @@ export function HomePage() {
             <span className="text-3xl font-black text-text-primary dark:text-white">
               {event.homeScore ?? 0} - {event.awayScore ?? 0}
             </span>
-            <span className="block text-[10px] text-red-500 dark:text-red-400 font-mono mt-1">
+            <span className="block text-[10px] text-positive-500 dark:text-positive-400 font-mono mt-1">
               {event.status}
             </span>
           </div>
