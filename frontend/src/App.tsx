@@ -21,6 +21,8 @@ import { JackpotResultsPage } from '@/pages/JackpotResultsPage';
 import { TestnetGuidePage } from '@/pages/TestnetGuidePage';
 import { EventChatPage } from '@/pages/EventChatPage';
 import { HowItWorksPage } from '@/pages/HowItWorksPage';
+import { NewsPage } from '@/pages/NewsPage';
+import { BetPotNewsPage, BetPotNewsPostPage } from '@/pages/BetPotNewsPage';
 
 // Admin pages
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
@@ -138,6 +140,9 @@ function AppContent() {
         <Route path="/dashboard" element={<AdminDashboardWrapper />} />
         <Route path="/testnet-guide" element={<TestnetGuidePage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/betpot-news" element={<BetPotNewsPage />} />
+        <Route path="/betpot-news/:id" element={<BetPotNewsPostPage />} />
         <Route path="/events/:eventId/chat" element={<EventChatPage />} />
       </Route>
 

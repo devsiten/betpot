@@ -597,6 +597,49 @@ class ApiService {
     const { data } = await this.client.put<ApiResponse<any>>(`/notifications/read-all`);
     return data;
   }
+
+  // ============================================================================
+  // NEWS (External)
+  // ============================================================================
+
+  async getNews(category: string = 'sports') {
+    const { data } = await this.client.get<ApiResponse<any>>(`/news?category=${category}`);
+    return data;
+  }
+
+  // ============================================================================
+  // BLOG (BetPot News/Blog)
+  // ============================================================================
+
+  async getBlogPosts() {
+    const { data } = await this.client.get<ApiResponse<any>>(`/blog`);
+    return data;
+  }
+
+  async getBlogPost(id: string) {
+    const { data } = await this.client.get<ApiResponse<any>>(`/blog/${id}`);
+    return data;
+  }
+
+  async getAdminBlogPosts() {
+    const { data } = await this.client.get<ApiResponse<any>>(`/blog/admin/all`);
+    return data;
+  }
+
+  async createBlogPost(post: { title: string; content: string; excerpt?: string; imageUrl?: string; category?: string; isPublished?: boolean }) {
+    const { data } = await this.client.post<ApiResponse<any>>(`/blog/admin/create`, post);
+    return data;
+  }
+
+  async updateBlogPost(id: string, post: Partial<{ title: string; content: string; excerpt?: string; imageUrl?: string; category?: string; isPublished?: boolean }>) {
+    const { data } = await this.client.put<ApiResponse<any>>(`/blog/admin/${id}`, post);
+    return data;
+  }
+
+  async deleteBlogPost(id: string) {
+    const { data } = await this.client.delete<ApiResponse<any>>(`/blog/admin/${id}`);
+    return data;
+  }
 }
 
 export const api = new ApiService();
