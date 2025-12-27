@@ -87,7 +87,18 @@ export function DashboardPage() {
         try {
             // Sign a message to verify ownership
             const message = new TextEncoder().encode(`Claim all winnings: ${Date.now()}`);
-            const signature = await signMessage(message);
+            let signature;
+            try {
+                signature = await signMessage(message);
+            } catch (signError: any) {
+                console.error('Wallet signing error:', signError);
+                if (signError.message?.includes('rejected')) {
+                    toast.error('Signing cancelled. Please approve the signature request.');
+                } else {
+                    toast.error('Wallet signing failed. Please reconnect your wallet and try again.');
+                }
+                return;
+            }
             const signatureBase64 = Buffer.from(signature).toString('base64');
 
             const result = await api.claimAllTickets(publicKey.toBase58(), signatureBase64);
