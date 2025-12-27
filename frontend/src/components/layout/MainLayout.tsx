@@ -23,29 +23,27 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Use the official Solana wallet adapter button for maximum stability
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+// Use the official Solana wallet adapter modal for stability
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 
-// Styled wrapper for the wallet button to match our design
+// Custom Connect Wallet button that uses the official modal
 function ConnectButton() {
-  const { connected } = useWallet();
+  const { connected, connecting } = useWallet();
+  const { setVisible } = useWalletModal();
 
   if (connected) {
     return null; // Don't show if connected - we handle connected state elsewhere
   }
 
   return (
-    <WalletMultiButton
-      style={{
-        backgroundColor: 'transparent',
-        border: '1px solid #e5e7eb',
-        borderRadius: '0.5rem',
-        padding: '0.625rem 1.25rem',
-        fontSize: '0.875rem',
-        fontWeight: '600',
-        height: 'auto',
-      }}
-    />
+    <button
+      onClick={() => setVisible(true)}
+      disabled={connecting}
+      className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-all disabled:opacity-50 border border-gray-200 dark:border-gray-700 whitespace-nowrap"
+    >
+      <Wallet className="w-4 h-4" />
+      {connecting ? 'Connecting...' : 'Connect Wallet'}
+    </button>
   );
 }
 
