@@ -267,28 +267,51 @@ export function DashboardPage() {
                 </div>
             </div>
 
-            {/* Claimable Earnings Card - Only shows when there's something to claim */}
-            {totalClaimable > 0 && (
-                <div className="bg-gradient-to-br from-positive-50 via-positive-100 to-positive-50 rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8 border-2 border-positive-300 shadow-lg relative overflow-hidden">
-                    {/* Decorative elements */}
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-positive-200 rounded-full blur-2xl opacity-50" />
-                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-40" />
+            {/* Claimable Earnings Card - Always visible */}
+            <div className={clsx(
+                'rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8 border-2 shadow-lg relative overflow-hidden',
+                totalClaimable > 0
+                    ? 'bg-gradient-to-br from-positive-50 via-positive-100 to-positive-50 border-positive-300'
+                    : 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-800 dark:via-gray-850 dark:to-gray-800 border-gray-200 dark:border-gray-700'
+            )}>
+                {/* Decorative elements */}
+                {totalClaimable > 0 && (
+                    <>
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-positive-200 rounded-full blur-2xl opacity-50" />
+                        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-40" />
+                    </>
+                )}
 
-                    <div className="relative">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            {/* Left side - Info */}
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-10 h-10 rounded-xl bg-positive-500 flex items-center justify-center">
-                                        <Gift className="w-5 h-5 text-white" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-positive-800">Claimable Earnings</h3>
-                                        <p className="text-xs text-positive-600">{claimableTickets.length} ticket{claimableTickets.length !== 1 ? 's' : ''} ready to claim</p>
-                                    </div>
+                <div className="relative">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        {/* Left side - Info */}
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className={clsx(
+                                    'w-10 h-10 rounded-xl flex items-center justify-center',
+                                    totalClaimable > 0 ? 'bg-positive-500' : 'bg-gray-400 dark:bg-gray-600'
+                                )}>
+                                    <Gift className="w-5 h-5 text-white" />
                                 </div>
+                                <div>
+                                    <h3 className={clsx(
+                                        'text-lg font-bold',
+                                        totalClaimable > 0 ? 'text-positive-800' : 'text-gray-700 dark:text-gray-300'
+                                    )}>Claimable Earnings</h3>
+                                    <p className={clsx(
+                                        'text-xs',
+                                        totalClaimable > 0 ? 'text-positive-600' : 'text-gray-500 dark:text-gray-400'
+                                    )}>
+                                        {claimableTickets.length > 0
+                                            ? `${claimableTickets.length} ticket${claimableTickets.length !== 1 ? 's' : ''} ready to claim`
+                                            : 'No tickets to claim'
+                                        }
+                                    </p>
+                                </div>
+                            </div>
 
-                                {/* Amount breakdown */}
+                            {/* Amount breakdown - only show if there's something to claim */}
+                            {totalClaimable > 0 && (
                                 <div className="mt-4 space-y-2">
                                     {claimableWinnings > 0 && (
                                         <div className="flex items-center justify-between bg-white/60 rounded-lg px-3 py-2">
@@ -309,42 +332,55 @@ export function DashboardPage() {
                                         </div>
                                     )}
                                 </div>
+                            )}
+                        </div>
+
+                        {/* Right side - Total & Button */}
+                        <div className="flex flex-col items-center lg:items-end gap-3">
+                            <div className="text-center lg:text-right">
+                                <p className={clsx(
+                                    'text-xs uppercase tracking-wider font-medium',
+                                    totalClaimable > 0 ? 'text-positive-600' : 'text-gray-500 dark:text-gray-400'
+                                )}>Total Available</p>
+                                <p className={clsx(
+                                    'text-3xl sm:text-4xl font-bold',
+                                    totalClaimable > 0 ? 'text-positive-700' : 'text-gray-400 dark:text-gray-500'
+                                )}>${totalClaimable.toFixed(2)}</p>
                             </div>
 
-                            {/* Right side - Total & Button */}
-                            <div className="flex flex-col items-center lg:items-end gap-3">
-                                <div className="text-center lg:text-right">
-                                    <p className="text-xs text-positive-600 uppercase tracking-wider font-medium">Total Available</p>
-                                    <p className="text-3xl sm:text-4xl font-bold text-positive-700">${totalClaimable.toFixed(2)}</p>
-                                </div>
-
-                                <button
-                                    onClick={handleClaimAll}
-                                    disabled={isClaiming}
-                                    className={clsx(
-                                        'flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-all shadow-lg',
-                                        isClaiming
-                                            ? 'bg-positive-400 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-positive-500 to-positive-600 hover:from-positive-600 hover:to-positive-700 hover:shadow-xl hover:scale-[1.02]'
-                                    )}
-                                >
-                                    {isClaiming ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            Claiming...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <DollarSign className="w-5 h-5" />
-                                            Claim All ${totalClaimable.toFixed(2)}
-                                        </>
-                                    )}
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleClaimAll}
+                                disabled={isClaiming || totalClaimable === 0}
+                                className={clsx(
+                                    'flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg',
+                                    totalClaimable > 0
+                                        ? isClaiming
+                                            ? 'bg-positive-400 text-white cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-positive-500 to-positive-600 hover:from-positive-600 hover:to-positive-700 text-white hover:shadow-xl hover:scale-[1.02]'
+                                        : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                )}
+                            >
+                                {isClaiming ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Claiming...
+                                    </>
+                                ) : totalClaimable > 0 ? (
+                                    <>
+                                        <DollarSign className="w-5 h-5" />
+                                        Claim All ${totalClaimable.toFixed(2)}
+                                    </>
+                                ) : (
+                                    <>
+                                        <DollarSign className="w-5 h-5" />
+                                        Nothing to Claim
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Stats Grid - Light theme cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -362,6 +398,9 @@ export function DashboardPage() {
                         <p className="text-xs text-positive-700 dark:text-positive-300 uppercase tracking-wider font-medium">Total Wins</p>
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-positive-600">{(stats?.wonTickets || 0) + (stats?.claimedTickets || 0)}</p>
+                    <p className="text-sm text-positive-600 dark:text-positive-400 font-medium mt-1">
+                        +${(Number(stats?.totalWinnings) || 0).toFixed(2)}
+                    </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-negative-100 to-negative-50 dark:from-negative-900/30 dark:to-negative-800/30 rounded-xl p-4 sm:p-5 border border-negative-200 dark:border-negative-800">
@@ -370,6 +409,9 @@ export function DashboardPage() {
                         <p className="text-xs text-negative-600 dark:text-negative-300 uppercase tracking-wider font-medium">Total Losses</p>
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-negative-500 dark:text-negative-400">{stats?.lostTickets || 0}</p>
+                    <p className="text-sm text-negative-500 dark:text-negative-400 font-medium mt-1">
+                        -${((Number(stats?.totalSpent) || 0) - (Number(stats?.totalWinnings) || 0)).toFixed(2)}
+                    </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-brand-100 to-brand-50 dark:from-brand-900/30 dark:to-brand-800/30 rounded-xl p-4 sm:p-5 border border-brand-200 dark:border-brand-800">
