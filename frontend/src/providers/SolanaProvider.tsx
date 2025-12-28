@@ -1,6 +1,5 @@
 import { FC, ReactNode, createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
-import Solflare from '@solflare-wallet/sdk';
 
 // RPC Endpoint
 const RPC_ENDPOINT = 'https://devnet.helius-rpc.com/?api-key=e495db18-fb79-4c7b-9750-5bf08d316aaf';
@@ -61,21 +60,22 @@ export function useWalletModal() {
     return useContext(WalletModalContext);
 }
 
-// Solflare instance (singleton)
-let solflareWallet: Solflare | null = null;
-
-function getSolflareWallet(): Solflare {
-    if (!solflareWallet) {
-        solflareWallet = new Solflare({ network: 'devnet' });
-    }
-    return solflareWallet;
-}
-
-// Get Phantom provider
+// Get Phantom provider from window
 function getPhantomProvider(): any | null {
     if (typeof window !== 'undefined' && 'phantom' in window) {
         const provider = (window as any).phantom?.solana;
         if (provider?.isPhantom) {
+            return provider;
+        }
+    }
+    return null;
+}
+
+// Get Solflare provider from window (extension)
+function getSolflareProvider(): any | null {
+    if (typeof window !== 'undefined' && 'solflare' in window) {
+        const provider = (window as any).solflare;
+        if (provider?.isSolflare) {
             return provider;
         }
     }
@@ -88,11 +88,15 @@ function CustomWalletModal() {
     const { connect, connecting } = useWallet();
 
     const phantomInstalled = typeof window !== 'undefined' && getPhantomProvider() !== null;
-    const solflareInstalled = typeof window !== 'undefined' && 'solflare' in window;
+    const solflareInstalled = typeof window !== 'undefined' && getSolflareProvider() !== null;
 
     const handleConnect = async (type: WalletType) => {
-        await connect(type);
-        setVisible(false);
+        try {
+            await connect(type);
+            setVisible(false);
+        } catch (error) {
+            console.error('Connect error:', error);
+        }
     };
 
     if (!visible) return null;
@@ -152,9 +156,14 @@ function CustomWalletModal() {
                         <div className="flex-1 text-left">
                             <p className="font-semibold text-gray-900 dark:text-white">Solflare</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {solflareInstalled ? 'Detected' : 'Click to connect'}
+                                {solflareInstalled ? 'Detected' : 'Not installed'}
                             </p>
                         </div>
+                        {!solflareInstalled && (
+                            <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                                Install
+                            </span>
+                        )}
                     </button>
                 </div>
 
@@ -174,7 +183,7 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [walletType, setWalletType] = useState<WalletType>(null);
     const [modalVisible, setModalVisible] = useState(false);
 
-    // Connect function
+    // Connect function - uses window providers directly (no SDK)
     const connect = useCallback(async (type: WalletType) => {
         if (!type) return;
 
@@ -184,6 +193,7 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 const provider = getPhantomProvider();
                 if (!provider) {
                     window.open('https://phantom.app/', '_blank');
+                    setConnecting(false);
                     return;
                 }
 
@@ -195,11 +205,17 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 localStorage.setItem(WALLET_STORAGE_KEY, 'phantom');
 
             } else if (type === 'solflare') {
-                const wallet = getSolflareWallet();
-                await wallet.connect();
+                const provider = getSolflareProvider();
+                if (!provider) {
+                    window.open('https://solflare.com/', '_blank');
+                    setConnecting(false);
+                    return;
+                }
 
-                if (wallet.publicKey) {
-                    setPublicKey(wallet.publicKey);
+                await provider.connect();
+
+                if (provider.publicKey) {
+                    setPublicKey(new PublicKey(provider.publicKey.toString()));
                     setConnected(true);
                     setWalletType('solflare');
                     localStorage.setItem(WALLET_STORAGE_KEY, 'solflare');
@@ -221,8 +237,10 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                     await provider.disconnect();
                 }
             } else if (walletType === 'solflare') {
-                const wallet = getSolflareWallet();
-                await wallet.disconnect();
+                const provider = getSolflareProvider();
+                if (provider) {
+                    await provider.disconnect();
+                }
             }
         } catch (error) {
             console.error('Disconnect error:', error);
@@ -242,8 +260,9 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
             const { signature } = await provider.signMessage(message, 'utf8');
             return signature;
         } else if (walletType === 'solflare') {
-            const wallet = getSolflareWallet();
-            const signature = await wallet.signMessage(message, 'utf8');
+            const provider = getSolflareProvider();
+            if (!provider) throw new Error('Solflare not connected');
+            const { signature } = await provider.signMessage(message, 'utf8');
             return signature;
         }
         throw new Error('No wallet connected');
@@ -251,30 +270,25 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     // Send transaction
     const sendTransaction = useCallback(async (transaction: Transaction, conn: Connection): Promise<string> => {
+        const { blockhash } = await conn.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = publicKey!;
+
         if (walletType === 'phantom') {
             const provider = getPhantomProvider();
             if (!provider) throw new Error('Phantom not connected');
-
-            const { blockhash } = await conn.getLatestBlockhash();
-            transaction.recentBlockhash = blockhash;
-            transaction.feePayer = publicKey!;
-
             const { signature } = await provider.signAndSendTransaction(transaction);
             return signature;
         } else if (walletType === 'solflare') {
-            const wallet = getSolflareWallet();
-
-            const { blockhash } = await conn.getLatestBlockhash();
-            transaction.recentBlockhash = blockhash;
-            transaction.feePayer = publicKey!;
-
-            const signature = await wallet.signAndSendTransaction(transaction);
+            const provider = getSolflareProvider();
+            if (!provider) throw new Error('Solflare not connected');
+            const { signature } = await provider.signAndSendTransaction(transaction);
             return signature;
         }
         throw new Error('No wallet connected');
     }, [walletType, publicKey]);
 
-    // Auto-connect on mount - check localStorage for previously connected wallet
+    // Auto-connect on mount
     useEffect(() => {
         const autoConnect = async () => {
             const savedWalletType = localStorage.getItem(WALLET_STORAGE_KEY) as WalletType;
@@ -283,69 +297,67 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 const provider = getPhantomProvider();
                 if (provider) {
                     try {
-                        // Try silent connect (only if previously approved)
                         const response = await provider.connect({ onlyIfTrusted: true });
                         setPublicKey(new PublicKey(response.publicKey.toString()));
                         setConnected(true);
                         setWalletType('phantom');
-                        console.log('Auto-connected to Phantom');
                     } catch (e) {
-                        // User hasn't approved before or rejected
                         localStorage.removeItem(WALLET_STORAGE_KEY);
                     }
                 }
             } else if (savedWalletType === 'solflare') {
-                const wallet = getSolflareWallet();
-                try {
-                    await wallet.connect();
-                    if (wallet.publicKey) {
-                        setPublicKey(wallet.publicKey);
+                const provider = getSolflareProvider();
+                if (provider && provider.isConnected) {
+                    try {
+                        setPublicKey(new PublicKey(provider.publicKey.toString()));
                         setConnected(true);
                         setWalletType('solflare');
-                        console.log('Auto-connected to Solflare');
+                    } catch (e) {
+                        localStorage.removeItem(WALLET_STORAGE_KEY);
                     }
-                } catch (e) {
-                    localStorage.removeItem(WALLET_STORAGE_KEY);
                 }
             }
         };
 
-        // Small delay to ensure wallet extensions are loaded
-        setTimeout(autoConnect, 100);
+        setTimeout(autoConnect, 200);
     }, []);
 
-    // Listen for wallet disconnect events
+    // Listen for wallet events
     useEffect(() => {
         const phantomProvider = getPhantomProvider();
+        const solflareProvider = getSolflareProvider();
 
-        const handlePhantomDisconnect = () => {
-            if (walletType === 'phantom') {
-                setConnected(false);
-                setPublicKey(null);
-                setWalletType(null);
-                localStorage.removeItem(WALLET_STORAGE_KEY);
-            }
-        };
-
-        const handlePhantomAccountChange = (newPublicKey: PublicKey | null) => {
-            if (walletType === 'phantom') {
-                if (newPublicKey) {
-                    setPublicKey(new PublicKey(newPublicKey.toString()));
-                } else {
-                    handlePhantomDisconnect();
-                }
-            }
+        const handleDisconnect = () => {
+            setConnected(false);
+            setPublicKey(null);
+            setWalletType(null);
+            localStorage.removeItem(WALLET_STORAGE_KEY);
         };
 
         if (phantomProvider) {
-            phantomProvider.on('disconnect', handlePhantomDisconnect);
-            phantomProvider.on('accountChanged', handlePhantomAccountChange);
+            phantomProvider.on('disconnect', handleDisconnect);
+            phantomProvider.on('accountChanged', (newPk: any) => {
+                if (walletType === 'phantom') {
+                    if (newPk) {
+                        setPublicKey(new PublicKey(newPk.toString()));
+                    } else {
+                        handleDisconnect();
+                    }
+                }
+            });
+        }
+
+        if (solflareProvider) {
+            solflareProvider.on('disconnect', handleDisconnect);
         }
 
         return () => {
             if (phantomProvider) {
-                phantomProvider.removeListener('disconnect', handlePhantomDisconnect);
-                phantomProvider.removeListener('accountChanged', handlePhantomAccountChange);
+                phantomProvider.removeAllListeners?.('disconnect');
+                phantomProvider.removeAllListeners?.('accountChanged');
+            }
+            if (solflareProvider) {
+                solflareProvider.removeAllListeners?.('disconnect');
             }
         };
     }, [walletType]);
