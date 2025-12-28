@@ -41,6 +41,7 @@ const categoryColors: Record<EventCategory, string> = {
 export function AdminEvents() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<'live' | 'week' | 'locked' | 'results'>('live');
   const [filters, setFilters] = useState({
     status: '',
     category: '',
@@ -57,7 +58,7 @@ export function AdminEvents() {
       category: filters.category as EventCategory || undefined,
       search: filters.search || undefined,
       page: filters.page,
-      limit: 20,
+      limit: 50,
     }),
   });
 
@@ -70,16 +71,57 @@ export function AdminEvents() {
     onError: () => toast.error('Failed to lock event'),
   });
 
-  const events = data?.data || [];
+  const allEvents = data?.data || [];
   const pagination = data?.pagination;
+
+  // Filter events based on active tab
+  const getFilteredEvents = () => {
+    switch (activeTab) {
+      case 'live':
+        return allEvents.filter(e => e.status === 'open' || e.status === 'upcoming');
+      case 'week':
+        return allEvents.filter(e => e.status === 'open' || e.status === 'upcoming');
+      case 'locked':
+        return allEvents.filter(e => e.status === 'locked');
+      case 'results':
+        return allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled');
+      default:
+        return allEvents;
+    }
+  };
+
+  // Group events by weekday for "Event of Week" tab
+  const getEventsByWeekday = () => {
+    const events = getFilteredEvents();
+    const grouped: Record<string, typeof events> = {};
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    events.forEach(event => {
+      const dayName = days[new Date(event.eventTime).getDay()];
+      if (!grouped[dayName]) grouped[dayName] = [];
+      grouped[dayName].push(event);
+    });
+
+    return grouped;
+  };
+
+  const events = getFilteredEvents();
+  const eventsByWeekday = activeTab === 'week' ? getEventsByWeekday() : {};
+
+  const tabs = [
+    { id: 'live' as const, label: 'Live', count: allEvents.filter(e => e.status === 'open' || e.status === 'upcoming').length, color: 'text-green-500 border-green-500' },
+    { id: 'week' as const, label: 'Event of Week', count: allEvents.filter(e => e.status === 'open' || e.status === 'upcoming').length, color: 'text-blue-500 border-blue-500' },
+    { id: 'locked' as const, label: 'Locked', count: allEvents.filter(e => e.status === 'locked').length, color: 'text-yellow-500 border-yellow-500' },
+    { id: 'results' as const, label: 'Results', count: allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled').length, color: 'text-purple-500 border-purple-500' },
+  ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Events</h1>
-          <p className="text-dark-400 mt-1">Manage prediction events</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Events</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage prediction events</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
@@ -90,75 +132,33 @@ export function AdminEvents() {
         </button>
       </div>
 
-      {/* Status Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button
-          onClick={() => setFilters({ ...filters, status: 'open', page: 1 })}
-          className={clsx(
-            'card p-4 text-left transition-all border-2',
-            filters.status === 'open' ? 'border-positive-500' : 'border-transparent hover:border-positive-500/50'
-          )}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-3 h-3 bg-positive-500 rounded-full"></span>
-            <span className="text-positive-400 font-bold">Open</span>
-          </div>
-          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'open').length}</p>
-          <p className="text-xs text-dark-400">Accepting bets</p>
-        </button>
-        <button
-          onClick={() => setFilters({ ...filters, status: 'locked', page: 1 })}
-          className={clsx(
-            'card p-4 text-left transition-all border-2',
-            filters.status === 'locked' ? 'border-yellow-500' : 'border-transparent hover:border-yellow-500/50'
-          )}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Lock className="w-4 h-4 text-yellow-400" />
-            <span className="text-yellow-400 font-bold">Locked</span>
-          </div>
-          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'locked').length}</p>
-          <p className="text-xs text-dark-400">Waiting for result</p>
-        </button>
-        <button
-          onClick={() => setFilters({ ...filters, status: 'resolved', page: 1 })}
-          className={clsx(
-            'card p-4 text-left transition-all border-2',
-            filters.status === 'resolved' ? 'border-purple-500' : 'border-transparent hover:border-purple-500/50'
-          )}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Trophy className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-400 font-bold">Resolved</span>
-          </div>
-          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'resolved').length}</p>
-          <p className="text-xs text-dark-400">Winners paid</p>
-        </button>
-        <button
-          onClick={() => setFilters({ ...filters, status: 'cancelled', page: 1 })}
-          className={clsx(
-            'card p-4 text-left transition-all border-2',
-            filters.status === 'cancelled' ? 'border-red-500' : 'border-transparent hover:border-red-500/50'
-          )}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <XCircle className="w-4 h-4 text-red-400" />
-            <span className="text-red-400 font-bold">Cancelled</span>
-          </div>
-          <p className="text-2xl font-bold text-white">{events.filter(e => e.status === 'cancelled').length}</p>
-          <p className="text-xs text-dark-400">Refunded</p>
-        </button>
+      {/* Tab Bar */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="flex gap-1 overflow-x-auto scrollbar-hide -mb-px" aria-label="Tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={clsx(
+                'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors',
+                activeTab === tab.id
+                  ? tab.color
+                  : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+              )}
+            >
+              {tab.label}
+              <span className={clsx(
+                'px-2 py-0.5 text-xs rounded-full',
+                activeTab === tab.id
+                  ? 'bg-current/10'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              )}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </nav>
       </div>
-
-      {/* Clear Filter Button */}
-      {filters.status && (
-        <button
-          onClick={() => setFilters({ ...filters, status: '', page: 1 })}
-          className="text-sm text-primary-400 hover:text-primary-300"
-        >
-          ← Show all events
-        </button>
-      )}
 
       {/* Filters */}
       <div className="card p-4">
@@ -208,195 +208,253 @@ export function AdminEvents() {
         </div>
       </div>
 
-      {/* Events Table */}
-      <div className="card overflow-hidden">
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Event</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Tickets</th>
-                <th>Pool</th>
-                <th>Event Time</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td colSpan={7}>
-                      <div className="h-12 bg-dark-800 animate-pulse rounded" />
+      {/* Events Table / Weekday Groups */}
+      {activeTab === 'week' ? (
+        /* Event of Week - Grouped by Weekday */
+        <div className="space-y-6">
+          {Object.keys(eventsByWeekday).length === 0 ? (
+            <div className="card p-12 text-center">
+              <Calendar className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">No events scheduled this week</p>
+            </div>
+          ) : (
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+              .filter(day => eventsByWeekday[day]?.length > 0)
+              .map(day => (
+                <div key={day} className="card overflow-hidden">
+                  <div className="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                      {day}
+                      <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                        ({eventsByWeekday[day].length} event{eventsByWeekday[day].length !== 1 ? 's' : ''})
+                      </span>
+                    </h3>
+                  </div>
+                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {eventsByWeekday[day].map(event => (
+                      <div
+                        key={event.id}
+                        onClick={() => navigate(`/admin/events/${event.id}`)}
+                        className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{event.title}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {format(new Date(event.eventTime), 'HH:mm')} • {event.ticketCount || 0} tickets
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className={clsx('badge', statusColors[event.status])}>
+                            {event.status}
+                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            ${(event.totalPool || 0).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+          )}
+        </div>
+      ) : (
+        /* Standard Table View */
+        <div className="card overflow-hidden">
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Tickets</th>
+                  <th>Pool</th>
+                  <th>Event Time</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      <td colSpan={7}>
+                        <div className="h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded" />
+                      </td>
+                    </tr>
+                  ))
+                ) : events.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      No events found
                     </td>
                   </tr>
-                ))
-              ) : events.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-12 text-dark-400">
-                    No events found
-                  </td>
-                </tr>
-              ) : (
-                events.map((event) => (
-                  <tr
-                    key={event.id}
-                    className="group cursor-pointer hover:bg-background-secondary transition-colors"
-                    onClick={() => navigate(`/admin/events/${event.id}`)}
-                  >
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500/20 to-accent-500/20 flex items-center justify-center">
-                          <Calendar className="w-5 h-5 text-primary-400" />
+                ) : (
+                  events.map((event) => (
+                    <tr
+                      key={event.id}
+                      className="group cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                      onClick={() => navigate(`/admin/events/${event.id}`)}
+                    >
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500/20 to-purple-500/20 flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-brand-400" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{event.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
+                              {event.id}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-white">{event.title}</p>
-                          <p className="text-xs text-dark-400 truncate max-w-[200px]">
-                            {event.id}
-                          </p>
+                      </td>
+                      <td>
+                        <span className={clsx('badge', categoryColors[event.category])}>
+                          {event.category}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={clsx('badge', statusColors[event.status])}>
+                          {event.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
+                          <Ticket className="w-4 h-4 text-gray-400" />
+                          <span>{event.ticketCount || 0}</span>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={clsx('badge', categoryColors[event.category])}>
-                        {event.category}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={clsx('badge', statusColors[event.status])}>
-                        {event.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-1">
-                        <Ticket className="w-4 h-4 text-dark-400" />
-                        <span>{event.ticketCount || 0}</span>
-                      </div>
-                    </td>
-                    <td className="font-medium">
-                      ${(event.totalPool || 0).toLocaleString()}
-                    </td>
-                    <td className="text-dark-300">
-                      {format(new Date(event.eventTime), 'MMM dd, yyyy HH:mm')}
-                    </td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <div className="relative">
-                        <button
-                          onClick={() => setActionMenu(actionMenu === event.id ? null : event.id)}
-                          className="p-2 rounded-lg hover:bg-dark-800 text-dark-400 hover:text-white"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+                      </td>
+                      <td className="font-medium text-gray-900 dark:text-white">
+                        ${(event.totalPool || 0).toLocaleString()}
+                      </td>
+                      <td className="text-gray-600 dark:text-gray-300">
+                        {format(new Date(event.eventTime), 'MMM dd, yyyy HH:mm')}
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <div className="relative">
+                          <button
+                            onClick={() => setActionMenu(actionMenu === event.id ? null : event.id)}
+                            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-white"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
 
-                        {actionMenu === event.id && (
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setActionMenu(null)}
-                            />
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 py-1">
-                              <button
-                                onClick={() => {
-                                  navigate(`/admin/events/${event.id}`);
-                                  setActionMenu(null);
-                                }}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                              >
-                                <Eye className="w-4 h-4" />
-                                View Details
-                              </button>
-
-                              {['draft', 'upcoming', 'open'].includes(event.status) && (
+                          {actionMenu === event.id && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setActionMenu(null)}
+                              />
+                              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 py-1">
                                 <button
                                   onClick={() => {
-                                    navigate(`/admin/events/${event.id}?edit=true`);
+                                    navigate(`/admin/events/${event.id}`);
                                     setActionMenu(null);
                                   }}
                                   className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                 >
-                                  <Edit className="w-4 h-4" />
-                                  Edit Event
+                                  <Eye className="w-4 h-4" />
+                                  View Details
                                 </button>
-                              )}
 
-                              {event.status === 'open' && (
-                                <button
-                                  onClick={() => {
-                                    lockMutation.mutate(event.id);
-                                    setActionMenu(null);
-                                  }}
-                                  className="w-full px-4 py-2 text-left text-sm text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                                >
-                                  <Lock className="w-4 h-4" />
-                                  Lock Event
-                                </button>
-                              )}
+                                {['draft', 'upcoming', 'open'].includes(event.status) && (
+                                  <button
+                                    onClick={() => {
+                                      navigate(`/admin/events/${event.id}?edit=true`);
+                                      setActionMenu(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                    Edit Event
+                                  </button>
+                                )}
 
-                              {event.status === 'locked' && (
-                                <button
-                                  onClick={() => {
-                                    navigate(`/admin/events/${event.id}?resolve=true`);
-                                    setActionMenu(null);
-                                  }}
-                                  className="w-full px-4 py-2 text-left text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                                >
-                                  <Trophy className="w-4 h-4" />
-                                  Resolve Event
-                                </button>
-                              )}
+                                {event.status === 'open' && (
+                                  <button
+                                    onClick={() => {
+                                      lockMutation.mutate(event.id);
+                                      setActionMenu(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  >
+                                    <Lock className="w-4 h-4" />
+                                    Lock Event
+                                  </button>
+                                )}
 
-                              {!['resolved', 'cancelled'].includes(event.status) && (
-                                <button
-                                  onClick={() => {
-                                    navigate(`/admin/events/${event.id}?cancel=true`);
-                                    setActionMenu(null);
-                                  }}
-                                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                  Cancel Event
-                                </button>
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                                {event.status === 'locked' && (
+                                  <button
+                                    onClick={() => {
+                                      navigate(`/admin/events/${event.id}?resolve=true`);
+                                      setActionMenu(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  >
+                                    <Trophy className="w-4 h-4" />
+                                    Resolve Event
+                                  </button>
+                                )}
 
-        {/* Pagination */}
-        {pagination && pagination.pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-dark-800">
-            <p className="text-sm text-dark-400">
-              Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-              {pagination.total} events
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
-                disabled={filters.page === 1}
-                className="btn btn-secondary text-sm"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
-                disabled={filters.page >= pagination.pages}
-                className="btn btn-secondary text-sm"
-              >
-                Next
-              </button>
-            </div>
+                                {!['resolved', 'cancelled'].includes(event.status) && (
+                                  <button
+                                    onClick={() => {
+                                      navigate(`/admin/events/${event.id}?cancel=true`);
+                                      setActionMenu(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  >
+                                    <XCircle className="w-4 h-4" />
+                                    Cancel Event
+                                  </button>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {pagination && pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
+                {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
+                {pagination.total} events
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
+                  disabled={filters.page === 1}
+                  className="btn btn-secondary text-sm"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
+                  disabled={filters.page >= pagination.pages}
+                  className="btn btn-secondary text-sm"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Create Event Modal */}
       {showCreateModal && (

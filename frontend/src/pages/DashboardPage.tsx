@@ -38,7 +38,7 @@ export function DashboardPage() {
     const [searchTicketId, setSearchTicketId] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [isClaiming, setIsClaiming] = useState(false);
-    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'won' | 'lost' | 'claimed' | 'refunded'>('all');
+    const [statusFilter, setStatusFilter] = useState<'active' | 'won' | 'lost'>('active');
     const [solPrice, setSolPrice] = useState<number>(125); // Default fallback price
 
     // Fetch SOL price on mount
@@ -133,7 +133,14 @@ export function DashboardPage() {
     // Filter tickets by search and status
     const filteredTickets = tickets.filter(ticket => {
         const matchesSearch = !searchTicketId.trim() || ticket.id.toLowerCase().includes(searchTicketId.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+        let matchesStatus = false;
+        if (statusFilter === 'active') {
+            matchesStatus = ticket.status === 'active';
+        } else if (statusFilter === 'won') {
+            matchesStatus = ticket.status === 'won' || ticket.status === 'claimed';
+        } else if (statusFilter === 'lost') {
+            matchesStatus = ticket.status === 'lost';
+        }
         return matchesSearch && matchesStatus;
     });
 
@@ -496,40 +503,36 @@ export function DashboardPage() {
                         </span>
                     </div>
 
-                    {/* Status Filter Tabs */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {[
-                            { value: 'all', label: 'All', color: 'bg-gray-500' },
-                            { value: 'active', label: 'Active', color: 'bg-blue-500' },
-                            { value: 'won', label: 'Won', color: 'bg-positive-500' },
-                            { value: 'lost', label: 'Lost', color: 'bg-negative-500' },
-                            { value: 'claimed', label: 'Claimed', color: 'bg-purple-500' },
-                            { value: 'refunded', label: 'Refunded', color: 'bg-yellow-500' },
-                        ].map(tab => {
-                            const count = tab.value === 'all'
-                                ? tickets.length
-                                : tickets.filter(t => t.status === tab.value).length;
-                            return (
+                    {/* Status Tabs */}
+                    <div className="border-b border-border dark:border-gray-700 -mx-4 sm:-mx-5 mb-4">
+                        <nav className="flex gap-1 px-4 sm:px-5 overflow-x-auto scrollbar-hide -mb-px" aria-label="Tabs">
+                            {[
+                                { value: 'active', label: 'Active Bets', color: 'text-blue-500 border-blue-500', count: tickets.filter(t => t.status === 'active').length },
+                                { value: 'won', label: 'Won', color: 'text-green-500 border-green-500', count: tickets.filter(t => t.status === 'won' || t.status === 'claimed').length },
+                                { value: 'lost', label: 'Lost', color: 'text-red-500 border-red-500', count: tickets.filter(t => t.status === 'lost').length },
+                            ].map(tab => (
                                 <button
                                     key={tab.value}
                                     onClick={() => { setStatusFilter(tab.value as any); setCurrentPage(1); }}
                                     className={clsx(
-                                        'px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5',
+                                        'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors',
                                         statusFilter === tab.value
-                                            ? `${tab.color} text-white shadow-md`
-                                            : 'bg-background-secondary text-text-muted hover:text-text-primary border border-border'
+                                            ? tab.color
+                                            : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                     )}
                                 >
                                     {tab.label}
                                     <span className={clsx(
-                                        'px-1.5 py-0.5 rounded-full text-xs',
-                                        statusFilter === tab.value ? 'bg-white/20' : 'bg-background-tertiary'
+                                        'px-2 py-0.5 text-xs rounded-full',
+                                        statusFilter === tab.value
+                                            ? 'bg-current/10'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                                     )}>
-                                        {count}
+                                        {tab.count}
                                     </span>
                                 </button>
-                            );
-                        })}
+                            ))}
+                        </nav>
                     </div>
 
                     {/* Search Input */}
