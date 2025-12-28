@@ -94,8 +94,8 @@ export async function createSolTransferTransaction(
     userPublicKey: PublicKey,
     solAmount: number
 ): Promise<Transaction> {
-    // Convert SOL to lamports
-    const lamports = Math.floor(solAmount * LAMPORTS_PER_SOL);
+    // Convert SOL to lamports (use Math.round for consistency with backend)
+    const lamports = Math.round(solAmount * LAMPORTS_PER_SOL);
 
     // Create transfer instruction
     const transferInstruction = SystemProgram.transfer({
