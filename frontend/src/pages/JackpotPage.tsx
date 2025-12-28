@@ -183,6 +183,66 @@ function EventCard({ event, variant = 'default' }: { event: any; variant?: 'defa
     );
 }
 
+// Result Card Component - for resolved events with different data structure
+function ResultCard({ event }: { event: any }) {
+    return (
+        <Link
+            to={`/events/${event.id}`}
+            className="card p-4 md:p-6 transition-all group cursor-pointer shadow-card bg-gradient-to-br from-green-50 to-background-card dark:from-green-900/20 dark:to-gray-900 border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-600"
+        >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
+                    <span className="text-xs font-medium uppercase text-green-600 dark:text-green-400">
+                        {event.status === 'cancelled' ? 'Cancelled' : 'Completed'}
+                    </span>
+                </div>
+                {event.resolvedAt && (
+                    <span className="text-xs text-text-secondary dark:text-gray-400 font-medium">
+                        {format(new Date(event.resolvedAt), 'MMM dd, yyyy')}
+                    </span>
+                )}
+            </div>
+
+            {/* Title */}
+            <h3 className="text-base md:text-lg font-bold text-text-primary dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors mb-3 line-clamp-2">
+                {event.title}
+            </h3>
+
+            {/* Winner */}
+            {event.winningOption && (
+                <div className="bg-green-100 dark:bg-green-900/40 rounded-lg p-3 mb-3">
+                    <p className="text-xs text-green-700 dark:text-green-300 font-medium mb-1">🏆 Winner</p>
+                    <p className="font-bold text-green-800 dark:text-green-200">{event.winningOption.label}</p>
+                </div>
+            )}
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
+                    <p className="text-xs text-text-muted dark:text-gray-400">Prize Pool</p>
+                    <p className="font-bold text-text-primary dark:text-white text-sm">
+                        {(event.totalPayout || event.totalPool || 0).toFixed(4)} SOL
+                    </p>
+                </div>
+                <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
+                    <p className="text-xs text-text-muted dark:text-gray-400">Winners</p>
+                    <p className="font-bold text-green-600 dark:text-green-400 text-sm">
+                        {event.winningTickets || 0} tickets
+                    </p>
+                </div>
+            </div>
+
+            {/* Action Button */}
+            <div className="w-full py-2 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center gap-2 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 group-hover:bg-green-200 dark:group-hover:bg-green-800/40 transition-colors">
+                <CheckCircle className="w-4 h-4" />
+                View Details
+            </div>
+        </Link>
+    );
+}
+
 export function JackpotPage() {
     const [activeTab, setActiveTab] = useState<TabType>('live');
 
@@ -317,7 +377,7 @@ export function JackpotPage() {
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {resolvedEvents.map((event: any) => (
-                            <EventCard key={event.id} event={event} variant="result" />
+                            <ResultCard key={event.id} event={event} />
                         ))}
                     </div>
                 );
