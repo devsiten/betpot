@@ -11,6 +11,9 @@ const connection = new Connection(RPC_ENDPOINT, 'confirmed');
 // Wallet types
 type WalletType = 'phantom' | 'solflare' | null;
 
+// Storage key for persisting wallet type
+const WALLET_STORAGE_KEY = 'betpot_wallet_type';
+
 // Wallet Context State
 interface WalletContextState {
     connected: boolean;
@@ -58,8 +61,15 @@ export function useWalletModal() {
     return useContext(WalletModalContext);
 }
 
-// Solflare instance
+// Solflare instance (singleton)
 let solflareWallet: Solflare | null = null;
+
+function getSolflareWallet(): Solflare {
+    if (!solflareWallet) {
+        solflareWallet = new Solflare({ network: 'devnet' });
+    }
+    return solflareWallet;
+}
 
 // Get Phantom provider
 function getPhantomProvider(): any | null {
@@ -178,20 +188,21 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 }
 
                 const response = await provider.connect();
-                setPublicKey(new PublicKey(response.publicKey.toString()));
+                const pk = new PublicKey(response.publicKey.toString());
+                setPublicKey(pk);
                 setConnected(true);
                 setWalletType('phantom');
+                localStorage.setItem(WALLET_STORAGE_KEY, 'phantom');
 
             } else if (type === 'solflare') {
-                if (!solflareWallet) {
-                    solflareWallet = new Solflare({ network: 'devnet' });
-                }
+                const wallet = getSolflareWallet();
+                await wallet.connect();
 
-                await solflareWallet.connect();
-                if (solflareWallet.publicKey) {
-                    setPublicKey(solflareWallet.publicKey);
+                if (wallet.publicKey) {
+                    setPublicKey(wallet.publicKey);
                     setConnected(true);
                     setWalletType('solflare');
+                    localStorage.setItem(WALLET_STORAGE_KEY, 'solflare');
                 }
             }
         } catch (error) {
@@ -209,8 +220,9 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 if (provider) {
                     await provider.disconnect();
                 }
-            } else if (walletType === 'solflare' && solflareWallet) {
-                await solflareWallet.disconnect();
+            } else if (walletType === 'solflare') {
+                const wallet = getSolflareWallet();
+                await wallet.disconnect();
             }
         } catch (error) {
             console.error('Disconnect error:', error);
@@ -219,6 +231,7 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setConnected(false);
         setPublicKey(null);
         setWalletType(null);
+        localStorage.removeItem(WALLET_STORAGE_KEY);
     }, [walletType]);
 
     // Sign message
@@ -228,8 +241,9 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
             if (!provider) throw new Error('Phantom not connected');
             const { signature } = await provider.signMessage(message, 'utf8');
             return signature;
-        } else if (walletType === 'solflare' && solflareWallet) {
-            const signature = await solflareWallet.signMessage(message, 'utf8');
+        } else if (walletType === 'solflare') {
+            const wallet = getSolflareWallet();
+            const signature = await wallet.signMessage(message, 'utf8');
             return signature;
         }
         throw new Error('No wallet connected');
@@ -247,66 +261,94 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
             const { signature } = await provider.signAndSendTransaction(transaction);
             return signature;
-        } else if (walletType === 'solflare' && solflareWallet) {
+        } else if (walletType === 'solflare') {
+            const wallet = getSolflareWallet();
+
             const { blockhash } = await conn.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = publicKey!;
 
-            const signature = await solflareWallet.signAndSendTransaction(transaction);
+            const signature = await wallet.signAndSendTransaction(transaction);
             return signature;
         }
         throw new Error('No wallet connected');
     }, [walletType, publicKey]);
 
-    // Auto-connect on mount
+    // Auto-connect on mount - check localStorage for previously connected wallet
     useEffect(() => {
         const autoConnect = async () => {
-            // Try Phantom first
-            const phantomProvider = getPhantomProvider();
-            if (phantomProvider?.isConnected) {
+            const savedWalletType = localStorage.getItem(WALLET_STORAGE_KEY) as WalletType;
+
+            if (savedWalletType === 'phantom') {
+                const provider = getPhantomProvider();
+                if (provider) {
+                    try {
+                        // Try silent connect (only if previously approved)
+                        const response = await provider.connect({ onlyIfTrusted: true });
+                        setPublicKey(new PublicKey(response.publicKey.toString()));
+                        setConnected(true);
+                        setWalletType('phantom');
+                        console.log('Auto-connected to Phantom');
+                    } catch (e) {
+                        // User hasn't approved before or rejected
+                        localStorage.removeItem(WALLET_STORAGE_KEY);
+                    }
+                }
+            } else if (savedWalletType === 'solflare') {
+                const wallet = getSolflareWallet();
                 try {
-                    const response = await phantomProvider.connect({ onlyIfTrusted: true });
-                    setPublicKey(new PublicKey(response.publicKey.toString()));
-                    setConnected(true);
-                    setWalletType('phantom');
-                    return;
+                    await wallet.connect();
+                    if (wallet.publicKey) {
+                        setPublicKey(wallet.publicKey);
+                        setConnected(true);
+                        setWalletType('solflare');
+                        console.log('Auto-connected to Solflare');
+                    }
                 } catch (e) {
-                    // Not previously connected
+                    localStorage.removeItem(WALLET_STORAGE_KEY);
                 }
             }
         };
 
-        autoConnect();
+        // Small delay to ensure wallet extensions are loaded
+        setTimeout(autoConnect, 100);
     }, []);
 
-    // Listen for wallet events
+    // Listen for wallet disconnect events
     useEffect(() => {
         const phantomProvider = getPhantomProvider();
 
-        if (phantomProvider) {
-            phantomProvider.on('disconnect', () => {
+        const handlePhantomDisconnect = () => {
+            if (walletType === 'phantom') {
                 setConnected(false);
                 setPublicKey(null);
                 setWalletType(null);
-            });
+                localStorage.removeItem(WALLET_STORAGE_KEY);
+            }
+        };
 
-            phantomProvider.on('accountChanged', (newPublicKey: PublicKey | null) => {
+        const handlePhantomAccountChange = (newPublicKey: PublicKey | null) => {
+            if (walletType === 'phantom') {
                 if (newPublicKey) {
-                    setPublicKey(newPublicKey);
+                    setPublicKey(new PublicKey(newPublicKey.toString()));
                 } else {
-                    disconnect();
+                    handlePhantomDisconnect();
                 }
-            });
+            }
+        };
+
+        if (phantomProvider) {
+            phantomProvider.on('disconnect', handlePhantomDisconnect);
+            phantomProvider.on('accountChanged', handlePhantomAccountChange);
         }
 
-        if (solflareWallet) {
-            solflareWallet.on('disconnect', () => {
-                setConnected(false);
-                setPublicKey(null);
-                setWalletType(null);
-            });
-        }
-    }, [disconnect]);
+        return () => {
+            if (phantomProvider) {
+                phantomProvider.removeListener('disconnect', handlePhantomDisconnect);
+                phantomProvider.removeListener('accountChanged', handlePhantomAccountChange);
+            }
+        };
+    }, [walletType]);
 
     return (
         <WalletContext.Provider value={{
