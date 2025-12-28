@@ -23,8 +23,8 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Use the official Solana wallet adapter modal for stability
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+// Use our custom wallet modal that only shows Phantom and Solflare
+import { useWalletModal } from '@/providers/SolanaProvider';
 
 // Custom Connect Wallet button that uses the official modal
 function ConnectButton() {
@@ -98,17 +98,42 @@ export function MainLayout() {
       const timestamp = Date.now();
       const message = `Sign this message to login to BETPOT: ${timestamp}`;
       const messageBytes = new TextEncoder().encode(message);
-      const signatureBytes = await signMessage(messageBytes);
+
+      // Request signature from wallet
+      let signatureBytes;
+      try {
+        signatureBytes = await signMessage(messageBytes);
+      } catch (signError: any) {
+        console.error('Signature error:', signError);
+        // Handle specific wallet errors
+        if (signError?.message?.includes('User rejected') || signError?.name === 'WalletSignTransactionError') {
+          toast.error('Signature rejected by user');
+        } else if (signError?.name === 'WalletSignMessageError') {
+          toast.error('Wallet error - please reconnect and try again');
+          // Try to reconnect wallet
+          disconnect();
+        } else {
+          toast.error('Failed to sign message - please try again');
+        }
+        return;
+      }
+
       const signature = bs58.encode(signatureBytes);
       const walletAddress = publicKey.toBase58();
 
       await walletLogin(walletAddress, signature, message);
       localStorage.setItem('betpot_wallet', walletAddress);
-      // No success toast needed - user can see they're signed in
+      toast.success('Signed in successfully!');
     } catch (error: unknown) {
       console.error('Sign/login failed:', error);
-      if (error instanceof Error && error.message?.includes('User rejected')) {
-        toast.error('Signature rejected');
+      if (error instanceof Error) {
+        if (error.message?.includes('User rejected')) {
+          toast.error('Signature rejected');
+        } else if (error.message?.includes('500') || error.message?.includes('server')) {
+          toast.error('Server error - please try again');
+        } else {
+          toast.error('Sign in failed - please try again');
+        }
       } else {
         toast.error('Sign in failed - please try again');
       }

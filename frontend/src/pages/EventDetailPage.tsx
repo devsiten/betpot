@@ -18,7 +18,7 @@ import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import clsx from 'clsx';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { getUSDCBalance, createUSDCTransferTransaction, formatUSDC } from '@/utils/usdc';
+import { getSolBalance, createSolTransferTransaction, formatSol, getSolPrice } from '@/utils/sol';
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +28,9 @@ export function EventDetailPage() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const [usdcBalance, setUsdcBalance] = useState<number>(0);
+  const [solBalance, setSolBalance] = useState<number>(0);
+  const [solPrice, setSolPrice] = useState<number>(0);
+  const [solCost, setSolCost] = useState<number>(0);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['event', id],
@@ -48,21 +50,34 @@ export function EventDetailPage() {
   const pool = poolData?.data;
   const userTickets = event?.userTickets || [];
 
-  // Fetch USDC balance when wallet connects
+  // Fetch SOL balance and price when wallet connects
   useEffect(() => {
     if (publicKey && connection) {
-      console.log('=== USDC Balance Check ===');
+      console.log('=== SOL Balance Check ===');
       console.log('Wallet:', publicKey.toBase58());
-      console.log('Connection endpoint:', connection.rpcEndpoint);
-      getUSDCBalance(connection, publicKey).then(balance => {
-        console.log('Balance result:', balance);
-        setUsdcBalance(balance);
+      getSolBalance(connection, publicKey).then(balance => {
+        console.log('SOL Balance:', balance);
+        setSolBalance(balance);
       }).catch(err => {
         console.error('Balance fetch error:', err);
-        setUsdcBalance(0);
+        setSolBalance(0);
+      });
+      // Fetch SOL price
+      getSolPrice().then(price => {
+        console.log('SOL Price:', price);
+        setSolPrice(price);
       });
     }
   }, [publicKey, connection]);
+
+  // Calculate SOL cost when quantity or ticket price changes
+  useEffect(() => {
+    const totalUsdcCost = (event?.ticketPrice || 0) * quantity;
+    if (totalUsdcCost > 0 && solPrice > 0) {
+      const sol = totalUsdcCost / solPrice;
+      setSolCost(Math.ceil(sol * 10000) / 10000); // Round up to 4 decimals
+    }
+  }, [quantity, event?.ticketPrice, solPrice]);
 
   const handlePurchase = async () => {
     if (!selectedOption || !publicKey || !user?.walletAddress) {
@@ -70,32 +85,22 @@ export function EventDetailPage() {
       return;
     }
 
-    const totalCost = (event?.ticketPrice || 0) * quantity;
-
-    // TEMPORARILY DISABLED - Check USDC balance
-    // TODO: Re-enable after fixing balance detection
-    /*
-    if (usdcBalance < totalCost) {
-      toast.error(`Insufficient USDC balance. Need ${formatUSDC(totalCost)}, have ${formatUSDC(usdcBalance)}`);
+    // Check SOL balance
+    if (solBalance < solCost) {
+      toast.error(`Insufficient SOL balance. Need ${formatSol(solCost)}, have ${formatSol(solBalance)}`);
       return;
-    }
-    */
-
-    // Warn user but allow to proceed
-    if (usdcBalance < totalCost && usdcBalance > 0) {
-      console.warn('USDC balance check:', { need: totalCost, have: usdcBalance });
     }
 
     setIsPurchasing(true);
     try {
-      // Create USDC transfer transaction
-      const transaction = await createUSDCTransferTransaction(
+      // Create SOL transfer transaction
+      const transaction = await createSolTransferTransaction(
         connection,
         publicKey,
-        totalCost
+        solCost
       );
 
-      // Send transaction (SOL pays for gas)
+      // Send transaction
       const signature = await sendTransaction(transaction, connection);
 
       // Wait for confirmation
@@ -103,7 +108,7 @@ export function EventDetailPage() {
       await connection.confirmTransaction(signature, 'confirmed');
       toast.dismiss('tx-confirm');
 
-      // Submit to backend with transaction signature
+      // Submit to backend with transaction signature and SOL amount
       const result = await api.purchaseTicket({
         eventId: id!,
         optionId: selectedOption,
@@ -111,6 +116,7 @@ export function EventDetailPage() {
         walletAddress: user.walletAddress,
         chain: 'SOL',
         purchaseTx: signature,
+        solAmount: solCost, // Send SOL amount for verification
       });
 
       if (result.success) {
@@ -118,8 +124,8 @@ export function EventDetailPage() {
         refetch();
         setSelectedOption(null);
         setQuantity(1);
-        // Refresh USDC balance
-        getUSDCBalance(connection, publicKey).then(setUsdcBalance);
+        // Refresh SOL balance
+        getSolBalance(connection, publicKey).then(setSolBalance);
       }
     } catch (error: any) {
       console.error('Purchase error:', error);
@@ -260,8 +266,8 @@ export function EventDetailPage() {
         </div>
         {publicKey && (
           <div className="card p-4 text-center bg-brand-500/10 border-brand-500/30">
-            <p className="text-2xl font-bold text-brand-400">{formatUSDC(usdcBalance)}</p>
-            <p className="text-sm text-brand-300">Your Balance</p>
+            <p className="text-2xl font-bold text-brand-400">{formatSol(solBalance)}</p>
+            <p className="text-sm text-brand-300">Your SOL Balance</p>
           </div>
         )}
 
@@ -421,21 +427,36 @@ export function EventDetailPage() {
                 </div>
               </div>
 
-              {/* Total */}
-              <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <span className="text-text-muted dark:text-gray-400">Total Cost</span>
-                <span className="text-2xl font-bold text-text-primary dark:text-white">
-                  ${(event.ticketPrice * quantity).toFixed(2)}
-                </span>
+              {/* Total - Show both SOL and USDC */}
+              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-text-muted dark:text-gray-400">Total Cost</span>
+                  <span className="text-2xl font-bold text-text-primary dark:text-white">
+                    {formatSol(solCost)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-text-muted dark:text-gray-500">≈ USD Value</span>
+                  <span className="text-sm text-text-muted dark:text-gray-400">
+                    ${(event.ticketPrice * quantity).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment notice */}
+              <div className="p-3 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-lg">
+                <p className="text-sm text-brand-700 dark:text-brand-300 text-center">
+                  You will pay in <strong>SOL</strong> (prices shown in USDC equivalent)
+                </p>
               </div>
 
               {/* Purchase button */}
               <button
                 onClick={handlePurchase}
-                disabled={isPurchasing}
+                disabled={isPurchasing || solBalance < solCost}
                 className="w-full btn btn-accent py-4 text-lg"
               >
-                {isPurchasing ? 'Processing...' : `Buy ${quantity} Ticket${quantity > 1 ? 's' : ''}`}
+                {isPurchasing ? 'Processing...' : `Pay ${formatSol(solCost)} for ${quantity} Ticket${quantity > 1 ? 's' : ''}`}
               </button>
             </div>
           )}

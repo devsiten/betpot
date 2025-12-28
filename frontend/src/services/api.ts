@@ -314,6 +314,7 @@ class ApiService {
     walletAddress: string;
     chain: string;
     purchaseTx: string;
+    solAmount?: number; // SOL amount for verification
   }) {
     const { data } = await this.client.post<ApiResponse<{
       tickets: { id: string; serialNumber: string; optionLabel: string; purchasePrice: number }[];
