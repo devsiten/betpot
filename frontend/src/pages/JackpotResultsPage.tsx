@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, ArrowLeft, DollarSign, Ticket, RefreshCw, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { api } from '@/services/api';
+import { getSolPrice } from '@/utils/sol';
 import clsx from 'clsx';
 
 interface ResolvedEvent {
@@ -23,11 +25,21 @@ interface ResolvedEvent {
 }
 
 export function JackpotResultsPage() {
+    const [solPrice, setSolPrice] = useState<number>(125);
+
     const { data, isLoading, refetch } = useQuery({
         queryKey: ['jackpot-results'],
         queryFn: () => api.getJackpotResults(),
         refetchInterval: 60000, // Refresh every minute
     });
+
+    // Fetch SOL price on mount
+    useEffect(() => {
+        getSolPrice().then(setSolPrice);
+    }, []);
+
+    // Helper to convert USDC to SOL
+    const usdToSol = (usd: number) => usd / solPrice;
 
     const results: ResolvedEvent[] = data?.data || [];
 
@@ -153,7 +165,10 @@ export function JackpotResultsPage() {
                                             <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total Payout</span>
                                         </div>
                                         <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                            ${result.totalPayout?.toLocaleString() || result.totalPool?.toLocaleString() || '0'}
+                                            {usdToSol(result.totalPayout || result.totalPool || 0).toFixed(4)} SOL
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            ≈ ${(result.totalPayout || result.totalPool || 0).toLocaleString()}
                                         </p>
                                     </div>
 
