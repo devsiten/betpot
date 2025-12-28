@@ -443,13 +443,6 @@ export function EventDetailPage() {
                 </div>
               </div>
 
-              {/* Payment notice */}
-              <div className="p-3 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-lg">
-                <p className="text-sm text-brand-700 dark:text-brand-300 text-center">
-                  You will pay in <strong>SOL</strong> (prices shown in USDC equivalent)
-                </p>
-              </div>
-
               {/* Purchase button */}
               <button
                 onClick={handlePurchase}
