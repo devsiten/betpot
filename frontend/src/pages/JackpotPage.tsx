@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Zap, Clock, Lock, CheckCircle, Calendar } from 'lucide-react';
 import { api } from '@/services/api';
+import { getSolPrice } from '@/utils/sol';
 import { format, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday } from 'date-fns';
 import clsx from 'clsx';
 import { EventCountdown } from '@/components/CountdownTimer';
@@ -43,9 +44,10 @@ function groupByWeekday(events: any[]): Record<string, any[]> {
 }
 
 // Event Card Component
-function EventCard({ event, variant = 'default' }: { event: any; variant?: 'default' | 'locked' | 'result' }) {
+function EventCard({ event, variant = 'default', solPrice }: { event: any; variant?: 'default' | 'locked' | 'result'; solPrice: number }) {
     const isLocked = variant === 'locked';
     const isResult = variant === 'result';
+    const usdToSol = (usd: number) => usd / solPrice;
 
     return (
         <Link
@@ -117,10 +119,10 @@ function EventCard({ event, variant = 'default' }: { event: any; variant?: 'defa
                         isLocked ? 'text-yellow-700 dark:text-yellow-300' :
                             'text-text-primary dark:text-white'
                 )}>
-                    {(event.totalPool || 0).toFixed(4)} SOL
+                    {usdToSol(event.totalPool || 0).toFixed(4)} SOL
                 </p>
                 <p className="text-xs text-text-muted dark:text-gray-400 font-medium mt-1">
-                    {event.ticketCount || 0} bets
+                    ≈ ${(event.totalPool || 0).toLocaleString()} • {event.ticketCount || 0} bets
                 </p>
             </div>
 
@@ -184,7 +186,9 @@ function EventCard({ event, variant = 'default' }: { event: any; variant?: 'defa
 }
 
 // Result Card Component - for resolved events with different data structure
-function ResultCard({ event }: { event: any }) {
+function ResultCard({ event, solPrice }: { event: any; solPrice: number }) {
+    const usdToSol = (usd: number) => usd / solPrice;
+
     return (
         <Link
             to={`/events/${event.id}`}
@@ -223,10 +227,10 @@ function ResultCard({ event }: { event: any }) {
                 <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
                     <p className="text-xs text-text-muted dark:text-gray-400">Prize Pool</p>
                     <p className="font-bold text-text-primary dark:text-white text-sm">
-                        {(event.totalPayout || event.totalPool || 0).toFixed(4)} SOL
+                        {usdToSol(event.totalPayout || event.totalPool || 0).toFixed(4)} SOL
                     </p>
                     <p className="text-xs text-text-muted dark:text-gray-500">
-                        ≈ ${((event.totalPayout || event.totalPool || 0) * 125).toFixed(2)}
+                        ≈ ${(event.totalPayout || event.totalPool || 0).toLocaleString()}
                     </p>
                 </div>
                 <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
@@ -256,6 +260,12 @@ function ResultCard({ event }: { event: any }) {
 
 export function JackpotPage() {
     const [activeTab, setActiveTab] = useState<TabType>('live');
+    const [solPrice, setSolPrice] = useState<number>(125);
+
+    // Fetch SOL price on mount
+    useEffect(() => {
+        getSolPrice().then(setSolPrice);
+    }, []);
 
     // Fetch all jackpots
     const { data: jackpotData, isLoading: loadingJackpots } = useQuery({
@@ -318,7 +328,7 @@ export function JackpotPage() {
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {liveEvents.map((event: any) => (
-                            <EventCard key={event.id} event={event} />
+                            <EventCard key={event.id} event={event} solPrice={solPrice} />
                         ))}
                     </div>
                 );
@@ -348,7 +358,7 @@ export function JackpotPage() {
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                                         {events.map((event: any) => (
-                                            <EventCard key={event.id} event={event} />
+                                            <EventCard key={event.id} event={event} solPrice={solPrice} />
                                         ))}
                                     </div>
                                 </div>
@@ -370,7 +380,7 @@ export function JackpotPage() {
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {lockedEvents.map((event: any) => (
-                            <EventCard key={event.id} event={event} variant="locked" />
+                            <EventCard key={event.id} event={event} variant="locked" solPrice={solPrice} />
                         ))}
                     </div>
                 );
@@ -388,7 +398,7 @@ export function JackpotPage() {
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {resolvedEvents.map((event: any) => (
-                            <ResultCard key={event.id} event={event} />
+                            <ResultCard key={event.id} event={event} solPrice={solPrice} />
                         ))}
                     </div>
                 );
