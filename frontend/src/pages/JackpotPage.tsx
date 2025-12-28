@@ -219,18 +219,29 @@ function ResultCard({ event }: { event: any }) {
             )}
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-3 gap-2 mb-3">
                 <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
                     <p className="text-xs text-text-muted dark:text-gray-400">Prize Pool</p>
                     <p className="font-bold text-text-primary dark:text-white text-sm">
                         {(event.totalPayout || event.totalPool || 0).toFixed(4)} SOL
                     </p>
+                    <p className="text-xs text-text-muted dark:text-gray-500">
+                        ≈ ${((event.totalPayout || event.totalPool || 0) * 125).toFixed(2)}
+                    </p>
                 </div>
                 <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
                     <p className="text-xs text-text-muted dark:text-gray-400">Winners</p>
                     <p className="font-bold text-green-600 dark:text-green-400 text-sm">
-                        {event.winningTickets || 0} tickets
+                        {event.winningTickets || 0}
                     </p>
+                    <p className="text-xs text-text-muted dark:text-gray-500">tickets</p>
+                </div>
+                <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-2 text-center">
+                    <p className="text-xs text-text-muted dark:text-gray-400">Losers</p>
+                    <p className="font-bold text-red-600 dark:text-red-400 text-sm">
+                        {event.losingTickets || 0}
+                    </p>
+                    <p className="text-xs text-text-muted dark:text-gray-500">tickets</p>
                 </div>
             </div>
 
