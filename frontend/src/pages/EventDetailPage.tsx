@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import clsx from 'clsx';
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@/providers/SolanaProvider';
 import { getSolBalance, createSolTransferTransaction, formatSol, getSolPrice } from '@/utils/sol';
 
 export function EventDetailPage() {

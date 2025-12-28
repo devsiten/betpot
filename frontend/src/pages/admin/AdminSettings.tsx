@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Settings, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/services/api';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@/providers/SolanaProvider';
 
 // Admin wallet addresses
 const ADMIN_WALLETS = [

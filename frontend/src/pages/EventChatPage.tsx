@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Send, MessageCircle, RefreshCw, AlertCircle, Trophy } from 'lucide-react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@/providers/SolanaProvider';
 import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 

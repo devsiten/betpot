@@ -14,7 +14,7 @@ import {
   Trophy,
   Gift,
 } from 'lucide-react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@/providers/SolanaProvider';
 import clsx from 'clsx';
 import { AlertTriangle, BookOpen, Edit2 } from 'lucide-react';
 

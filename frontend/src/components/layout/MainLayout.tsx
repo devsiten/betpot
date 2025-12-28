@@ -14,7 +14,7 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@/providers/SolanaProvider';
 import clsx from 'clsx';
 import bs58 from 'bs58';
 import { useAuthStore } from '@/stores/authStore';
