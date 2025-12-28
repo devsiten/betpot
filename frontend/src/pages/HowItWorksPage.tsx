@@ -116,7 +116,7 @@ export function HowItWorksPage() {
                     </div>
                     <div className="bg-background-card dark:bg-gray-900 border border-border dark:border-gray-800 rounded-xl p-6">
                         <h3 className="font-bold text-text-primary dark:text-white mb-2">How do I get started?</h3>
-                        <p className="text-text-secondary dark:text-gray-300">Connect your Solana wallet (Phantom or Solflare), get some USDC on Devnet, and place your first bet!</p>
+                        <p className="text-text-secondary dark:text-gray-300">Connect your Solana wallet (Phantom or Solflare), get some SOL on Devnet from the faucet, and place your first bet!</p>
                     </div>
                     <div className="bg-background-card dark:bg-gray-900 border border-border dark:border-gray-800 rounded-xl p-6">
                         <h3 className="font-bold text-text-primary dark:text-white mb-2">How are winnings calculated?</h3>
@@ -124,7 +124,7 @@ export function HowItWorksPage() {
                     </div>
                     <div className="bg-background-card dark:bg-gray-900 border border-border dark:border-gray-800 rounded-xl p-6">
                         <h3 className="font-bold text-text-primary dark:text-white mb-2">Is this real money?</h3>
-                        <p className="text-text-secondary dark:text-gray-300">Currently we're running on Solana Devnet with test USDC. It's completely free to try!</p>
+                        <p className="text-text-secondary dark:text-gray-300">Currently we're running on Solana Devnet with test SOL. It's completely free to try!</p>
                     </div>
                 </div>
             </div>

@@ -6,6 +6,7 @@ import { useWallet } from '@/providers/SolanaProvider';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
+import { getSolPrice } from '@/utils/sol';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -38,6 +39,15 @@ export function DashboardPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [isClaiming, setIsClaiming] = useState(false);
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'won' | 'lost' | 'claimed' | 'refunded'>('all');
+    const [solPrice, setSolPrice] = useState<number>(125); // Default fallback price
+
+    // Fetch SOL price on mount
+    useEffect(() => {
+        getSolPrice().then(setSolPrice);
+    }, []);
+
+    // Helper to convert USDC to SOL
+    const usdToSol = (usd: number) => usd / solPrice;
 
     // Fetch user stats - works with just wallet connection
     const { data: statsData } = useQuery({
@@ -350,7 +360,10 @@ export function DashboardPage() {
                                                 <Trophy className="w-4 h-4 text-positive-600" />
                                                 <span className="text-sm text-positive-700">Winnings</span>
                                             </div>
-                                            <span className="font-bold text-positive-700">${claimableWinnings.toFixed(2)}</span>
+                                            <div className="text-right">
+                                                <span className="font-bold text-positive-700">{usdToSol(claimableWinnings).toFixed(4)} SOL</span>
+                                                <p className="text-xs text-positive-600">≈ ${claimableWinnings.toFixed(2)}</p>
+                                            </div>
                                         </div>
                                     )}
                                     {claimableRefunds > 0 && (
@@ -359,7 +372,10 @@ export function DashboardPage() {
                                                 <Clock className="w-4 h-4 text-yellow-600" />
                                                 <span className="text-sm text-yellow-700">Refunds</span>
                                             </div>
-                                            <span className="font-bold text-yellow-700">${claimableRefunds.toFixed(2)}</span>
+                                            <div className="text-right">
+                                                <span className="font-bold text-yellow-700">{usdToSol(claimableRefunds).toFixed(4)} SOL</span>
+                                                <p className="text-xs text-yellow-600">≈ ${claimableRefunds.toFixed(2)}</p>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -376,7 +392,11 @@ export function DashboardPage() {
                                 <p className={clsx(
                                     'text-3xl sm:text-4xl font-bold',
                                     totalClaimable > 0 ? 'text-positive-700' : 'text-gray-400 dark:text-gray-500'
-                                )}>${totalClaimable.toFixed(2)}</p>
+                                )}>{usdToSol(totalClaimable).toFixed(4)} SOL</p>
+                                <p className={clsx(
+                                    'text-sm',
+                                    totalClaimable > 0 ? 'text-positive-600' : 'text-gray-400'
+                                )}>≈ ${totalClaimable.toFixed(2)}</p>
                             </div>
 
                             <button
@@ -399,7 +419,7 @@ export function DashboardPage() {
                                 ) : totalClaimable > 0 ? (
                                     <>
                                         <DollarSign className="w-5 h-5" />
-                                        Claim All ${totalClaimable.toFixed(2)}
+                                        Claim {usdToSol(totalClaimable).toFixed(4)} SOL
                                     </>
                                 ) : (
                                     <>
@@ -430,7 +450,10 @@ export function DashboardPage() {
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-positive-600">{(stats?.wonTickets || 0) + (stats?.claimedTickets || 0)}</p>
                     <p className="text-sm text-positive-600 dark:text-positive-400 font-medium mt-1">
-                        +${(Number(stats?.totalWinnings) || 0).toFixed(2)}
+                        +{usdToSol(Number(stats?.totalWinnings) || 0).toFixed(4)} SOL
+                    </p>
+                    <p className="text-xs text-positive-500 dark:text-positive-500">
+                        ≈ ${(Number(stats?.totalWinnings) || 0).toFixed(2)}
                     </p>
                 </div>
 
@@ -441,7 +464,10 @@ export function DashboardPage() {
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold text-negative-500 dark:text-negative-400">{stats?.lostTickets || 0}</p>
                     <p className="text-sm text-negative-500 dark:text-negative-400 font-medium mt-1">
-                        -${((Number(stats?.totalSpent) || 0) - (Number(stats?.totalWinnings) || 0)).toFixed(2)}
+                        -{usdToSol((Number(stats?.totalSpent) || 0) - (Number(stats?.totalWinnings) || 0)).toFixed(4)} SOL
+                    </p>
+                    <p className="text-xs text-negative-400 dark:text-negative-500">
+                        ≈ ${((Number(stats?.totalSpent) || 0) - (Number(stats?.totalWinnings) || 0)).toFixed(2)}
                     </p>
                 </div>
 
@@ -450,7 +476,10 @@ export function DashboardPage() {
                         <DollarSign className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                         <p className="text-xs text-brand-700 dark:text-brand-300 uppercase tracking-wider font-medium">Total Volume</p>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">${(Number(stats?.totalSpent) || 0).toFixed(2)}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-brand-600 dark:text-brand-400">{usdToSol(Number(stats?.totalSpent) || 0).toFixed(4)} SOL</p>
+                    <p className="text-xs text-brand-500 dark:text-brand-500">
+                        ≈ ${(Number(stats?.totalSpent) || 0).toFixed(2)}
+                    </p>
                 </div>
             </div>
 
@@ -606,18 +635,32 @@ export function DashboardPage() {
 
                                         {/* Amount */}
                                         <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
-                                            <p className={clsx(
-                                                'text-lg sm:text-xl font-bold',
-                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600 dark:text-positive-400',
-                                                ticket.status === 'lost' && 'text-negative-500 dark:text-negative-400',
-                                                ticket.status === 'active' && 'text-text-primary dark:text-white',
-                                                ticket.status === 'refunded' && 'text-yellow-600 dark:text-yellow-400'
-                                            )}>
-                                                {(ticket.status === 'won' || ticket.status === 'claimed') && `+$${ticket.payoutAmount?.toFixed(2) || ticket.purchasePrice}`}
-                                                {ticket.status === 'lost' && `-$${ticket.purchasePrice.toFixed(2)}`}
-                                                {ticket.status === 'active' && `$${ticket.purchasePrice.toFixed(2)}`}
-                                                {ticket.status === 'refunded' && `$${ticket.purchasePrice.toFixed(2)}`}
-                                            </p>
+                                            <div className="text-right">
+                                                <p className={clsx(
+                                                    'text-lg sm:text-xl font-bold',
+                                                    (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600 dark:text-positive-400',
+                                                    ticket.status === 'lost' && 'text-negative-500 dark:text-negative-400',
+                                                    ticket.status === 'active' && 'text-text-primary dark:text-white',
+                                                    ticket.status === 'refunded' && 'text-yellow-600 dark:text-yellow-400'
+                                                )}>
+                                                    {(ticket.status === 'won' || ticket.status === 'claimed') && `+${usdToSol(ticket.payoutAmount || ticket.purchasePrice).toFixed(4)} SOL`}
+                                                    {ticket.status === 'lost' && `-${usdToSol(ticket.purchasePrice).toFixed(4)} SOL`}
+                                                    {ticket.status === 'active' && `${usdToSol(ticket.purchasePrice).toFixed(4)} SOL`}
+                                                    {ticket.status === 'refunded' && `${usdToSol(ticket.purchasePrice).toFixed(4)} SOL`}
+                                                </p>
+                                                <p className={clsx(
+                                                    'text-xs',
+                                                    (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-500',
+                                                    ticket.status === 'lost' && 'text-negative-400',
+                                                    ticket.status === 'active' && 'text-text-muted',
+                                                    ticket.status === 'refunded' && 'text-yellow-500'
+                                                )}>
+                                                    {(ticket.status === 'won' || ticket.status === 'claimed') && `≈ +$${(ticket.payoutAmount || ticket.purchasePrice).toFixed(2)}`}
+                                                    {ticket.status === 'lost' && `≈ -$${ticket.purchasePrice.toFixed(2)}`}
+                                                    {ticket.status === 'active' && `≈ $${ticket.purchasePrice.toFixed(2)}`}
+                                                    {ticket.status === 'refunded' && `≈ $${ticket.purchasePrice.toFixed(2)}`}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

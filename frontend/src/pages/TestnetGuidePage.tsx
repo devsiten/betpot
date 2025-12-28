@@ -29,7 +29,7 @@ export function TestnetGuidePage() {
                 </p>
                 <p className="text-text-secondary dark:text-gray-300 leading-relaxed">
                     All transactions happen on-chain for complete transparency. Currently testing on Solana Devnet
-                    with more chains coming soon. Uses USDC for betting and native tokens for gas fees.
+                    with more chains coming soon. Uses SOL for betting and gas fees.
                 </p>
             </section>
 
@@ -60,7 +60,7 @@ export function TestnetGuidePage() {
                         {
                             step: '4',
                             title: 'Claim Your Winnings',
-                            description: 'If you won, go to your Dashboard to claim your share of the prize pool. Winnings are paid in USDC directly to your wallet.'
+                            description: 'If you won, go to your Dashboard to claim your share of the prize pool. Winnings are paid in SOL directly to your wallet.'
                         }
                     ].map((item) => (
                         <div key={item.step} className="flex gap-4 bg-background-card dark:bg-gray-900 rounded-xl p-5 border border-border dark:border-gray-800 shadow-soft">
@@ -89,11 +89,7 @@ export function TestnetGuidePage() {
                     </li>
                     <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-                        <span><strong className="text-text-primary dark:text-white">USDC</strong> for ticket purchases and payouts</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-                        <span><strong className="text-text-primary dark:text-white">Native tokens</strong> for gas fees (SOL on Solana testnet)</span>
+                        <span><strong className="text-text-primary dark:text-white">SOL</strong> for ticket purchases, payouts, and gas fees</span>
                     </li>
                 </ul>
             </section>
@@ -102,14 +98,14 @@ export function TestnetGuidePage() {
             <section className="mb-8">
                 <h2 className="text-2xl font-bold text-text-primary dark:text-white mb-6 flex items-center gap-3">
                     <Gift className="w-6 h-6 text-positive-600 dark:text-positive-400" />
-                    Get Testnet Tokens
+                    Get Testnet SOL
                 </h2>
                 <p className="text-text-secondary dark:text-gray-300 mb-6">
-                    To participate in the testnet, you'll need Devnet SOL (for gas) and Devnet USDC (for betting).
-                    Get them for free from these faucets:
+                    To participate in the testnet, you'll need Devnet SOL for gas and betting.
+                    Get it for free from the official Solana faucet:
                 </p>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-1 gap-4">
                     {/* SOL Faucet */}
                     <a
                         href="https://faucet.solana.com/"
@@ -124,28 +120,9 @@ export function TestnetGuidePage() {
                             <h3 className="text-text-primary dark:text-white font-semibold group-hover:text-positive-600 dark:group-hover:text-positive-400 transition-colors">
                                 Solana Faucet
                             </h3>
-                            <p className="text-text-muted dark:text-gray-400 text-sm">Get free Devnet SOL for gas fees</p>
+                            <p className="text-text-muted dark:text-gray-400 text-sm">Get free Devnet SOL for gas and betting</p>
                         </div>
                         <ExternalLink className="w-5 h-5 text-text-muted dark:text-gray-400 group-hover:text-positive-600 dark:group-hover:text-positive-400" />
-                    </a>
-
-                    {/* USDC Faucet */}
-                    <a
-                        href="https://spl-token-faucet.com/?token-name=USDC"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-4 bg-background-card dark:bg-gray-900 hover:bg-background-secondary dark:hover:bg-gray-800 rounded-xl p-6 border border-border dark:border-gray-800 hover:border-brand-300 dark:hover:border-brand-600 transition-all shadow-soft"
-                    >
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-                            <Coins className="w-7 h-7 text-white" />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="text-text-primary dark:text-white font-semibold group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                                USDC Faucet
-                            </h3>
-                            <p className="text-text-muted dark:text-gray-400 text-sm">Get free Devnet USDC for betting</p>
-                        </div>
-                        <ExternalLink className="w-5 h-5 text-text-muted dark:text-gray-400 group-hover:text-brand-600 dark:group-hover:text-brand-400" />
                     </a>
                 </div>
             </section>

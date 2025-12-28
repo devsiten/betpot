@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users,
@@ -24,6 +25,7 @@ import {
 } from 'recharts';
 import { format, formatDistanceToNow } from 'date-fns';
 import { api } from '@/services/api';
+import { getSolPrice } from '@/utils/sol';
 import clsx from 'clsx';
 
 function StatCard({
@@ -76,11 +78,21 @@ function StatCard({
 }
 
 export function AdminDashboard() {
+  const [solPrice, setSolPrice] = useState<number>(125);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'dashboard'],
     queryFn: () => api.getAdminDashboard(),
     refetchInterval: 30000,
   });
+
+  // Fetch SOL price on mount
+  useEffect(() => {
+    getSolPrice().then(setSolPrice);
+  }, []);
+
+  // Helper to convert USDC to SOL
+  const usdToSol = (usd: number) => usd / solPrice;
 
   const dashboard = data?.data;
 
@@ -136,7 +148,8 @@ export function AdminDashboard() {
         <StatCard
           icon={DollarSign}
           label="Total Volume"
-          value={`$${(dashboard?.overview.totalVolume || 0).toLocaleString()}`}
+          value={`${usdToSol(dashboard?.overview.totalVolume || 0).toFixed(4)} SOL`}
+          change={`≈ $${(dashboard?.overview.totalVolume || 0).toLocaleString()}`}
           loading={isLoading}
         />
       </div>
@@ -158,14 +171,15 @@ export function AdminDashboard() {
         <StatCard
           icon={TrendingUp}
           label="Total Payouts"
-          value={`$${(dashboard?.overview.totalPayouts || 0).toLocaleString()}`}
+          value={`${usdToSol(dashboard?.overview.totalPayouts || 0).toFixed(4)} SOL`}
+          change={`≈ $${(dashboard?.overview.totalPayouts || 0).toLocaleString()}`}
           loading={isLoading}
         />
         <StatCard
           icon={DollarSign}
           label="Platform Fees Earned"
-          value={`$${((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(2)}`}
-          change="1% of volume"
+          value={`${usdToSol((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(4)} SOL`}
+          change={`≈ $${((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(2)}`}
           changeType="up"
           loading={isLoading}
         />
@@ -321,9 +335,9 @@ export function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-text-primary dark:text-white">
-                      ${(event.totalPool || 0).toLocaleString()}
+                      {usdToSol(event.totalPool || 0).toFixed(4)} SOL
                     </p>
-                    <p className="text-xs text-text-muted dark:text-gray-400">pool</p>
+                    <p className="text-xs text-text-muted dark:text-gray-400">≈ ${(event.totalPool || 0).toLocaleString()}</p>
                   </div>
                 </div>
               ))
