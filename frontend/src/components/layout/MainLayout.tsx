@@ -68,7 +68,7 @@ function ThemeToggle() {
 
 // Admin wallet addresses (whitelist)
 const ADMIN_WALLETS = [
-  '8eQUQeiqaroRzjLZoZtqnz8371X87WUTNdv5JRKbmLe2',
+  '9B7SLBvupwfUGxYfxmK1VRWx6BtbEinRrx5u973JquKj',
   'CJpMo2ANF1Q614szsj9jU7qkaWM8RMTTgF3AtKM7Lpw',
   '4Gw23RWwuam8DeRyjXxMNmccaH6f1u82jMDkVJxQ4SGR',
   'GJrjFmeqSvLwDdRJiQFoYXUiRQgF95bE9NddZfEsJQvz',
