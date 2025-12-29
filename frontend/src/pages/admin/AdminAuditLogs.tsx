@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Shield, Clock, User, Activity, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Shield, Clock, User, Activity, ChevronLeft, ChevronRight, Filter, X, FileText } from 'lucide-react';
 import { api } from '@/services/api';
 import clsx from 'clsx';
 
@@ -25,9 +25,61 @@ const actionLabels: Record<string, string> = {
     DELETE_EVENT: 'Deleted Event',
 };
 
+// Details Modal Component
+function DetailsModal({ details, onClose }: { details: string; onClose: () => void }) {
+    let parsedDetails: any = {};
+    try {
+        parsedDetails = JSON.parse(details);
+    } catch {
+        parsedDetails = { raw: details };
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+            <div
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl max-h-[80vh] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-blue-500" />
+                        Action Details
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                </div>
+                <div className="p-4 overflow-y-auto max-h-[60vh]">
+                    <div className="space-y-3">
+                        {Object.entries(parsedDetails).map(([key, value]) => (
+                            <div key={key} className="flex flex-col gap-1">
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
+                                </span>
+                                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 font-mono text-sm text-gray-700 dark:text-gray-300 break-all">
+                                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                    <button onClick={onClose} className="btn btn-secondary w-full">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function AdminAuditLogs() {
     const [page, setPage] = useState(1);
     const [actionFilter, setActionFilter] = useState('');
+    const [selectedDetails, setSelectedDetails] = useState<string | null>(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ['admin', 'audit-logs', page, actionFilter],
@@ -39,6 +91,11 @@ export function AdminAuditLogs() {
 
     return (
         <div className="space-y-6">
+            {/* Details Modal */}
+            {selectedDetails && (
+                <DetailsModal details={selectedDetails} onClose={() => setSelectedDetails(null)} />
+            )}
+
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -133,8 +190,8 @@ export function AdminAuditLogs() {
                                         <td>
                                             {log.details ? (
                                                 <button
-                                                    onClick={() => alert(JSON.stringify(JSON.parse(log.details), null, 2))}
-                                                    className="text-xs text-blue-500 hover:underline"
+                                                    onClick={() => setSelectedDetails(log.details)}
+                                                    className="text-xs text-blue-500 hover:text-blue-600 hover:underline font-medium"
                                                 >
                                                     View Details
                                                 </button>

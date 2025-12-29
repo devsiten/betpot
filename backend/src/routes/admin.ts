@@ -4,7 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 import { eq, desc, asc, sql, and, gte, lte, like, or, count, sum } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { auth, requireAdmin, requireSuperAdmin } from '../middleware/auth';
-import { events, eventOptions, tickets, users, adminAuditLogs, platformSettings, failedTransactions } from '../db/schema';
+import { events, eventOptions, tickets, users, adminAuditLogs, platformSettings, failedTransactions, resolutionApprovals } from '../db/schema';
 import { AppContext } from '../types';
 import { createNotification } from './notifications';
 
@@ -561,12 +561,106 @@ admin.post('/events/:id/unlock', async (c) => {
 });
 
 // ============================================================================
-// RESOLVE EVENT & WINNER MANAGEMENT
+// RESOLVE EVENT & WINNER MANAGEMENT (2-Admin Approval Required)
 // ============================================================================
+
+// Get existing approvals for an event
+admin.get('/events/:id/approvals', async (c) => {
+  const db = c.get('db');
+  const { id } = c.req.param();
+
+  const approvals = await db.query.resolutionApprovals.findMany({
+    where: eq(resolutionApprovals.eventId, id),
+  });
+
+  return c.json({ success: true, data: approvals });
+});
+
+// Submit resolution approval (first or second admin)
+const approvalSchema = z.object({
+  winningOption: z.string().min(1),
+});
+
+admin.post('/events/:id/submit-approval', zValidator('json', approvalSchema), async (c) => {
+  const db = c.get('db');
+  const user = c.get('user')!;
+  const { id } = c.req.param();
+  const { winningOption } = c.req.valid('json');
+
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, id),
+    with: { options: true },
+  });
+
+  if (!event) {
+    return c.json({ success: false, error: 'Event not found' }, 404);
+  }
+
+  if (event.status !== 'locked') {
+    return c.json({ success: false, error: 'Event must be locked' }, 400);
+  }
+
+  const validOption = event.options.find(o => o.optionId === winningOption || o.id === winningOption);
+  if (!validOption) {
+    return c.json({ success: false, error: 'Invalid winning option' }, 400);
+  }
+
+  // Check if this admin already approved
+  const existingApproval = await db.query.resolutionApprovals.findFirst({
+    where: and(
+      eq(resolutionApprovals.eventId, id),
+      eq(resolutionApprovals.adminId, user.id)
+    ),
+  });
+
+  if (existingApproval) {
+    return c.json({ success: false, error: 'You have already submitted an approval for this event' }, 400);
+  }
+
+  // Insert approval
+  await db.insert(resolutionApprovals).values({
+    id: nanoid(),
+    eventId: id,
+    adminId: user.id,
+    winningOption: validOption.optionId,
+    approved: true,
+    createdAt: new Date(),
+  });
+
+  // Check how many approvals we have now
+  const allApprovals = await db.query.resolutionApprovals.findMany({
+    where: eq(resolutionApprovals.eventId, id),
+  });
+
+  // Check if we have 2 approvals with matching winning option
+  const matchingApprovals = allApprovals.filter(a => a.winningOption === validOption.optionId);
+
+  if (matchingApprovals.length >= 2) {
+    return c.json({
+      success: true,
+      message: '2 approvals received! You can now resolve the event.',
+      approvals: allApprovals,
+      canResolve: true,
+      requiredApprovals: 2,
+      currentApprovals: allApprovals.length,
+    });
+  }
+
+  // Need more approvals
+  return c.json({
+    success: true,
+    message: `Approval submitted. Waiting for ${2 - matchingApprovals.length} more admin(s) to approve.`,
+    approvals: allApprovals,
+    canResolve: false,
+    requiredApprovals: 2,
+    currentApprovals: allApprovals.length,
+  });
+});
 
 const resolveEventSchema = z.object({
   winningOption: z.string().min(1),
 });
+
 
 admin.post('/events/:id/resolve', zValidator('json', resolveEventSchema), async (c) => {
   const db = c.get('db');
@@ -597,6 +691,22 @@ admin.post('/events/:id/resolve', zValidator('json', resolveEventSchema), async 
 
   if (!winner) {
     return c.json({ success: false, error: 'Invalid winning option' }, 400);
+  }
+
+  // TWO-ADMIN APPROVAL CHECK
+  const approvals = await db.query.resolutionApprovals.findMany({
+    where: eq(resolutionApprovals.eventId, id),
+  });
+  const matchingApprovals = approvals.filter(a => a.winningOption === winner.optionId);
+
+  if (matchingApprovals.length < 2) {
+    return c.json({
+      success: false,
+      error: `Resolution requires 2 admin approvals for the same option. Currently: ${matchingApprovals.length}/2 approvals for option ${winner.optionId}.`,
+      approvals,
+      requiredApprovals: 2,
+      currentMatchingApprovals: matchingApprovals.length,
+    }, 400);
   }
 
   // Calculate payouts
@@ -1679,6 +1789,104 @@ admin.put('/settings', zValidator('json', platformSettingsSchema), async (c) => 
     data: updated,
     message: 'Settings updated successfully',
   });
+});
+
+// ============================================================================
+// USER LOOKUP (by wallet address)
+// ============================================================================
+
+admin.get('/users/lookup', async (c) => {
+  const db = c.get('db');
+  const wallet = c.req.query('wallet');
+
+  if (!wallet || wallet.length < 32) {
+    return c.json({ success: false, error: 'Valid wallet address required' }, 400);
+  }
+
+  try {
+    // Find user by wallet address
+    const user = await db.query.users.findFirst({
+      where: like(users.walletAddress, `%${wallet}%`),
+    });
+
+    if (!user) {
+      return c.json({ success: false, error: 'User not found' }, 404);
+    }
+
+    // Get all tickets for this user with event details
+    const userTickets = await db.query.tickets.findMany({
+      where: eq(tickets.userId, user.id),
+      with: {
+        event: true,
+        option: true,
+      },
+      orderBy: [desc(tickets.createdAt)],
+    });
+
+    // Get failed transactions for this user
+    const userFailedTx = await db.query.failedTransactions.findMany({
+      where: eq(failedTransactions.userId, user.id),
+      orderBy: [desc(failedTransactions.createdAt)],
+    });
+
+    // Calculate stats
+    const totalBets = userTickets.length;
+    const totalWon = userTickets.filter(t => t.status === 'won' || t.status === 'claimed').length;
+    const totalLost = userTickets.filter(t => t.status === 'lost').length;
+    const totalPending = userTickets.filter(t => t.status === 'active').length;
+    const totalSpent = userTickets.reduce((sum, t) => sum + (t.purchasePrice || 0), 0);
+    const totalWinnings = userTickets
+      .filter(t => t.status === 'claimed')
+      .reduce((sum, t) => sum + (t.payoutAmount || 0), 0);
+    const unclaimedWinnings = userTickets
+      .filter(t => t.status === 'won')
+      .reduce((sum, t) => sum + (t.payoutAmount || 0), 0);
+
+    return c.json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          walletAddress: user.walletAddress,
+          username: user.username,
+          role: user.role,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin,
+        },
+        stats: {
+          totalBets,
+          totalWon,
+          totalLost,
+          totalPending,
+          winRate: totalBets > 0 ? ((totalWon / (totalWon + totalLost)) * 100).toFixed(1) : '0',
+          totalSpent,
+          totalWinnings,
+          unclaimedWinnings,
+        },
+        tickets: userTickets.map(t => ({
+          id: t.id,
+          eventTitle: t.event?.title || 'Unknown Event',
+          eventId: t.eventId,
+          optionLabel: t.option?.label || 'Unknown',
+          optionId: t.option?.optionId,
+          purchasePrice: t.purchasePrice,
+          purchaseTx: t.purchaseTx,
+          status: t.status,
+          payoutAmount: t.payoutAmount,
+          claimedAt: t.claimedAt,
+          createdAt: t.createdAt,
+        })),
+        failedTransactions: userFailedTx,
+      },
+    });
+  } catch (error: any) {
+    console.error('User lookup error:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to lookup user',
+    }, 500);
+  }
 });
 
 export default admin;

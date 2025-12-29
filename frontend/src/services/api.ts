@@ -472,6 +472,70 @@ class ApiService {
     return data;
   }
 
+  // Two-admin approval workflow
+  async getEventApprovals(eventId: string) {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      eventId: string;
+      adminId: string;
+      winningOption: string;
+      approved: boolean;
+      createdAt: string;
+    }>>>(`/admin/events/${eventId}/approvals`);
+    return data;
+  }
+
+  async submitApproval(eventId: string, winningOption: string) {
+    const { data } = await this.client.post<ApiResponse<{
+      message: string;
+      approvals: any[];
+      canResolve: boolean;
+      requiredApprovals: number;
+      currentApprovals: number;
+    }>>(`/admin/events/${eventId}/submit-approval`, { winningOption });
+    return data;
+  }
+
+  // User Lookup by wallet address
+  async userLookup(wallet: string) {
+    const { data } = await this.client.get<ApiResponse<{
+      user: {
+        id: string;
+        email: string;
+        walletAddress: string;
+        username: string | null;
+        role: string;
+        createdAt: string;
+        lastLogin: string | null;
+      };
+      stats: {
+        totalBets: number;
+        totalWon: number;
+        totalLost: number;
+        totalPending: number;
+        winRate: string;
+        totalSpent: number;
+        totalWinnings: number;
+        unclaimedWinnings: number;
+      };
+      tickets: Array<{
+        id: string;
+        eventTitle: string;
+        eventId: string;
+        optionLabel: string;
+        optionId: string;
+        purchasePrice: number;
+        purchaseTx: string;
+        status: string;
+        payoutAmount: number;
+        claimedAt: string | null;
+        createdAt: string;
+      }>;
+      failedTransactions: any[];
+    }>>('/admin/users/lookup', { params: { wallet } });
+    return data;
+  }
+
   async cancelEvent(id: string, reason: string) {
     const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/events/${id}/cancel`, { reason });
     return data;

@@ -25,6 +25,7 @@ const navItems = [
   { path: '/admin/events', icon: Calendar, label: 'Events' },
   { path: '/admin/bets', icon: Ticket, label: 'Bets & Winners' },
   { path: '/admin/payment-issues', icon: AlertTriangle, label: 'Payment Issues' },
+  { path: '/admin/user-lookup', icon: Search, label: 'User Lookup' },
   { path: '/admin/blog', icon: Edit2, label: 'Blog Manager' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/audit-logs', icon: Shield, label: 'Audit Logs' },

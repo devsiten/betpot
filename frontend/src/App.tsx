@@ -36,6 +36,7 @@ import { AdminPaymentIssues } from '@/pages/admin/AdminPaymentIssues';
 import { AdminGuidePage } from '@/pages/admin/AdminGuidePage';
 import { AdminBlogManager } from '@/pages/admin/AdminBlogManager';
 import { AdminAuditLogs } from '@/pages/admin/AdminAuditLogs';
+import { AdminUserLookup } from '@/pages/admin/AdminUserLookup';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -160,6 +161,7 @@ function AppContent() {
         <Route path="events/:id" element={<AdminEventDetail />} />
         <Route path="bets" element={<AdminBets />} />
         <Route path="payment-issues" element={<AdminPaymentIssues />} />
+        <Route path="user-lookup" element={<AdminUserLookup />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="winnings" element={<DashboardPage />} />
         <Route path="guide" element={<AdminGuidePage />} />

@@ -605,6 +605,22 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
   } | null>(null);
   const [loadingResult, setLoadingResult] = useState(false);
 
+  // Fetch existing approvals
+  const { data: approvalsData, refetch: refetchApprovals } = useQuery({
+    queryKey: ['admin', 'event', event.id, 'approvals'],
+    queryFn: () => api.getEventApprovals(event.id),
+  });
+
+  const approvals = approvalsData?.data || [];
+
+  // Check if we can resolve (2 matching approvals)
+  const getMatchingApprovals = (optionId: string) => {
+    return approvals.filter((a: any) => a.winningOption === optionId);
+  };
+
+  const selectedMatchingApprovals = selectedOption ? getMatchingApprovals(selectedOption) : [];
+  const canResolve = selectedMatchingApprovals.length >= 2;
+
   // Fetch match result for sports events
   useState(() => {
     if (event.category === 'sports') {
@@ -620,11 +636,19 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
             });
           }
         })
-        .catch(() => {
-          // Match not found - that's OK
-        })
+        .catch(() => { })
         .finally(() => setLoadingResult(false));
     }
+  });
+
+  const submitApprovalMutation = useMutation({
+    mutationFn: () => api.submitApproval(event.id, selectedOption),
+    onSuccess: (data) => {
+      refetchApprovals();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'event', event.id] });
+      toast.success(data.data?.message || 'Approval submitted!');
+    },
+    onError: (error: any) => toast.error(error.response?.data?.error || 'Failed to submit approval'),
   });
 
   const resolveMutation = useMutation({
@@ -632,23 +656,49 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'event', event.id] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'events'] });
-      toast.success(`Event resolved! ${data.data?.winnersCount} winners, $${data.data?.payoutPerTicket?.toFixed(2)} per ticket`);
+      toast.success(`Event resolved! ${data.data?.winnersCount} winners`);
       onClose();
     },
-    onError: () => toast.error('Failed to resolve event'),
+    onError: (error: any) => toast.error(error.response?.data?.error || 'Failed to resolve event'),
   });
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Resolve Event</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Select the winning option</p>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Resolve Event</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Requires 2 admin approvals</p>
+        </div>
+
+        {/* Approval Status Banner */}
+        <div className="px-4 sm:px-6 pt-4">
+          <div className={clsx(
+            'p-3 sm:p-4 rounded-lg border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2',
+            approvals.length >= 2
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+              : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+          )}>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {approvals.length}/2 Approvals
+              </span>
+            </div>
+            {approvals.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {approvals.map((a: any) => (
+                  <span key={a.id} className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                    Option {a.winningOption}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Match Result for Sports */}
         {event.category === 'sports' && (
-          <div className="px-6 pt-4">
+          <div className="px-4 sm:px-6 pt-4">
             {loadingResult ? (
               <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-center">
                 <p className="text-gray-500 dark:text-gray-400 text-sm">Loading match result...</p>
@@ -683,47 +733,69 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
           </div>
         )}
 
-        <div className="p-6 space-y-4">
-          {event.options?.map((option: any) => (
-            <button
-              key={option.id}
-              onClick={() => setSelectedOption(option.optionId)}
-              className={clsx(
-                'w-full p-4 rounded-lg border text-left transition-all',
-                selectedOption === option.optionId
-                  ? 'bg-green-100 dark:bg-green-500/20 border-green-500 dark:border-green-400'
-                  : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-900 dark:text-white">
-                    {option.optionId}
-                  </span>
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{option.label}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{option.ticketsSold} tickets</p>
-                  </div>
-                </div>
-                {selectedOption === option.optionId && (
-                  <CheckCircle className="w-6 h-6 text-green-500 dark:text-green-400" />
+        {/* Options Selection */}
+        <div className="p-4 sm:p-6 space-y-3">
+          {event.options?.map((option: any) => {
+            const optionApprovals = getMatchingApprovals(option.optionId);
+            return (
+              <button
+                key={option.id}
+                onClick={() => setSelectedOption(option.optionId)}
+                className={clsx(
+                  'w-full p-3 sm:p-4 rounded-lg border text-left transition-all',
+                  selectedOption === option.optionId
+                    ? 'bg-green-100 dark:bg-green-500/20 border-green-500 dark:border-green-400'
+                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 )}
-              </div>
-            </button>
-          ))}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-900 dark:text-white flex-shrink-0">
+                      {option.optionId}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 dark:text-white truncate">{option.label}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        {option.ticketsSold} tickets • {optionApprovals.length} approval(s)
+                      </p>
+                    </div>
+                  </div>
+                  {selectedOption === option.optionId && (
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500 dark:text-green-400 flex-shrink-0" />
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-          <button onClick={onClose} className="btn btn-secondary">
-            Cancel
-          </button>
+        {/* Actions */}
+        <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+          {/* Submit Approval Button */}
           <button
-            onClick={() => resolveMutation.mutate()}
-            disabled={!selectedOption || resolveMutation.isPending}
-            className="btn btn-success"
+            onClick={() => submitApprovalMutation.mutate()}
+            disabled={!selectedOption || submitApprovalMutation.isPending}
+            className="btn btn-secondary w-full"
           >
-            {resolveMutation.isPending ? 'Resolving...' : 'Confirm Resolution'}
+            {submitApprovalMutation.isPending ? 'Submitting...' : 'Submit My Approval'}
           </button>
+
+          {/* Resolve Button (only enabled with 2 matching approvals) */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={onClose} className="btn btn-secondary flex-1 order-2 sm:order-1">
+              Cancel
+            </button>
+            <button
+              onClick={() => resolveMutation.mutate()}
+              disabled={!canResolve || resolveMutation.isPending}
+              className={clsx(
+                'btn flex-1 order-1 sm:order-2',
+                canResolve ? 'btn-success' : 'btn-secondary opacity-50 cursor-not-allowed'
+              )}
+            >
+              {resolveMutation.isPending ? 'Resolving...' : canResolve ? 'Confirm Resolution' : `Need ${2 - selectedMatchingApprovals.length} more approval(s)`}
+            </button>
+          </div>
         </div>
       </div>
     </div>

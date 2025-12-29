@@ -244,3 +244,21 @@ export const blogPosts = sqliteTable('blog_posts', {
 export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
   author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
 }));
+
+// Resolution Approvals table for two-admin approval workflow
+export const resolutionApprovals = sqliteTable('resolution_approvals', {
+  id: text('id').primaryKey(),
+  eventId: text('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  adminId: text('admin_id').notNull().references(() => users.id),
+  winningOption: text('winning_option').notNull(), // The option this admin selected
+  approved: integer('approved', { mode: 'boolean' }).default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  eventIdx: index('resolution_approvals_event_idx').on(table.eventId),
+  adminIdx: index('resolution_approvals_admin_idx').on(table.adminId),
+}));
+
+export const resolutionApprovalsRelations = relations(resolutionApprovals, ({ one }) => ({
+  event: one(events, { fields: [resolutionApprovals.eventId], references: [events.id] }),
+  admin: one(users, { fields: [resolutionApprovals.adminId], references: [users.id] }),
+}));
