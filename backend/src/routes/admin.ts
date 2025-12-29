@@ -1804,18 +1804,9 @@ admin.get('/users/lookup', async (c) => {
   }
 
   try {
-    // Find user by wallet address
-    const user = await db.query.users.findFirst({
-      where: like(users.walletAddress, `%${wallet}%`),
-    });
-
-    if (!user) {
-      return c.json({ success: false, error: 'User not found' }, 404);
-    }
-
-    // Get all tickets for this user with event details
+    // Search tickets by wallet address directly
     const userTickets = await db.query.tickets.findMany({
-      where: eq(tickets.userId, user.id),
+      where: eq(tickets.walletAddress, wallet),
       with: {
         event: true,
         option: true,
@@ -1823,9 +1814,19 @@ admin.get('/users/lookup', async (c) => {
       orderBy: [desc(tickets.createdAt)],
     });
 
-    // Get failed transactions for this user
+    if (userTickets.length === 0) {
+      return c.json({ success: false, error: 'No tickets found for this wallet' }, 404);
+    }
+
+    // Try to find user record (may not exist for wallet-only users)
+    const userId = userTickets[0].userId;
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    // Get failed transactions for this wallet
     const userFailedTx = await db.query.failedTransactions.findMany({
-      where: eq(failedTransactions.userId, user.id),
+      where: eq(failedTransactions.userId, userId),
       orderBy: [desc(failedTransactions.createdAt)],
     });
 
@@ -1846,20 +1847,20 @@ admin.get('/users/lookup', async (c) => {
       success: true,
       data: {
         user: {
-          id: user.id,
-          email: user.email,
-          walletAddress: user.walletAddress,
-          username: user.username,
-          role: user.role,
-          createdAt: user.createdAt,
-          lastLogin: user.lastLogin,
+          id: userId,
+          email: user?.email || 'N/A',
+          walletAddress: wallet,
+          username: user?.username || 'Wallet User',
+          role: user?.role || 'user',
+          createdAt: user?.createdAt || userTickets[0].createdAt,
+          lastLogin: user?.lastLogin || null,
         },
         stats: {
           totalBets,
           totalWon,
           totalLost,
           totalPending,
-          winRate: totalBets > 0 ? ((totalWon / (totalWon + totalLost)) * 100).toFixed(1) : '0',
+          winRate: totalBets > 0 ? ((totalWon / (totalWon + totalLost || 1)) * 100).toFixed(1) : '0',
           totalSpent,
           totalWinnings,
           unclaimedWinnings,
@@ -1868,7 +1869,7 @@ admin.get('/users/lookup', async (c) => {
           id: t.id,
           eventTitle: t.event?.title || 'Unknown Event',
           eventId: t.eventId,
-          optionLabel: t.option?.label || 'Unknown',
+          optionLabel: t.option?.label || t.optionLabel || 'Unknown',
           optionId: t.option?.optionId,
           purchasePrice: t.purchasePrice,
           purchaseTx: t.purchaseTx,
@@ -1877,7 +1878,7 @@ admin.get('/users/lookup', async (c) => {
           claimedAt: t.claimedAt,
           createdAt: t.createdAt,
         })),
-        failedTransactions: userFailedTx,
+        failedTransactions: userFailedTx || [],
       },
     });
   } catch (error: any) {
