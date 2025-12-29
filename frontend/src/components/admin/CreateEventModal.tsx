@@ -32,6 +32,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
     lockTime: '',
     eventTime: '',
     status: 'upcoming',
+    isJackpot: true,
   });
 
   const mutation = useMutation({
@@ -70,7 +71,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate options
     if (formData.options.some(o => !o.label.trim())) {
       toast.error('All options must have labels');
@@ -260,6 +261,21 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
               <option value="draft">Draft (hidden)</option>
               <option value="upcoming">Upcoming (visible)</option>
             </select>
+          </div>
+
+          {/* Jackpot Toggle */}
+          <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-500/30 dark:border-yellow-600/30">
+            <input
+              type="checkbox"
+              id="isJackpot"
+              checked={formData.isJackpot || false}
+              onChange={(e) => setFormData({ ...formData, isJackpot: e.target.checked })}
+              className="w-5 h-5 rounded border-yellow-400 text-yellow-500 focus:ring-yellow-500"
+            />
+            <label htmlFor="isJackpot" className="flex-1">
+              <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">🏆 Featured Jackpot Event</span>
+              <p className="text-xs text-yellow-600/80 dark:text-yellow-500/80 mt-0.5">Shows on the Jackpot page for users</p>
+            </label>
           </div>
 
           {/* Actions */}

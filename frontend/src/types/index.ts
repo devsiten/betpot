@@ -188,6 +188,7 @@ export interface CreateEventForm {
   lockTime: string;
   eventTime: string;
   status?: 'draft' | 'upcoming';
+  isJackpot?: boolean;
 }
 
 export interface ResolveEventForm {
