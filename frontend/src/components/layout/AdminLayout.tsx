@@ -13,6 +13,7 @@ import {
   Search,
   Trophy,
   Gift,
+  Shield,
 } from 'lucide-react';
 import { useWallet } from '@/providers/SolanaProvider';
 import clsx from 'clsx';
@@ -26,6 +27,7 @@ const navItems = [
   { path: '/admin/payment-issues', icon: AlertTriangle, label: 'Payment Issues' },
   { path: '/admin/blog', icon: Edit2, label: 'Blog Manager' },
   { path: '/admin/users', icon: Users, label: 'Users' },
+  { path: '/admin/audit-logs', icon: Shield, label: 'Audit Logs' },
   { path: '/admin/winnings', icon: Gift, label: 'My Winnings' },
   { path: '/admin/guide', icon: BookOpen, label: 'Admin Guide' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },

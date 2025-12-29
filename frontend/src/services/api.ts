@@ -418,6 +418,14 @@ class ApiService {
     return data;
   }
 
+  // Get admin audit logs
+  async getAdminAuditLogs(filters?: { page?: number; limit?: number; action?: string }) {
+    const { data } = await this.client.get<ApiResponse<AdminAuditLog[]> & { pagination: Pagination }>('/admin/audit-logs', {
+      params: filters,
+    });
+    return data;
+  }
+
   async getAdminEvent(id: string) {
     const { data } = await this.client.get<ApiResponse<Event & { tickets: Ticket[] }>>(`/admin/events/${id}`);
     return data;
