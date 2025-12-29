@@ -1,5 +1,4 @@
 import { Globe, Ticket, Gift, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const steps = [
     {
@@ -78,31 +77,7 @@ export function HowItWorksPage() {
                 </div>
             </div>
 
-            {/* CTA Section */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="bg-gradient-to-br from-brand-500/20 to-purple-500/20 dark:from-brand-500/10 dark:to-purple-500/10 rounded-3xl p-12 text-center border border-brand-500/30">
-                    <h2 className="text-3xl font-bold text-text-primary dark:text-white mb-4">
-                        Ready to Start Winning?
-                    </h2>
-                    <p className="text-text-secondary dark:text-gray-300 mb-8 max-w-xl mx-auto">
-                        Connect your wallet and place your first bet on the Jackpot event!
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            to="/jackpot"
-                            className="btn bg-gradient-to-r from-brand-500 to-purple-500 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-brand-500/30 transition-all"
-                        >
-                            Go to Jackpot
-                        </Link>
-                        <Link
-                            to="/events"
-                            className="btn bg-white/10 dark:bg-gray-800 text-text-primary dark:text-white px-8 py-3 rounded-xl font-bold hover:bg-white/20 dark:hover:bg-gray-700 transition-all border border-border dark:border-gray-700"
-                        >
-                            Browse Markets
-                        </Link>
-                    </div>
-                </div>
-            </div>
+
 
             {/* FAQ Section */}
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

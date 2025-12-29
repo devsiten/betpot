@@ -24,9 +24,10 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
     description: '',
     category: 'sports',
     ticketPrice: 10,
+    ticketLimit: 10000,
     options: [
-      { label: '', ticketLimit: 1000 },
-      { label: '', ticketLimit: 1000 },
+      { label: '' },
+      { label: '' },
     ],
     startTime: '',
     lockTime: '',
@@ -51,7 +52,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
     if (formData.options.length >= 6) return;
     setFormData({
       ...formData,
-      options: [...formData.options, { label: '', ticketLimit: 1000 }],
+      options: [...formData.options, { label: '' }],
     });
   };
 
@@ -63,9 +64,9 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
     });
   };
 
-  const updateOption = (index: number, field: 'label' | 'ticketLimit', value: string | number) => {
+  const updateOption = (index: number, value: string) => {
     const newOptions = [...formData.options];
-    newOptions[index] = { ...newOptions[index], [field]: value };
+    newOptions[index] = { label: value };
     setFormData({ ...formData, options: newOptions });
   };
 
@@ -131,8 +132,8 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
             />
           </div>
 
-          {/* Category & Price */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Category, Price & Ticket Limit */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="label">Category</label>
               <select
@@ -155,6 +156,18 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                 onChange={(e) => setFormData({ ...formData, ticketPrice: parseFloat(e.target.value) })}
                 className="input"
               />
+            </div>
+            <div>
+              <label className="label">Total Ticket Limit</label>
+              <input
+                type="number"
+                min={10}
+                max={1000000}
+                value={formData.ticketLimit}
+                onChange={(e) => setFormData({ ...formData, ticketLimit: parseInt(e.target.value) })}
+                className="input"
+              />
+              <p className="text-xs text-dark-500 mt-1">Across all options</p>
             </div>
           </div>
 
@@ -182,19 +195,10 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                   <input
                     type="text"
                     value={option.label}
-                    onChange={(e) => updateOption(index, 'label', e.target.value)}
+                    onChange={(e) => updateOption(index, e.target.value)}
                     placeholder={`Option ${String.fromCharCode(65 + index)} label`}
                     required
                     className="input flex-1"
-                  />
-                  <input
-                    type="number"
-                    min={10}
-                    max={1000000}
-                    value={option.ticketLimit}
-                    onChange={(e) => updateOption(index, 'ticketLimit', parseInt(e.target.value))}
-                    className="input w-32"
-                    title="Ticket limit"
                   />
                   {formData.options.length > 2 && (
                     <button
@@ -209,7 +213,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
               ))}
             </div>
             <p className="text-xs text-dark-500 mt-2">
-              Minimum 2 options, maximum 6. Enter ticket limit for each option.
+              Minimum 2 options, maximum 6 betting choices.
             </p>
           </div>
 

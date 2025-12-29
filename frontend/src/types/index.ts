@@ -182,8 +182,9 @@ export interface CreateEventForm {
   description?: string;
   category: EventCategory;
   ticketPrice?: number;
+  ticketLimit?: number; // Total tickets for entire event
   imageUrl?: string;
-  options: { label: string; ticketLimit: number }[];
+  options: { label: string }[]; // Options now just need label
   startTime: string;
   lockTime: string;
   eventTime: string;
