@@ -116,7 +116,7 @@ export function AdminBets() {
           <p className="text-xs text-text-muted dark:text-gray-400">Unclaimed</p>
         </div>
         <div className="card p-4 dark:bg-gray-900 dark:border-gray-800">
-          <p className="text-2xl font-bold text-text-primary dark:text-white">${(allTimeStats.totalPayout || 0).toLocaleString()}</p>
+          <p className="text-2xl font-bold text-text-primary dark:text-white">{((allTimeStats.totalPayout || 0) / 125).toFixed(4)} SOL</p>
           <p className="text-xs text-text-muted dark:text-gray-400">Total Payout</p>
         </div>
       </div>
@@ -286,13 +286,17 @@ export function AdminBets() {
                         {ticket.status}
                       </span>
                     </td>
-                    <td>${ticket.purchasePrice}</td>
+                    <td>
+                      <div>
+                        <span className="text-text-primary dark:text-white">{ticket.solAmount ? ticket.solAmount.toFixed(4) : (ticket.purchasePrice / 125).toFixed(4)} SOL</span>
+                      </div>
+                    </td>
                     <td className={clsx(
                       ticket.payoutAmount && ticket.payoutAmount > 0
                         ? 'text-green-400 font-medium'
-                        : 'text-dark-400'
+                        : 'text-text-muted dark:text-gray-400'
                     )}>
-                      {ticket.payoutAmount ? `$${ticket.payoutAmount.toFixed(2)}` : '-'}
+                      {ticket.payoutSolAmount ? `${ticket.payoutSolAmount.toFixed(4)} SOL` : (ticket.payoutAmount ? `${(ticket.payoutAmount / 125).toFixed(4)} SOL` : '-')}
                     </td>
                     <td className="text-dark-300 text-sm">
                       {format(new Date(ticket.createdAt), 'MMM dd, HH:mm')}

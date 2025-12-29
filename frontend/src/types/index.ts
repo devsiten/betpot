@@ -65,9 +65,11 @@ export interface Ticket {
   walletAddress: string;
   chain: Chain;
   purchasePrice: number;
+  solAmount?: number; // Actual SOL paid
   purchaseTx: string;
   status: TicketStatus;
   payoutAmount?: number;
+  payoutSolAmount?: number; // Actual SOL payout
   claimTx?: string;
   claimedAt?: string;
   createdAt: string;

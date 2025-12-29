@@ -216,7 +216,6 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
               Minimum 2 options, maximum 6 betting choices.
             </p>
           </div>
-
           {/* Times */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -228,7 +227,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                 required
                 className="input"
               />
-              <p className="text-xs text-dark-500 mt-1">When betting opens</p>
+              <p className="text-xs text-text-muted dark:text-gray-500 mt-1">When betting opens</p>
             </div>
             <div>
               <label className="label">Lock Time</label>
@@ -239,7 +238,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                 required
                 className="input"
               />
-              <p className="text-xs text-dark-500 mt-1">When betting closes</p>
+              <p className="text-xs text-text-muted dark:text-gray-500 mt-1">When betting closes</p>
             </div>
             <div>
               <label className="label">Event Time</label>
@@ -250,7 +249,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                 required
                 className="input"
               />
-              <p className="text-xs text-dark-500 mt-1">When event occurs</p>
+              <p className="text-xs text-text-muted dark:text-gray-500 mt-1">When event occurs</p>
             </div>
           </div>
 
