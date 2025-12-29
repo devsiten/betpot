@@ -136,6 +136,34 @@
     @apply bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-brand-500;
   }
 
+  /* Datetime inputs - ensure picker icons are visible */
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="time"] {
+    color-scheme: light;
+  }
+
+  .dark input[type="datetime-local"],
+  .dark input[type="date"],
+  .dark input[type="time"] {
+    color-scheme: dark;
+  }
+
+  /* Ensure calendar/clock icons are clickable */
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: none;
+  }
+
+  .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  .dark input[type="date"]::-webkit-calendar-picker-indicator,
+  .dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
+
   .label {
     @apply block text-xs font-medium text-text-secondary mb-2;
   }
