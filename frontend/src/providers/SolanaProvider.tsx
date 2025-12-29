@@ -100,12 +100,31 @@ export function useWallet() {
         await adapterDisconnect();
     }, [adapterDisconnect]);
 
-    // Sign message wrapper
+    // Sign message wrapper with retry logic for better Solflare compatibility
     const signMessage = useCallback(async (message: Uint8Array): Promise<Uint8Array> => {
-        if (!adapterSignMessage) {
-            throw new Error('Wallet does not support message signing');
+        // Wait for signMessage to be available (Solflare sometimes delays)
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        while (!adapterSignMessage && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            attempts++;
         }
-        return adapterSignMessage(message);
+
+        if (!adapterSignMessage) {
+            throw new Error('Wallet does not support message signing. Please reconnect your wallet.');
+        }
+
+        try {
+            return await adapterSignMessage(message);
+        } catch (error: any) {
+            console.error('Sign message error:', error);
+            // Re-throw with clearer message
+            if (error?.message?.includes('User rejected')) {
+                throw error;
+            }
+            throw new Error(`Failed to sign: ${error?.message || 'Unknown error'}`);
+        }
     }, [adapterSignMessage]);
 
     // Send transaction wrapper
