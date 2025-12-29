@@ -96,10 +96,10 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="card p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Create New Event</h2>
+          <h2 className="text-xl font-bold text-text-primary dark:text-white">Create New Event</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-dark-800 text-dark-400 hover:text-white"
+            className="p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-muted dark:text-gray-400 hover:text-text-primary dark:hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
