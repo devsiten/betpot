@@ -13,6 +13,7 @@ import {
   CheckCircle,
   AlertCircle,
   Copy,
+  Star,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '@/services/api';
@@ -80,6 +81,15 @@ export function AdminEventDetail() {
       toast.success('Event unlocked successfully');
     },
     onError: () => toast.error('Failed to unlock event'),
+  });
+
+  const jackpotMutation = useMutation({
+    mutationFn: (isJackpot: boolean) => api.setEventJackpot(id!, isJackpot),
+    onSuccess: (_, isJackpot) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'event', id] });
+      toast.success(isJackpot ? 'Event added to Jackpots!' : 'Event removed from Jackpots');
+    },
+    onError: () => toast.error('Failed to update jackpot status'),
   });
 
   const event = eventData?.data;
@@ -185,6 +195,22 @@ export function AdminEventDetail() {
             >
               <XCircle className="w-4 h-4" />
               Cancel
+            </button>
+          )}
+          {/* Jackpot Toggle */}
+          {!['resolved', 'cancelled'].includes(event.status) && (
+            <button
+              onClick={() => jackpotMutation.mutate(!(event as any).isJackpot)}
+              disabled={jackpotMutation.isPending}
+              className={clsx(
+                'btn',
+                (event as any).isJackpot
+                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30'
+                  : 'btn-secondary'
+              )}
+            >
+              <Star className={clsx('w-4 h-4', (event as any).isJackpot && 'fill-yellow-400')} />
+              {(event as any).isJackpot ? 'In Jackpot' : 'Add to Jackpot'}
             </button>
           )}
         </div>
