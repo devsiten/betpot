@@ -442,8 +442,13 @@ class ApiService {
   }
 
   async setEventJackpot(id: string, isJackpot: boolean) {
-    const { data } = await this.client.put<ApiResponse<Event>>(`/admin/events/${id}`, { isJackpot });
-    return data;
+    if (isJackpot) {
+      const { data } = await this.client.post<ApiResponse<Event>>(`/admin/events/${id}/jackpot`);
+      return data;
+    } else {
+      const { data } = await this.client.delete<ApiResponse<Event>>(`/admin/events/${id}/jackpot`);
+      return data;
+    }
   }
 
   async lockEvent(id: string) {
