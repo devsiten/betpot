@@ -62,6 +62,13 @@ export function AdminEvents() {
     }),
   });
 
+  // Fetch pending resolve events from server (accurate server-side time)
+  const { data: pendingResolveData } = useQuery({
+    queryKey: ['admin', 'events', 'pending-resolve'],
+    queryFn: () => api.getAdminPendingResolve(),
+    enabled: activeTab === 'resolve', // Only fetch when on Resolve tab
+  });
+
   const lockMutation = useMutation({
     mutationFn: (id: string) => api.lockEvent(id),
     onSuccess: () => {
@@ -72,6 +79,7 @@ export function AdminEvents() {
   });
 
   const allEvents = data?.data || [];
+  const pendingResolveEvents = pendingResolveData?.data || [];
   const pagination = data?.pagination;
 
   // Filter events based on active tab
@@ -86,8 +94,8 @@ export function AdminEvents() {
       case 'locked':
         return allEvents.filter(e => e.status === 'locked');
       case 'resolve':
-        // Resolve tab: locked events where match has finished (eventTime < now)
-        return allEvents.filter(e => e.status === 'locked' && new Date(e.eventTime) < new Date());
+        // Resolve tab: use server-side filtered data (accurate server time)
+        return pendingResolveEvents;
       case 'results':
         return allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled');
       default:
@@ -117,7 +125,7 @@ export function AdminEvents() {
     { id: 'live' as const, label: 'Live', count: allEvents.filter(e => e.status === 'open').length, color: 'text-green-500 border-green-500' },
     { id: 'week' as const, label: 'Event of Week', count: allEvents.filter((e: any) => e.isJackpot && e.status === 'upcoming').length, color: 'text-blue-500 border-blue-500' },
     { id: 'locked' as const, label: 'Locked', count: allEvents.filter(e => e.status === 'locked').length, color: 'text-yellow-500 border-yellow-500' },
-    { id: 'resolve' as const, label: 'Resolve', count: allEvents.filter(e => e.status === 'locked' && new Date(e.eventTime) < new Date()).length, color: 'text-orange-500 border-orange-500' },
+    { id: 'resolve' as const, label: 'Resolve', count: pendingResolveEvents.length, color: 'text-orange-500 border-orange-500' },
     { id: 'results' as const, label: 'Results', count: allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled').length, color: 'text-purple-500 border-purple-500' },
   ];
 

@@ -412,6 +412,12 @@ class ApiService {
     return data;
   }
 
+  // Get events pending resolution (locked + eventTime passed) - server-side filter
+  async getAdminPendingResolve() {
+    const { data } = await this.client.get<ApiResponse<Event[]> & { count: number }>('/admin/events/pending-resolve');
+    return data;
+  }
+
   async getAdminEvent(id: string) {
     const { data } = await this.client.get<ApiResponse<Event & { tickets: Ticket[] }>>(`/admin/events/${id}`);
     return data;
