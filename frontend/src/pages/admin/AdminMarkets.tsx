@@ -442,7 +442,7 @@ export function AdminMarkets() {
                                             <span className="badge badge-success">{eventSource === 'polymarket' ? 'Live' : 'Upcoming'}</span>
                                         )}
                                         <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-gray-200 dark:bg-white/5 px-2 py-1 rounded">
-                                            {event.sport || event.category || selectedPolyCategory}
+                                            {event.sport || event.category || (eventSource === 'sports' ? 'SPORTS' : selectedPolyCategory)}
                                         </span>
                                     </div>
                                     <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
@@ -469,21 +469,13 @@ export function AdminMarkets() {
                                         {event.options?.slice(0, 3).map((option: any, idx: number) => (
                                             <div
                                                 key={idx}
-                                                className={clsx(
-                                                    'p-3 rounded-lg border flex items-center justify-between',
-                                                    option.percentage !== undefined && option.percentage > 50
-                                                        ? 'bg-green-500/10 border-green-500/30'
-                                                        : 'bg-gray-100 dark:bg-black/40 border-gray-300 dark:border-white/10'
-                                                )}
+                                                className="p-3 rounded-lg border flex items-center justify-between bg-gray-100 dark:bg-black/40 border-gray-300 dark:border-white/10"
                                             >
                                                 <span className="text-sm font-medium text-text-primary dark:text-white truncate flex-1">
                                                     {option.label}
                                                 </span>
                                                 {option.percentage !== undefined ? (
-                                                    <span className={clsx(
-                                                        'text-lg font-bold ml-2',
-                                                        option.percentage > 50 ? 'text-green-400' : 'text-gray-400'
-                                                    )}>
+                                                    <span className="text-lg font-bold ml-2 text-gray-400">
                                                         {option.percentage}%
                                                     </span>
                                                 ) : option.type && (
