@@ -284,19 +284,6 @@ export function AdminMarkets() {
         return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
     }, [externalEvents]);
 
-    // Helper to get team initials from title (e.g., "Arsenal FC vs Chelsea FC" -> ["ARS", "CHE"])
-    const getTeamInitials = (title: string): string[] => {
-        const parts = title.split(/\s+vs\.?\s+|\s+-\s+/i);
-        return parts.slice(0, 2).map(team => {
-            const words = team.trim().split(/\s+/);
-            if (words.length === 1) {
-                return words[0].substring(0, 3).toUpperCase();
-            }
-            // Take first letter of each word (up to 3)
-            return words.slice(0, 3).map(w => w[0]).join('').toUpperCase();
-        });
-    };
-
     // Check if event is already a jackpot (by title or externalId match)
     const isAlreadyJackpot = (event: ExternalEvent) => {
         return allJackpots.some((jp: any) =>
@@ -458,7 +445,8 @@ export function AdminMarkets() {
                     <p className="text-text-primary text-lg font-bold">No upcoming events</p>
                     <p className="text-text-secondary text-sm mt-1 font-mono">Try selecting a different sport</p>
                 </div>
-            ) : (
+            ) : eventSource === 'sports' ? (
+                /* SPORTS - Grouped by day */
                 <div className="space-y-8">
                     {sortedAndGroupedEvents.map(([dayKey, { label: dayLabel, events: dayEvents }]) => (
                         <div key={dayKey}>
@@ -476,10 +464,7 @@ export function AdminMarkets() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                                 {dayEvents.map((event: any) => {
                                     const alreadyJackpot = isAlreadyJackpot(event);
-                                    const teamInitials = getTeamInitials(event.title);
                                     const eventTime = new Date(event.startTime || event.eventTime);
-                                    const hasImage = !!event.image;
-                                    const isSportsEvent = eventSource === 'sports' || event.sport;
 
                                     return (
                                         <div
@@ -490,28 +475,6 @@ export function AdminMarkets() {
                                                 alreadyJackpot && 'ring-2 ring-green-500 opacity-60'
                                             )}
                                         >
-                                            {/* Event Image or Team Initials */}
-                                            {hasImage ? (
-                                                <div className="h-24 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden">
-                                                    <img
-                                                        src={event.image}
-                                                        alt={event.title}
-                                                        className="w-full h-full object-cover opacity-80"
-                                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                    />
-                                                </div>
-                                            ) : isSportsEvent && teamInitials.length >= 2 ? (
-                                                <div className="h-24 bg-gradient-to-br from-cyan-900/30 to-blue-900/30 flex items-center justify-center gap-4">
-                                                    <div className="w-14 h-14 rounded-full bg-cyan-500/20 border-2 border-cyan-500/50 flex items-center justify-center">
-                                                        <span className="text-cyan-400 font-bold text-sm">{teamInitials[0]}</span>
-                                                    </div>
-                                                    <span className="text-gray-400 font-bold text-xs">VS</span>
-                                                    <div className="w-14 h-14 rounded-full bg-orange-500/20 border-2 border-orange-500/50 flex items-center justify-center">
-                                                        <span className="text-orange-400 font-bold text-sm">{teamInitials[1]}</span>
-                                                    </div>
-                                                </div>
-                                            ) : null}
-
                                             {/* Event Header */}
                                             <div className="p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
                                                 <div className="flex items-start justify-between mb-3">
@@ -526,25 +489,18 @@ export function AdminMarkets() {
                                                         </div>
                                                     )}
                                                     <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-gray-200 dark:bg-white/5 px-2 py-1 rounded">
-                                                        {event.sport || event.category || (eventSource === 'sports' ? 'SPORTS' : selectedPolyCategory)}
+                                                        SPORTS
                                                     </span>
                                                 </div>
                                                 <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
                                                     {event.title}
                                                 </h3>
-                                                <div className="flex items-center gap-4 mt-2">
-                                                    <p className="text-xs text-gray-500 font-mono">
-                                                        {format(eventTime, 'EEE, MMM dd • HH:mm')}
-                                                    </p>
-                                                    {event.volume && (
-                                                        <p className="text-xs text-cyan-400 font-mono">
-                                                            Vol: ${(event.volume / 1000000).toFixed(1)}M
-                                                        </p>
-                                                    )}
-                                                </div>
+                                                <p className="text-xs text-gray-500 font-mono mt-2">
+                                                    {format(eventTime, 'EEE, MMM dd • HH:mm')}
+                                                </p>
                                             </div>
 
-                                            {/* Options with Percentages */}
+                                            {/* Options */}
                                             <div className="p-5 bg-white dark:bg-gray-900/50">
                                                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Betting Options</p>
                                                 <div className="space-y-2">
@@ -556,11 +512,7 @@ export function AdminMarkets() {
                                                             <span className="text-sm font-medium text-text-primary dark:text-white truncate flex-1">
                                                                 {option.label}
                                                             </span>
-                                                            {option.percentage !== undefined ? (
-                                                                <span className="text-lg font-bold ml-2 text-gray-400">
-                                                                    {option.percentage}%
-                                                                </span>
-                                                            ) : option.type && (
+                                                            {option.type && (
                                                                 <span className="text-xs text-gray-500 uppercase ml-2">
                                                                     {option.type === 'home' ? 'Home' : option.type === 'away' ? 'Away' : 'Draw'}
                                                                 </span>
@@ -569,7 +521,6 @@ export function AdminMarkets() {
                                                     ))}
                                                 </div>
 
-                                                {/* Set as Jackpot Button */}
                                                 <button
                                                     onClick={() => handleSetJackpot(event)}
                                                     className={clsx(
@@ -598,6 +549,108 @@ export function AdminMarkets() {
                             </div>
                         </div>
                     ))}
+                </div>
+            ) : (
+                /* POLYMARKET / MY EVENTS - Flat grid (original layout) */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    {externalEvents.slice(0, 24).map((event: any) => {
+                        const alreadyJackpot = isAlreadyJackpot(event);
+                        return (
+                            <div
+                                key={event.id}
+                                className={clsx(
+                                    'card p-0 overflow-hidden transition-all',
+                                    selectedEvent?.id === event.id && 'ring-2 ring-yellow-500',
+                                    alreadyJackpot && 'ring-2 ring-green-500 opacity-60'
+                                )}
+                            >
+                                {/* Event Image (Polymarket) */}
+                                {event.image && (
+                                    <div className="h-24 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden">
+                                        <img
+                                            src={event.image}
+                                            alt={event.title}
+                                            className="w-full h-full object-cover opacity-80"
+                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Event Header */}
+                                <div className="p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
+                                    <div className="flex items-start justify-between mb-3">
+                                        {alreadyJackpot ? (
+                                            <span className="badge bg-green-500/20 text-green-400 border border-green-500/40">✓ Already Jackpot</span>
+                                        ) : (
+                                            <span className="badge badge-success">Live</span>
+                                        )}
+                                        <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-gray-200 dark:bg-white/5 px-2 py-1 rounded">
+                                            {event.category || selectedPolyCategory}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-text-primary dark:text-white leading-tight line-clamp-2">
+                                        {event.title}
+                                    </h3>
+                                    <div className="flex items-center gap-4 mt-2">
+                                        {event.startTime && (
+                                            <p className="text-xs text-gray-500 font-mono">
+                                                {format(new Date(event.startTime), 'MMM dd, yyyy')}
+                                            </p>
+                                        )}
+                                        {event.volume && (
+                                            <p className="text-xs text-cyan-400 font-mono">
+                                                Vol: ${(event.volume / 1000000).toFixed(1)}M
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Options with Percentages */}
+                                <div className="p-5 bg-white dark:bg-gray-900/50">
+                                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Betting Options</p>
+                                    <div className="space-y-2">
+                                        {event.options?.slice(0, 3).map((option: any, idx: number) => (
+                                            <div
+                                                key={idx}
+                                                className="p-3 rounded-lg border flex items-center justify-between bg-gray-100 dark:bg-black/40 border-gray-300 dark:border-white/10"
+                                            >
+                                                <span className="text-sm font-medium text-text-primary dark:text-white truncate flex-1">
+                                                    {option.label}
+                                                </span>
+                                                {option.percentage !== undefined && (
+                                                    <span className="text-lg font-bold ml-2 text-gray-400">
+                                                        {option.percentage}%
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() => handleSetJackpot(event)}
+                                        className={clsx(
+                                            'mt-4 w-full py-3 rounded-xl font-bold uppercase text-sm tracking-wider transition-all flex items-center justify-center gap-2',
+                                            selectedEvent?.id === event.id
+                                                ? 'bg-green-600 text-white shadow-lg shadow-green-500/50'
+                                                : 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
+                                        )}
+                                    >
+                                        {selectedEvent?.id === event.id ? (
+                                            <>
+                                                <Check className="w-4 h-4" />
+                                                Selected
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trophy className="w-4 h-4" />
+                                                Set as Jackpot
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 
