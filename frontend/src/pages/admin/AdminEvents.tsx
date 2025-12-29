@@ -86,8 +86,8 @@ export function AdminEvents() {
       case 'locked':
         return allEvents.filter(e => e.status === 'locked');
       case 'resolve':
-        // Resolve tab: locked events ready to be resolved
-        return allEvents.filter(e => e.status === 'locked');
+        // Resolve tab: locked events where match has finished (eventTime < now)
+        return allEvents.filter(e => e.status === 'locked' && new Date(e.eventTime) < new Date());
       case 'results':
         return allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled');
       default:
@@ -117,7 +117,7 @@ export function AdminEvents() {
     { id: 'live' as const, label: 'Live', count: allEvents.filter(e => e.status === 'open').length, color: 'text-green-500 border-green-500' },
     { id: 'week' as const, label: 'Event of Week', count: allEvents.filter((e: any) => e.isJackpot && e.status === 'upcoming').length, color: 'text-blue-500 border-blue-500' },
     { id: 'locked' as const, label: 'Locked', count: allEvents.filter(e => e.status === 'locked').length, color: 'text-yellow-500 border-yellow-500' },
-    { id: 'resolve' as const, label: 'Resolve', count: allEvents.filter(e => e.status === 'locked').length, color: 'text-orange-500 border-orange-500' },
+    { id: 'resolve' as const, label: 'Resolve', count: allEvents.filter(e => e.status === 'locked' && new Date(e.eventTime) < new Date()).length, color: 'text-orange-500 border-orange-500' },
     { id: 'results' as const, label: 'Results', count: allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled').length, color: 'text-purple-500 border-purple-500' },
   ];
 
