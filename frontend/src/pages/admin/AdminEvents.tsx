@@ -78,9 +78,11 @@ export function AdminEvents() {
   const getFilteredEvents = () => {
     switch (activeTab) {
       case 'live':
-        return allEvents.filter(e => e.status === 'open' || e.status === 'upcoming');
+        // Live tab: only open events (not upcoming)
+        return allEvents.filter(e => e.status === 'open');
       case 'week':
-        return allEvents.filter(e => e.status === 'open' || e.status === 'upcoming');
+        // Event of Week: jackpot events that are open or locked
+        return allEvents.filter((e: any) => e.isJackpot && (e.status === 'open' || e.status === 'locked'));
       case 'locked':
         return allEvents.filter(e => e.status === 'locked');
       case 'results':
