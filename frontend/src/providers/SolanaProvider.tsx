@@ -1,4 +1,4 @@
-import { FC, ReactNode, useMemo, useCallback } from 'react';
+import { FC, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
 import { Connection, Transaction } from '@solana/web3.js';
 import { ConnectionProvider, WalletProvider, useWallet as useAdapterWallet, useConnection as useAdapterConnection } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, useWalletModal as useAdapterModal } from '@solana/wallet-adapter-react-ui';
@@ -9,6 +9,53 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 
 // RPC Endpoint - Devnet
 const RPC_ENDPOINT = 'https://devnet.helius-rpc.com/?api-key=e495db18-fb79-4c7b-9750-5bf08d316aaf';
+
+// Wallet detection functions
+function detectPhantom(): boolean {
+    if (typeof window === 'undefined') return false;
+    return !!(window as any).phantom?.solana?.isPhantom;
+}
+
+function detectSolflare(): boolean {
+    if (typeof window === 'undefined') return false;
+    return !!(window as any).solflare?.isSolflare;
+}
+
+// Hook to get detected wallets with live updates
+export function useDetectedWallets() {
+    const [detected, setDetected] = useState({
+        phantom: false,
+        solflare: false,
+        any: false,
+    });
+
+    useEffect(() => {
+        // Check immediately
+        const checkWallets = () => {
+            const phantom = detectPhantom();
+            const solflare = detectSolflare();
+            setDetected({
+                phantom,
+                solflare,
+                any: phantom || solflare,
+            });
+        };
+
+        // Check on mount
+        checkWallets();
+
+        // Re-check after a short delay (wallets may inject late)
+        const timer = setTimeout(checkWallets, 500);
+        const timer2 = setTimeout(checkWallets, 1500);
+
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(timer2);
+        };
+    }, []);
+
+    return detected;
+}
 
 // Re-export hooks with same interface as before for compatibility
 export function useWallet() {
