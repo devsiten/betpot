@@ -197,12 +197,36 @@ export const SolanaProvider: FC<{ children: ReactNode }> = ({ children }) => {
                     return;
                 }
 
-                const response = await provider.connect();
-                const pk = new PublicKey(response.publicKey.toString());
-                setPublicKey(pk);
-                setConnected(true);
-                setWalletType('phantom');
-                localStorage.setItem(WALLET_STORAGE_KEY, 'phantom');
+                try {
+                    // Try to connect (may fail if wallet is locked)
+                    const response = await provider.connect();
+                    const pk = new PublicKey(response.publicKey.toString());
+                    setPublicKey(pk);
+                    setConnected(true);
+                    setWalletType('phantom');
+                    localStorage.setItem(WALLET_STORAGE_KEY, 'phantom');
+                } catch (phantomError: any) {
+                    console.error('Phantom connect error:', phantomError);
+                    // If user rejected or wallet locked, show helpful message
+                    if (phantomError?.code === 4001) {
+                        console.log('User rejected connection');
+                    } else {
+                        // Try disconnect first then reconnect
+                        try {
+                            await provider.disconnect();
+                            const response = await provider.connect();
+                            const pk = new PublicKey(response.publicKey.toString());
+                            setPublicKey(pk);
+                            setConnected(true);
+                            setWalletType('phantom');
+                            localStorage.setItem(WALLET_STORAGE_KEY, 'phantom');
+                        } catch (retryError) {
+                            console.error('Retry failed:', retryError);
+                            throw retryError;
+                        }
+                    }
+                }
+
 
             } else if (type === 'solflare') {
                 const provider = getSolflareProvider();
