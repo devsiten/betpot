@@ -597,6 +597,35 @@ export function AdminEventDetail() {
 function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [selectedOption, setSelectedOption] = useState('');
+  const [matchResult, setMatchResult] = useState<{
+    score: string;
+    winner: string;
+    isLive: boolean;
+    status: string;
+  } | null>(null);
+  const [loadingResult, setLoadingResult] = useState(false);
+
+  // Fetch match result for sports events
+  useState(() => {
+    if (event.category === 'sports') {
+      setLoadingResult(true);
+      api.getMatchResult(event.title)
+        .then((result) => {
+          if (result.success && result.data) {
+            setMatchResult({
+              score: result.data.score,
+              winner: result.data.winner,
+              isLive: result.data.isLive,
+              status: result.data.status,
+            });
+          }
+        })
+        .catch(() => {
+          // Match not found - that's OK
+        })
+        .finally(() => setLoadingResult(false));
+    }
+  });
 
   const resolveMutation = useMutation({
     mutationFn: () => api.resolveEvent(event.id, selectedOption),
@@ -616,6 +645,43 @@ function ResolveEventModal({ event, onClose }: { event: any; onClose: () => void
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Resolve Event</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Select the winning option</p>
         </div>
+
+        {/* Match Result for Sports */}
+        {event.category === 'sports' && (
+          <div className="px-6 pt-4">
+            {loadingResult ? (
+              <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-center">
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Loading match result...</p>
+              </div>
+            ) : matchResult ? (
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">
+                    {matchResult.isLive ? '🔴 LIVE' : '✓ FINISHED'}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{matchResult.status}</span>
+                </div>
+                <p className="text-lg font-bold text-gray-900 dark:text-white text-center mb-2">
+                  {matchResult.score}
+                </p>
+                <p className={clsx(
+                  'text-center font-bold uppercase tracking-wider text-sm px-3 py-1 rounded-full inline-block w-full',
+                  matchResult.winner === 'Home Win' && 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+                  matchResult.winner === 'Away Win' && 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+                  matchResult.winner === 'Draw' && 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                )}>
+                  {matchResult.winner}
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                <p className="text-yellow-700 dark:text-yellow-400 text-sm text-center">
+                  ⚠️ Match result not found. Select winner manually.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="p-6 space-y-4">
           {event.options?.map((option: any) => (

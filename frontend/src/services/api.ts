@@ -305,6 +305,22 @@ class ApiService {
     return data;
   }
 
+  // Get match result by event title (for sports resolution)
+  async getMatchResult(title: string): Promise<ApiResponse<{
+    status: string;
+    isLive: boolean;
+    elapsed: number | null;
+    homeTeam: string;
+    awayTeam: string;
+    homeScore: number;
+    awayScore: number;
+    score: string;
+    winner: 'Home Win' | 'Away Win' | 'Draw';
+  }>> {
+    const { data } = await this.client.get('/sports/match-result', { params: { title } });
+    return data;
+  }
+
   // ========== TICKETS ==========
 
   async purchaseTicket(params: {

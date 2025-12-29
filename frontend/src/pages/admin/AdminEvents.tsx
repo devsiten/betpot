@@ -251,7 +251,7 @@ export function AdminEvents() {
                         </div>
                         <div className="flex items-center gap-3">
                           <span className={clsx('badge', statusColors[event.status])}>
-                            {event.status}
+                            {event.status === 'locked' && event.category === 'sports' ? 'LIVE' : event.status}
                           </span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             ${(event.totalPool || 0).toLocaleString()}
@@ -322,7 +322,7 @@ export function AdminEvents() {
                       </td>
                       <td>
                         <span className={clsx('badge', statusColors[event.status])}>
-                          {event.status}
+                          {event.status === 'locked' && event.category === 'sports' ? 'LIVE' : event.status}
                         </span>
                       </td>
                       <td>
