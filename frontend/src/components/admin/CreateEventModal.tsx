@@ -32,7 +32,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
     lockTime: '',
     eventTime: '',
     status: 'upcoming',
-    isJackpot: true,
+    isJackpot: false,
   });
 
   const mutation = useMutation({
