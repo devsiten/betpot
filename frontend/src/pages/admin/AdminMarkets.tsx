@@ -85,6 +85,7 @@ export function AdminMarkets() {
     const [selectedEvent, setSelectedEvent] = useState<ExternalEvent | null>(null);
     const [ticketPrice, setTicketPrice] = useState('10');
     const [ticketLimit, setTicketLimit] = useState('1000');
+    const [scheduleStartTime, setScheduleStartTime] = useState(''); // When betting opens
     const queryClient = useQueryClient();
 
     // Fetch sports events from Polymarket (same source as Browse Markets)
@@ -176,8 +177,10 @@ export function AdminMarkets() {
                     ticketLimit: parseInt(ticketLimit),
                 })),
                 eventTime: eventTimeISO,
+                startTime: scheduleStartTime ? new Date(scheduleStartTime).toISOString() : new Date().toISOString(),
                 ticketPrice: parseFloat(ticketPrice),
                 isJackpot: true,
+                status: scheduleStartTime ? 'upcoming' : 'open', // If scheduled, set as upcoming
                 externalData: event,
             };
 
@@ -572,6 +575,36 @@ export function AdminMarkets() {
                             </div>
                         </div>
 
+                        {/* Schedule Option */}
+                        <div className="mb-6">
+                            <label className="label flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-brand-500" />
+                                Schedule Start Time (optional)
+                            </label>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                Leave empty to open betting immediately. Set a time to schedule for later.
+                            </p>
+                            <input
+                                type="datetime-local"
+                                value={scheduleStartTime}
+                                onChange={(e) => setScheduleStartTime(e.target.value)}
+                                className="input w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600"
+                            />
+                            {scheduleStartTime && (
+                                <div className="mt-2 flex items-center justify-between">
+                                    <p className="text-sm text-brand-500 font-medium">
+                                        📅 Betting opens: {format(new Date(scheduleStartTime), 'MMM dd, yyyy • HH:mm')}
+                                    </p>
+                                    <button
+                                        onClick={() => setScheduleStartTime('')}
+                                        className="text-xs text-red-400 hover:text-red-300"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setSelectedEvent(null)}
@@ -582,14 +615,24 @@ export function AdminMarkets() {
                             <button
                                 onClick={confirmJackpot}
                                 disabled={createJackpotMutation.isPending}
-                                className="btn flex-1 bg-gradient-to-r from-yellow-500 to-orange-600 text-text-primary dark:text-white font-bold"
+                                className={clsx(
+                                    'btn flex-1 font-bold',
+                                    scheduleStartTime
+                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white'
+                                        : 'bg-gradient-to-r from-yellow-500 to-orange-600 text-text-primary dark:text-white'
+                                )}
                             >
                                 {createJackpotMutation.isPending ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : scheduleStartTime ? (
+                                    <>
+                                        <Calendar className="w-4 h-4" />
+                                        Schedule Jackpot
+                                    </>
                                 ) : (
                                     <>
                                         <Trophy className="w-4 h-4" />
-                                        Create Jackpot
+                                        Create Jackpot Now
                                     </>
                                 )}
                             </button>
