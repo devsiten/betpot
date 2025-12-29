@@ -91,7 +91,9 @@ export function AdminDashboard() {
     getSolPrice().then(setSolPrice);
   }, []);
 
-  // Helper to convert USDC to SOL
+  // Helper to convert SOL to USDC (backend now returns SOL for stats)
+  const solToUsd = (sol: number) => sol * solPrice;
+  // Helper to convert USDC to SOL (for legacy data like event pools)
   const usdToSol = (usd: number) => usd / solPrice;
 
   const dashboard = data?.data;
@@ -148,8 +150,8 @@ export function AdminDashboard() {
         <StatCard
           icon={DollarSign}
           label="Total Volume"
-          value={`${usdToSol(dashboard?.overview.totalVolume || 0).toFixed(4)} SOL`}
-          change={`≈ $${(dashboard?.overview.totalVolume || 0).toLocaleString()}`}
+          value={`${(dashboard?.overview.totalVolume || 0).toFixed(4)} SOL`}
+          change={`≈ $${solToUsd(dashboard?.overview.totalVolume || 0).toLocaleString()}`}
           loading={isLoading}
         />
       </div>
@@ -171,15 +173,15 @@ export function AdminDashboard() {
         <StatCard
           icon={TrendingUp}
           label="Total Payouts"
-          value={`${usdToSol(dashboard?.overview.totalPayouts || 0).toFixed(4)} SOL`}
-          change={`≈ $${(dashboard?.overview.totalPayouts || 0).toLocaleString()}`}
+          value={`${(dashboard?.overview.totalPayouts || 0).toFixed(4)} SOL`}
+          change={`≈ $${solToUsd(dashboard?.overview.totalPayouts || 0).toLocaleString()}`}
           loading={isLoading}
         />
         <StatCard
           icon={DollarSign}
           label="Platform Fees Earned"
-          value={`${usdToSol((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(4)} SOL`}
-          change={`≈ $${((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(2)}`}
+          value={`${((dashboard?.overview.totalVolume || 0) * 0.01).toFixed(4)} SOL`}
+          change={`≈ $${(solToUsd((dashboard?.overview.totalVolume || 0) * 0.01)).toFixed(2)}`}
           changeType="up"
           loading={isLoading}
         />
