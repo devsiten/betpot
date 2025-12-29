@@ -41,7 +41,7 @@ const categoryColors: Record<EventCategory, string> = {
 export function AdminEvents() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'live' | 'week' | 'locked' | 'results'>('live');
+  const [activeTab, setActiveTab] = useState<'live' | 'week' | 'locked' | 'resolve' | 'results'>('live');
   const [filters, setFilters] = useState({
     status: '',
     category: '',
@@ -78,12 +78,15 @@ export function AdminEvents() {
   const getFilteredEvents = () => {
     switch (activeTab) {
       case 'live':
-        // Live tab: only open events (not upcoming)
+        // Live tab: only open events
         return allEvents.filter(e => e.status === 'open');
       case 'week':
-        // Event of Week: jackpot events that are open or locked
-        return allEvents.filter((e: any) => e.isJackpot && (e.status === 'open' || e.status === 'locked'));
+        // Event of Week: upcoming jackpot events only
+        return allEvents.filter((e: any) => e.isJackpot && e.status === 'upcoming');
       case 'locked':
+        return allEvents.filter(e => e.status === 'locked');
+      case 'resolve':
+        // Resolve tab: locked events ready to be resolved
         return allEvents.filter(e => e.status === 'locked');
       case 'results':
         return allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled');
@@ -111,9 +114,10 @@ export function AdminEvents() {
   const eventsByWeekday = activeTab === 'week' ? getEventsByWeekday() : {};
 
   const tabs = [
-    { id: 'live' as const, label: 'Live', count: allEvents.filter(e => e.status === 'open' || e.status === 'upcoming').length, color: 'text-green-500 border-green-500' },
-    { id: 'week' as const, label: 'Event of Week', count: allEvents.filter(e => e.status === 'open' || e.status === 'upcoming').length, color: 'text-blue-500 border-blue-500' },
+    { id: 'live' as const, label: 'Live', count: allEvents.filter(e => e.status === 'open').length, color: 'text-green-500 border-green-500' },
+    { id: 'week' as const, label: 'Event of Week', count: allEvents.filter((e: any) => e.isJackpot && e.status === 'upcoming').length, color: 'text-blue-500 border-blue-500' },
     { id: 'locked' as const, label: 'Locked', count: allEvents.filter(e => e.status === 'locked').length, color: 'text-yellow-500 border-yellow-500' },
+    { id: 'resolve' as const, label: 'Resolve', count: allEvents.filter(e => e.status === 'locked').length, color: 'text-orange-500 border-orange-500' },
     { id: 'results' as const, label: 'Results', count: allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled').length, color: 'text-purple-500 border-purple-500' },
   ];
 
