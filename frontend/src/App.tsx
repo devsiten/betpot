@@ -188,7 +188,7 @@ export default function App() {
             position="top-right"
             toastOptions={{
               className: '!bg-white dark:!bg-gray-800 !text-gray-800 dark:!text-white !border !border-gray-200 dark:!border-gray-700 !shadow-lg',
-              duration: 4000,
+              duration: 1500,
             }}
           />
         </BrowserRouter>
