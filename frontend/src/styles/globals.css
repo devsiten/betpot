@@ -268,3 +268,53 @@
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
   }
 }
+
+/* Wallet Adapter Modal Styles - Force visibility */
+.wallet-adapter-modal-wrapper {
+  z-index: 9999 !important;
+}
+
+.wallet-adapter-modal {
+  z-index: 10000 !important;
+}
+
+.wallet-adapter-modal-overlay {
+  z-index: 9998 !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+.wallet-adapter-modal-container {
+  z-index: 10000 !important;
+}
+
+/* Ensure button wrapper is visible */
+.wallet-adapter-button-trigger {
+  display: inline-flex !important;
+}
+
+/* Dark mode fixes for wallet modal */
+.dark .wallet-adapter-modal {
+  background: #1f2937 !important;
+}
+
+.dark .wallet-adapter-modal-title {
+  color: #fff !important;
+}
+
+.dark .wallet-adapter-modal-list {
+  background: #111827 !important;
+}
+
+.dark .wallet-adapter-modal-list-more {
+  background: #111827 !important;
+  color: #9ca3af !important;
+}
+
+.dark .wallet-adapter-modal-list li button {
+  background: #1f2937 !important;
+  color: #fff !important;
+}
+
+.dark .wallet-adapter-modal-list li button:hover {
+  background: #374151 !important;
+}
