@@ -23,6 +23,7 @@ import { EventChatPage } from '@/pages/EventChatPage';
 import { HowItWorksPage } from '@/pages/HowItWorksPage';
 import { NewsPage } from '@/pages/NewsPage';
 import { BetPotNewsPage, BetPotNewsPostPage } from '@/pages/BetPotNewsPage';
+import { DisclaimerPage, PrivacyPolicyPage, TermsOfServicePage } from '@/pages/legal';
 
 // Admin pages
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
@@ -148,6 +149,11 @@ function AppContent() {
         <Route path="/betpot-news" element={<BetPotNewsPage />} />
         <Route path="/betpot-news/:id" element={<BetPotNewsPostPage />} />
         <Route path="/events/:eventId/chat" element={<EventChatPage />} />
+
+        {/* Legal pages */}
+        <Route path="/disclaimer" element={<DisclaimerPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
       </Route>
 
       {/* Admin routes */}

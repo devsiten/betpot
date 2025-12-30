@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   Menu,
   X,
@@ -386,13 +386,70 @@ export function MainLayout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 py-6">
+      <footer className="border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-text-muted dark:text-gray-400 font-medium">
-              © {new Date().getFullYear()} BETPOT PROTOCOL
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Logo & Description */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">BP</span>
+                </div>
+                <span className="font-bold text-lg text-text-primary dark:text-white">BetPot</span>
+              </div>
+              <p className="text-sm text-text-muted dark:text-gray-400">
+                Decentralized prediction market on Solana. Bet on sports, crypto, and world events.
+              </p>
+              <span className="inline-block text-xs text-brand-500 dark:text-brand-400 font-medium px-2 py-1 bg-brand-50 dark:bg-brand-900/30 rounded">DEVNET</span>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h4 className="font-semibold text-text-primary dark:text-white mb-4">Legal</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/disclaimer" className="text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors">
+                    Disclaimer
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy" className="text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms" className="text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Social & Contact */}
+            <div>
+              <h4 className="font-semibold text-text-primary dark:text-white mb-4">Connect</h4>
+              <a
+                href="https://x.com/BetPotWeb3wl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                @BetPotWeb3wl
+              </a>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="mt-8 pt-6 border-t border-border dark:border-gray-800 flex items-center justify-between">
+            <p className="text-xs text-text-muted dark:text-gray-500">
+              © {new Date().getFullYear()} BETPOT PROTOCOL. All rights reserved.
             </p>
-            <span className="text-xs text-brand-500 dark:text-brand-400 font-medium px-2 py-1 bg-brand-50 dark:bg-brand-900/30 rounded">DEVNET</span>
+            <p className="text-xs text-text-muted dark:text-gray-500">
+              Built on Solana
+            </p>
           </div>
         </div>
       </footer>
