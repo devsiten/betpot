@@ -387,7 +387,7 @@ export function HomePage() {
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-text-secondary dark:text-gray-300 mb-8 font-medium backdrop-blur-sm bg-background-card/30 dark:bg-gray-800/50 p-4 rounded-xl border border-border/50 dark:border-gray-700/50 shadow-soft">
-                The decentralized jackpot platform. Browse live markets, discuss events with the community, and place your bets on featured jackpots.
+                BetPot is a prediction jackpot platform where everyone who picks the right outcome splits the prize pool.
               </p>
 
               <div className="flex items-center gap-4">

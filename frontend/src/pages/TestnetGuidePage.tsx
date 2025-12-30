@@ -23,9 +23,9 @@ export function TestnetGuidePage() {
                     <h2 className="text-2xl font-bold text-text-primary dark:text-white">What is BETPOT?</h2>
                 </div>
                 <p className="text-text-secondary dark:text-gray-300 leading-relaxed mb-4">
-                    BETPOT is a decentralized jackpot betting platform. We bring the thrill of prediction markets
-                    to Web3 with a simple yet exciting mechanic: pick the winning outcome, buy your tickets, and claim your share
-                    of the prize pool if you win.
+                    BetPot is a prediction jackpot platform where everyone who picks the right outcome splits the prize pool.
+                    We bring the thrill of prediction markets to Web3 with a simple mechanic: pick the winning outcome,
+                    buy your tickets, and claim your share of the prize pool if you win.
                 </p>
                 <p className="text-text-secondary dark:text-gray-300 leading-relaxed">
                     All transactions happen on-chain for complete transparency. Currently testing on Solana Devnet
