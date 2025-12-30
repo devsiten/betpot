@@ -766,6 +766,114 @@ class ApiService {
     });
     return data;
   }
+
+  // ============================================================================
+  // USER PROFILE
+  // ============================================================================
+
+  async getProfile() {
+    const { data } = await this.client.get<ApiResponse<{
+      id: string;
+      email: string;
+      username: string | null;
+      displayName: string | null;
+      walletAddress: string | null;
+      referralCode: string | null;
+      discordId: string | null;
+      discordUsername: string | null;
+      discordRole: string | null;
+      twitterHandle: string | null;
+      twitterVerified: boolean;
+      volumePoints: number;
+      referralPoints: number;
+    }>>('/auth/profile');
+    return data;
+  }
+
+  async updateProfile(updates: { username?: string; displayName?: string }) {
+    const { data } = await this.client.put<ApiResponse<{ message: string }>>('/auth/profile', updates);
+    return data;
+  }
+
+  async deleteAccount() {
+    const { data } = await this.client.delete<ApiResponse<{ message: string }>>('/auth/account');
+    return data;
+  }
+
+  // ============================================================================
+  // REFERRAL SYSTEM
+  // ============================================================================
+
+  async getReferralStats() {
+    const { data } = await this.client.get<ApiResponse<{
+      referralCode: string;
+      discordRole: string | null;
+      discordUsername: string | null;
+      discordConnected: boolean;
+      twitterHandle: string | null;
+      twitterVerified: boolean;
+      volumePoints: number;
+      referralPoints: number;
+      totalReferrals: number;
+      verifiedReferrals: number;
+      pendingReferrals: number;
+      referralLimit: number;
+    }>>('/referrals/stats');
+    return data;
+  }
+
+  async getMyReferrals() {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      referredUser: {
+        walletAddress: string;
+        displayName: string | null;
+      };
+      discordVerified: boolean;
+      twitterVerified: boolean;
+      pointsAwarded: boolean;
+      createdAt: string;
+    }>>>('/referrals/my-referrals');
+    return data;
+  }
+
+  async submitTwitterVerification(twitterHandle: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>('/referrals/twitter-verification', {
+      twitterHandle,
+    });
+    return data;
+  }
+
+  async applyReferralCode(code: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>('/referrals/apply-code', { code });
+    return data;
+  }
+
+  // ============================================================================
+  // ADMIN - TWITTER VERIFICATIONS
+  // ============================================================================
+
+  async getTwitterVerifications(status: string = 'pending') {
+    const { data } = await this.client.get<ApiResponse<Array<{
+      id: string;
+      userId: string;
+      twitterHandle: string;
+      status: string;
+      user: { walletAddress: string; email: string; displayName: string | null };
+      createdAt: string;
+    }>> & { count: number }>('/admin/twitter-verifications', { params: { status } });
+    return data;
+  }
+
+  async approveTwitterVerification(id: string, note?: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/twitter-verifications/${id}/approve`, { note });
+    return data;
+  }
+
+  async rejectTwitterVerification(id: string, reason: string) {
+    const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/twitter-verifications/${id}/reject`, { reason });
+    return data;
+  }
 }
 
 export const api = new ApiService();
