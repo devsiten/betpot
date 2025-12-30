@@ -167,7 +167,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                 onChange={(e) => setFormData({ ...formData, ticketLimit: parseInt(e.target.value) })}
                 className="input"
               />
-              <p className="text-xs text-dark-500 mt-1">Across all options</p>
+              <p className="text-xs text-text-muted dark:text-gray-500 mt-1">Across all options</p>
             </div>
           </div>
 
@@ -189,7 +189,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
             <div className="space-y-3">
               {formData.options.map((option, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center text-sm font-bold text-dark-400">
+                  <span className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300">
                     {String.fromCharCode(65 + index)}
                   </span>
                   <input
@@ -204,7 +204,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                     <button
                       type="button"
                       onClick={() => removeOption(index)}
-                      className="p-2 rounded-lg hover:bg-dark-800 text-dark-400 hover:text-red-400"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -212,7 +212,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-dark-500 mt-2">
+            <p className="text-xs text-text-muted dark:text-gray-500 mt-2">
               Minimum 2 options, maximum 6 betting choices.
             </p>
           </div>
@@ -282,7 +282,7 @@ export function CreateEventModal({ onClose }: CreateEventModalProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t border-dark-800">
+          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={onClose}
