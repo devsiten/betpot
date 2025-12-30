@@ -162,7 +162,7 @@ export function AdminPaymentIssues() {
                                 </div>
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-500">Amount</p>
-                                    <p className="text-text-primary dark:text-white font-bold">${tx.amount.toFixed(2)}</p>
+                                    <p className="text-text-primary dark:text-white font-bold">{(tx.solAmount || tx.amount).toFixed(4)} SOL</p>
                                 </div>
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-500">Quantity</p>

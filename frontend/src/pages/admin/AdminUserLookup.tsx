@@ -156,14 +156,14 @@ export function AdminUserLookup() {
                                 <DollarSign className="w-4 h-4 text-purple-500" />
                                 <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Spent</span>
                             </div>
-                            <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">${userData.stats.totalSpent.toFixed(2)}</p>
+                            <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">{userData.stats.totalSpent.toFixed(4)} SOL</p>
                         </div>
                         <div className="card p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-2">
                                 <DollarSign className="w-4 h-4 text-yellow-500" />
                                 <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Unclaimed</span>
                             </div>
-                            <p className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">${userData.stats.unclaimedWinnings.toFixed(2)}</p>
+                            <p className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">{userData.stats.unclaimedWinnings.toFixed(4)} SOL</p>
                         </div>
                     </div>
 
@@ -195,7 +195,7 @@ export function AdminUserLookup() {
                                                             Option: {ticket.optionLabel}
                                                         </span>
                                                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                            ${ticket.purchasePrice}
+                                                            {(ticket.solAmount || ticket.purchasePrice).toFixed(4)} SOL
                                                         </span>
                                                         <span className="text-xs text-gray-500 dark:text-gray-400">
                                                             {format(new Date(ticket.createdAt), 'MMM d, HH:mm')}
@@ -206,9 +206,9 @@ export function AdminUserLookup() {
                                                     <span className={clsx('badge text-xs', statusColors[ticket.status] || '')}>
                                                         {ticket.status}
                                                     </span>
-                                                    {ticket.payoutAmount > 0 && (
+                                                    {(ticket.payoutSolAmount || ticket.payoutAmount) > 0 && (
                                                         <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                                                            +${ticket.payoutAmount.toFixed(2)}
+                                                            +{(ticket.payoutSolAmount || ticket.payoutAmount).toFixed(4)} SOL
                                                         </span>
                                                     )}
                                                 </div>
@@ -244,7 +244,7 @@ export function AdminUserLookup() {
                                                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{tx.error}</p>
                                                 </div>
                                                 <div className="text-left sm:text-right">
-                                                    <p className="text-sm font-medium text-red-600 dark:text-red-400">${tx.amount}</p>
+                                                    <p className="text-sm font-medium text-red-600 dark:text-red-400">{(tx.solAmount || tx.amount).toFixed(4)} SOL</p>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         {format(new Date(tx.createdAt), 'MMM d, HH:mm')}
                                                     </p>
