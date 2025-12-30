@@ -23,42 +23,21 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Use our custom wallet modal that only shows Phantom and Solflare
-import { useWalletModal } from '@/providers/SolanaProvider';
+import { WalletSelectModal } from '@/components/WalletSelectModal';
 
-import { MobileWalletModal } from '@/components/MobileWalletModal';
-
-// Custom Connect Wallet button that uses the official modal or mobile modal
+// Custom Connect Wallet button - shows our custom modal
 function ConnectButton() {
   const { connected, connecting } = useWallet();
-  const { setVisible } = useWalletModal();
-  const [showMobileModal, setShowMobileModal] = useState(false);
-
-  // Check if we're on mobile without wallet extension
-  const isMobileWithoutWallet = () => {
-    if (typeof window === 'undefined') return false;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const hasPhantom = !!(window as any).phantom?.solana?.isPhantom;
-    const hasSolflare = !!(window as any).solflare?.isSolflare;
-    return isMobile && !hasPhantom && !hasSolflare;
-  };
+  const [showModal, setShowModal] = useState(false);
 
   if (connected) {
     return null; // Don't show if connected - we handle connected state elsewhere
   }
 
-  const handleClick = () => {
-    if (isMobileWithoutWallet()) {
-      setShowMobileModal(true);
-    } else {
-      setVisible(true);
-    }
-  };
-
   return (
     <>
       <button
-        onClick={handleClick}
+        onClick={() => setShowModal(true)}
         disabled={connecting}
         className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-all disabled:opacity-50 border border-gray-200 dark:border-gray-700 whitespace-nowrap"
       >
@@ -66,9 +45,9 @@ function ConnectButton() {
         {connecting ? 'Connecting...' : 'Connect Wallet'}
       </button>
 
-      <MobileWalletModal
-        isOpen={showMobileModal}
-        onClose={() => setShowMobileModal(false)}
+      <WalletSelectModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
       />
     </>
   );
