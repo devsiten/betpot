@@ -1,4 +1,5 @@
 import { Globe, Ticket, Gift, ArrowRight } from 'lucide-react';
+import { BetPotLogoIcon } from '@/components/icons/BetPotLogo';
 
 const steps = [
     {
@@ -28,6 +29,9 @@ export function HowItWorksPage() {
             <div className="relative overflow-hidden py-20">
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-500/10 to-transparent" />
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div className="flex justify-center mb-4">
+                        <BetPotLogoIcon size={64} />
+                    </div>
                     <h1 className="text-4xl md:text-5xl font-bold text-text-primary dark:text-white mb-4">
                         How It Works
                     </h1>

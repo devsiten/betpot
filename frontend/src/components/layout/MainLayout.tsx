@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
+import { BetPotLogoIcon } from '@/components/icons/BetPotLogo';
 import {
   Menu,
   X,
@@ -203,11 +204,9 @@ export function MainLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <NavLink to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0 shadow-soft">
-                <span className="text-white font-bold text-xl">B</span>
-              </div>
-              <span className="text-xl font-semibold text-text-primary dark:text-white hidden sm:block">BETPOT</span>
+            <NavLink to="/" className="flex items-center gap-2 group">
+              <BetPotLogoIcon size={36} />
+              <span className="text-xl font-bold text-transparent bg-clip-text hidden sm:block" style={{ backgroundImage: 'linear-gradient(135deg, #2DD4A8 0%, #22B8CF 35%, #3B82F6 65%, #A855F7 100%)' }}>BetPot</span>
             </NavLink>
 
             {/* Desktop Navigation */}
@@ -389,18 +388,12 @@ export function MainLayout() {
       <footer className="border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Logo & Description */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">BP</span>
-                </div>
-                <span className="font-bold text-lg text-text-primary dark:text-white">BetPot</span>
-              </div>
-              <p className="text-sm text-text-muted dark:text-gray-400">
-                Decentralized prediction market on Solana. Bet on sports, crypto, and world events.
-              </p>
-              <span className="inline-block text-xs text-brand-500 dark:text-brand-400 font-medium px-2 py-1 bg-brand-50 dark:bg-brand-900/30 rounded">DEVNET</span>
+            {/* Logo */}
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <BetPotLogoIcon size={40} />
+              </Link>
+              <span className="text-xs text-brand-500 dark:text-brand-400 font-medium px-2 py-1 bg-brand-50 dark:bg-brand-900/30 rounded">DEVNET</span>
             </div>
 
             {/* Legal Links */}

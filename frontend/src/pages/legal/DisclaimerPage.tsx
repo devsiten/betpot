@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
+import { BetPotLogoIcon } from '@/components/icons/BetPotLogo';
 
 export function DisclaimerPage() {
     return (
@@ -13,13 +14,16 @@ export function DisclaimerPage() {
                     Back to Home
                 </Link>
 
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-                        <Shield className="w-6 h-6 text-yellow-500" />
+                <div className="flex items-center gap-4 mb-8">
+                    <BetPotLogoIcon size={48} />
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                            <Shield className="w-5 h-5 text-yellow-500" />
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">
+                            Disclaimer
+                        </h1>
                     </div>
-                    <h1 className="text-3xl font-bold text-text-primary dark:text-white">
-                        Disclaimer
-                    </h1>
                 </div>
 
                 <div className="card p-8 space-y-6 text-text-secondary dark:text-gray-300">
@@ -56,7 +60,6 @@ export function DisclaimerPage() {
                         <ul className="list-disc ml-6 mt-2 space-y-1">
                             <li>Lost funds due to incorrect wallet addresses</li>
                             <li>Network congestion or failed transactions</li>
-                            <li>Smart contract vulnerabilities</li>
                             <li>Wallet security breaches</li>
                         </ul>
                     </section>

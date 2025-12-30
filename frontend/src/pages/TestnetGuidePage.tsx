@@ -1,10 +1,14 @@
 import { ExternalLink, Wallet, Coins, Trophy, Gift, Clock, Info, CheckCircle } from 'lucide-react';
+import { BetPotLogoIcon } from '@/components/icons/BetPotLogo';
 
 export function TestnetGuidePage() {
     return (
         <div className="p-6 max-w-4xl mx-auto">
             {/* Hero Section */}
             <div className="text-center mb-12">
+                <div className="flex justify-center mb-4">
+                    <BetPotLogoIcon size={64} />
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-text-primary dark:text-white mb-4">
                     BETPOT Testnet Guide
                 </h1>
