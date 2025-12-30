@@ -1676,7 +1676,7 @@ admin.post('/failed-transactions/:id/resolve', zValidator('json', z.object({
   });
 });
 
-// Mark failed transaction as refunded
+// Mark failed transaction as refunded AND create claimable ticket for user
 admin.post('/failed-transactions/:id/refund', zValidator('json', z.object({
   refundTx: z.string().optional(),
   note: z.string().optional(),
@@ -1688,19 +1688,76 @@ admin.post('/failed-transactions/:id/refund', zValidator('json', z.object({
 
   const now = new Date();
 
-  const result = await db.update(failedTransactions)
+  // Get the failed transaction details
+  const txResult = await db.select().from(failedTransactions).where(eq(failedTransactions.id, id)).limit(1);
+  const tx = txResult[0];
+
+  if (!tx) {
+    return c.json({ success: false, error: 'Transaction not found' }, 404);
+  }
+
+  if (tx.status !== 'pending') {
+    return c.json({ success: false, error: 'Transaction already processed' }, 400);
+  }
+
+  // Find or create user for this wallet
+  let userId = tx.userId;
+  if (!userId) {
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.walletAddress, tx.walletAddress),
+    });
+    if (existingUser) {
+      userId = existingUser.id;
+    } else {
+      // Create a new user for this wallet
+      userId = nanoid();
+      await db.insert(users).values({
+        id: userId,
+        walletAddress: tx.walletAddress,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+  }
+
+  // Create a refund ticket so user can claim their SOL back
+  const ticketId = nanoid();
+  const serialNumber = `REF-${tx.walletAddress.slice(0, 4)}-${Date.now().toString(36).toUpperCase()}`;
+
+  await db.insert(tickets).values({
+    id: ticketId,
+    serialNumber,
+    eventId: tx.eventId,
+    optionId: tx.optionId || 'REFUND',
+    optionLabel: 'Refund',
+    userId,
+    walletAddress: tx.walletAddress,
+    chain: tx.chain || 'SOL',
+    purchasePrice: tx.amount,
+    payoutAmount: tx.amount, // Full refund
+    solAmount: tx.solAmount || (tx.amount / 125), // Actual SOL amount
+    payoutSolAmount: tx.solAmount || (tx.amount / 125), // Refund same SOL amount
+    purchaseTx: tx.transactionSignature,
+    status: 'refunded', // This status allows user to claim
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  // Mark failed transaction as refunded
+  await db.update(failedTransactions)
     .set({
       status: 'refunded',
       resolvedBy: user.id,
       resolvedAt: now,
-      resolutionNote: note || `Refunded via tx: ${refundTx || 'manual'}`,
+      resolutionNote: note || `Refund ticket created: ${ticketId}`,
       updatedAt: now,
     })
-    .where(and(eq(failedTransactions.id, id), eq(failedTransactions.status, 'pending')));
+    .where(eq(failedTransactions.id, id));
 
   return c.json({
     success: true,
-    message: 'Transaction marked as refunded',
+    message: 'Refund ticket created - user can now claim their SOL',
+    ticketId,
   });
 });
 

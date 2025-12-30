@@ -370,7 +370,7 @@ ticketsRoutes.get('/my-stats', async (c) => {
     claimedTickets: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} = 'claimed' THEN 1 ELSE 0 END), 0)`,
     refundedTickets: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} = 'refunded' THEN 1 ELSE 0 END), 0)`,
     totalWinnings: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} IN ('won', 'claimed') THEN ${tickets.payoutAmount} ELSE 0 END), 0)`,
-    unclaimedWinnings: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} = 'won' AND ${tickets.claimedAt} IS NULL THEN ${tickets.payoutAmount} ELSE 0 END), 0)`,
+    unclaimedWinnings: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} IN ('won', 'refunded') AND ${tickets.claimedAt} IS NULL THEN ${tickets.payoutAmount} ELSE 0 END), 0)`,
   }).from(tickets).where(userCondition);
 
   // Get claimed refunds count by joining with cancelled events
@@ -413,7 +413,7 @@ ticketsRoutes.get('/stats', async (c) => {
     lostTickets: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} = 'lost' THEN 1 ELSE 0 END), 0)`,
     claimedTickets: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} = 'claimed' THEN 1 ELSE 0 END), 0)`,
     totalWinnings: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} IN ('won', 'claimed') THEN ${tickets.payoutAmount} ELSE 0 END), 0)`,
-    unclaimedWinnings: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} = 'won' AND ${tickets.claimedAt} IS NULL THEN ${tickets.payoutAmount} ELSE 0 END), 0)`,
+    unclaimedWinnings: sql<number>`COALESCE(SUM(CASE WHEN ${tickets.status} IN ('won', 'refunded') AND ${tickets.claimedAt} IS NULL THEN ${tickets.payoutAmount} ELSE 0 END), 0)`,
   }).from(tickets).where(eq(tickets.userId, user.id));
 
   return c.json({ success: true, data: stats[0] });
