@@ -1713,7 +1713,10 @@ admin.post('/failed-transactions/:id/refund', zValidator('json', z.object({
       userId = nanoid();
       await db.insert(users).values({
         id: userId,
+        email: `${tx.walletAddress.slice(0, 8)}@wallet.betpot`,
+        passwordHash: 'wallet-auth-no-password',
         walletAddress: tx.walletAddress,
+        role: 'user',
         createdAt: now,
         updatedAt: now,
       });

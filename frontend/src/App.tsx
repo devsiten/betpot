@@ -37,6 +37,7 @@ import { AdminGuidePage } from '@/pages/admin/AdminGuidePage';
 import { AdminBlogManager } from '@/pages/admin/AdminBlogManager';
 import { AdminAuditLogs } from '@/pages/admin/AdminAuditLogs';
 import { AdminUserLookup } from '@/pages/admin/AdminUserLookup';
+import AdminTwitterVerifications from '@/pages/admin/AdminTwitterVerifications';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -161,6 +162,7 @@ function AppContent() {
         <Route path="events/:id" element={<AdminEventDetail />} />
         <Route path="bets" element={<AdminBets />} />
         <Route path="payment-issues" element={<AdminPaymentIssues />} />
+        <Route path="twitter-verifications" element={<AdminTwitterVerifications />} />
         <Route path="user-lookup" element={<AdminUserLookup />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="winnings" element={<DashboardPage />} />
