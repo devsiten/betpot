@@ -384,64 +384,51 @@ export function MainLayout() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 py-8">
+      {/* Footer - Compact */}
+      <footer className="border-t border-border dark:border-gray-800 bg-background-card dark:bg-gray-900 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Logo */}
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Left: Logo + DEVNET */}
+            <div className="flex items-center gap-3">
               <Link to="/">
-                <BetPotLogoIcon size={40} />
+                <BetPotLogoIcon size={32} />
               </Link>
               <span className="text-xs text-brand-500 dark:text-brand-400 font-medium px-2 py-1 bg-brand-50 dark:bg-brand-900/30 rounded">DEVNET</span>
             </div>
 
-            {/* Legal Links */}
-            <div>
-              <h4 className="font-semibold text-text-primary dark:text-white mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/disclaimer" className="text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors">
-                    Disclaimer
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms" className="text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Social & Contact */}
-            <div>
-              <h4 className="font-semibold text-text-primary dark:text-white mb-4">Connect</h4>
+            {/* Center: Legal icons + X icon */}
+            <div className="flex items-center gap-4">
+              <Link to="/disclaimer" className="text-text-muted dark:text-gray-400 hover:text-yellow-500 transition-colors" title="Disclaimer">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </Link>
+              <Link to="/privacy" className="text-text-muted dark:text-gray-400 hover:text-blue-500 transition-colors" title="Privacy Policy">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </Link>
+              <Link to="/terms" className="text-text-muted dark:text-gray-400 hover:text-purple-500 transition-colors" title="Terms of Service">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </Link>
               <a
                 href="https://x.com/BetPotWeb3wl"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors"
+                className="text-text-muted dark:text-gray-400 hover:text-brand-500 transition-colors"
+                title="@BetPotWeb3wl"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                @BetPotWeb3wl
               </a>
             </div>
-          </div>
 
-          {/* Copyright */}
-          <div className="mt-8 pt-6 border-t border-border dark:border-gray-800 flex items-center justify-between">
+            {/* Right: Copyright */}
             <p className="text-xs text-text-muted dark:text-gray-500">
-              © {new Date().getFullYear()} BETPOT PROTOCOL. All rights reserved.
-            </p>
-            <p className="text-xs text-text-muted dark:text-gray-500">
-              Built on Solana
+              © {new Date().getFullYear()} BETPOT
             </p>
           </div>
         </div>

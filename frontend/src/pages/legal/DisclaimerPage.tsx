@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Shield } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { BetPotLogoIcon } from '@/components/icons/BetPotLogo';
 
 export function DisclaimerPage() {
@@ -16,14 +16,9 @@ export function DisclaimerPage() {
 
                 <div className="flex items-center gap-4 mb-8">
                     <BetPotLogoIcon size={48} />
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-yellow-500" />
-                        </div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">
-                            Disclaimer
-                        </h1>
-                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">
+                        Disclaimer
+                    </h1>
                 </div>
 
                 <div className="card p-8 space-y-6 text-text-secondary dark:text-gray-300">
