@@ -95,7 +95,11 @@ export function AdminEvents() {
         return allEvents.filter(e => e.status === 'locked');
       case 'resolve':
         // Resolve tab: use server-side filtered data (accurate server time)
-        return pendingResolveEvents;
+        // Deduplicate by event ID to prevent duplicates
+        const uniqueEvents = pendingResolveEvents.filter((event: any, index: number, self: any[]) =>
+          index === self.findIndex((e: any) => e.id === event.id)
+        );
+        return uniqueEvents;
       case 'results':
         return allEvents.filter(e => e.status === 'resolved' || e.status === 'cancelled');
       default:
