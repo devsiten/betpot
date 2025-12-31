@@ -25,14 +25,28 @@ const actionLabels: Record<string, string> = {
     DELETE_EVENT: 'Deleted Event',
 };
 
-// Details Modal Component
-function DetailsModal({ details, onClose }: { details: string; onClose: () => void }) {
+// Details Modal Component - now accepts full log object
+function DetailsModal({ log, onClose }: { log: any; onClose: () => void }) {
     let parsedDetails: any = {};
     try {
-        parsedDetails = JSON.parse(details);
+        parsedDetails = log.details ? JSON.parse(log.details) : {};
     } catch {
-        parsedDetails = { raw: details };
+        parsedDetails = { raw: log.details };
     }
+
+    // Combine admin info with details
+    const allDetails = {
+        'Admin ID': log.adminId || 'N/A',
+        'Admin Wallet': log.admin?.walletAddress || log.adminWallet || 'N/A',
+        'Admin Username': log.admin?.username || log.adminUsername || 'N/A',
+        'Action': log.action,
+        'Entity Type': log.entityType,
+        'Entity ID': log.entityId,
+        'IP Address': log.ipAddress || 'N/A',
+        'User Agent': log.userAgent || 'N/A',
+        'Timestamp': log.createdAt ? new Date(log.createdAt).toLocaleString() : 'N/A',
+        ...parsedDetails, // Spread the parsed details
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -54,13 +68,13 @@ function DetailsModal({ details, onClose }: { details: string; onClose: () => vo
                 </div>
                 <div className="p-4 overflow-y-auto max-h-[60vh]">
                     <div className="space-y-3">
-                        {Object.entries(parsedDetails).map(([key, value]) => (
+                        {Object.entries(allDetails).map(([key, value]) => (
                             <div key={key} className="flex flex-col gap-1">
                                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
                                 </span>
                                 <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 font-mono text-sm text-gray-700 dark:text-gray-300 break-all">
-                                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value || 'N/A')}
                                 </div>
                             </div>
                         ))}
@@ -79,7 +93,7 @@ function DetailsModal({ details, onClose }: { details: string; onClose: () => vo
 export function AdminAuditLogs() {
     const [page, setPage] = useState(1);
     const [actionFilter, setActionFilter] = useState('');
-    const [selectedDetails, setSelectedDetails] = useState<string | null>(null);
+    const [selectedLog, setSelectedLog] = useState<any>(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ['admin', 'audit-logs', page, actionFilter],
@@ -92,8 +106,8 @@ export function AdminAuditLogs() {
     return (
         <div className="space-y-6">
             {/* Details Modal */}
-            {selectedDetails && (
-                <DetailsModal details={selectedDetails} onClose={() => setSelectedDetails(null)} />
+            {selectedLog && (
+                <DetailsModal log={selectedLog} onClose={() => setSelectedLog(null)} />
             )}
 
             {/* Header */}
@@ -188,16 +202,12 @@ export function AdminAuditLogs() {
                                             </div>
                                         </td>
                                         <td>
-                                            {log.details ? (
-                                                <button
-                                                    onClick={() => setSelectedDetails(log.details)}
-                                                    className="text-xs text-blue-500 hover:text-blue-600 hover:underline font-medium"
-                                                >
-                                                    View Details
-                                                </button>
-                                            ) : (
-                                                <span className="text-xs text-gray-400">-</span>
-                                            )}
+                                            <button
+                                                onClick={() => setSelectedLog(log)}
+                                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline font-medium"
+                                            >
+                                                View Details
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}

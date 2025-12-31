@@ -1,0 +1,347 @@
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
+
+// ============================================================================
+// ENUMS (stored as text in SQLite)
+// ============================================================================
+
+export const userRoles = ['user', 'admin', 'superadmin'] as const;
+export const chains = ['SOL', 'ETH', 'BSC', 'TRC'] as const;
+export const eventCategories = ['sports', 'finance', 'crypto', 'politics', 'entertainment', 'news', 'other'] as const;
+export const eventStatuses = ['draft', 'upcoming', 'open', 'locked', 'resolved', 'cancelled'] as const;
+export const ticketStatuses = ['active', 'won', 'lost', 'claimed', 'refunded'] as const;
+
+export type UserRole = typeof userRoles[number];
+export type Chain = typeof chains[number];
+export type EventCategory = typeof eventCategories[number];
+export type EventStatus = typeof eventStatuses[number];
+export type TicketStatus = typeof ticketStatuses[number];
+
+// ============================================================================
+// TABLES
+// ============================================================================
+
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
+  walletAddress: text('wallet_address'),
+  preferredChain: text('preferred_chain').$type<Chain>().default('SOL'),
+  role: text('role').$type<UserRole>().default('user'),
+  username: text('username').unique(), // Unique username for login/profile
+  displayName: text('display_name'), // Display name shown publicly
+  // Referral system fields
+  referralCode: text('referral_code').unique(), // User's unique referral code
+  referredBy: text('referred_by'), // Referral code used when signing up
+  // Discord integration
+  discordId: text('discord_id').unique(),
+  discordUsername: text('discord_username'),
+  discordRole: text('discord_role'), // early_contributor, og, influencer
+  // Twitter/X (manual verification)
+  twitterHandle: text('twitter_handle'),
+  twitterVerified: integer('twitter_verified', { mode: 'boolean' }).default(false),
+  // Points system
+  volumePoints: integer('volume_points').default(0),
+  referralPoints: integer('referral_points').default(0),
+  // Timestamps
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  lastLogin: integer('last_login', { mode: 'timestamp' }),
+}, (table) => ({
+  walletIdx: index('users_wallet_idx').on(table.walletAddress),
+  roleIdx: index('users_role_idx').on(table.role),
+  emailIdx: index('users_email_idx').on(table.email),
+  referralCodeIdx: index('users_referral_code_idx').on(table.referralCode),
+  discordIdIdx: index('users_discord_id_idx').on(table.discordId),
+}));
+
+export const events = sqliteTable('events', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  category: text('category').$type<EventCategory>().notNull(),
+  ticketPrice: real('ticket_price').default(10.00),
+  imageUrl: text('image_url'),
+  startTime: integer('start_time', { mode: 'timestamp' }).notNull(),
+  lockTime: integer('lock_time', { mode: 'timestamp' }).notNull(),
+  eventTime: integer('event_time', { mode: 'timestamp' }).notNull(),
+  status: text('status').$type<EventStatus>().default('draft'),
+  winningOption: text('winning_option'),
+  resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
+  resolvedBy: text('resolved_by'),
+  totalPool: real('total_pool').default(0),
+  ticketLimit: integer('ticket_limit').default(10000), // Total tickets for entire event
+  ticketsSold: integer('tickets_sold').default(0), // Total tickets sold across all options
+  // Jackpot & External API fields
+  isJackpot: integer('is_jackpot', { mode: 'boolean' }).default(false),
+  externalId: text('external_id'), // ID from external API
+  externalSource: text('external_source'), // 'odds-api' or 'api-sports'
+  externalData: text('external_data'), // JSON string of full external data
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  statusIdx: index('events_status_idx').on(table.status),
+  categoryIdx: index('events_category_idx').on(table.category),
+  eventTimeIdx: index('events_event_time_idx').on(table.eventTime),
+  jackpotIdx: index('events_jackpot_idx').on(table.isJackpot),
+}));
+
+export const eventOptions = sqliteTable('event_options', {
+  id: text('id').primaryKey(),
+  eventId: text('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  optionId: text('option_id').notNull(), // A, B, C, D
+  label: text('label').notNull(),
+  ticketLimit: integer('ticket_limit').notNull(),
+  ticketsSold: integer('tickets_sold').default(0),
+  poolAmount: real('pool_amount').default(0),
+  isWinner: integer('is_winner', { mode: 'boolean' }).default(false),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  eventIdx: index('event_options_event_idx').on(table.eventId),
+  uniqueOption: index('event_options_unique').on(table.eventId, table.optionId),
+}));
+
+export const tickets = sqliteTable('tickets', {
+  id: text('id').primaryKey(),
+  serialNumber: text('serial_number').notNull().unique(),
+  eventId: text('event_id').notNull().references(() => events.id),
+  optionId: text('option_id').notNull().references(() => eventOptions.id),
+  optionLabel: text('option_label').notNull(),
+  userId: text('user_id').notNull().references(() => users.id),
+  walletAddress: text('wallet_address').notNull(),
+  chain: text('chain').$type<Chain>().notNull(),
+  purchasePrice: real('purchase_price').notNull(), // USDC value for reference
+  solAmount: real('sol_amount'), // Actual SOL paid during purchase
+  purchaseTx: text('purchase_tx').notNull(),
+  status: text('status').$type<TicketStatus>().default('active'),
+  payoutAmount: real('payout_amount'), // USDC value for payout (legacy)
+  payoutSolAmount: real('payout_sol_amount'), // Actual SOL to be paid out
+  claimTx: text('claim_tx'),
+  claimedAt: integer('claimed_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  userIdx: index('tickets_user_idx').on(table.userId),
+  eventIdx: index('tickets_event_idx').on(table.eventId),
+  walletIdx: index('tickets_wallet_idx').on(table.walletAddress),
+  statusIdx: index('tickets_status_idx').on(table.status),
+}));
+
+export const adminAuditLogs = sqliteTable('admin_audit_logs', {
+  id: text('id').primaryKey(),
+  adminId: text('admin_id').notNull().references(() => users.id),
+  action: text('action').notNull(),
+  entityType: text('entity_type').notNull(),
+  entityId: text('entity_id').notNull(),
+  details: text('details'), // JSON string
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  adminIdx: index('audit_admin_idx').on(table.adminId),
+  entityIdx: index('audit_entity_idx').on(table.entityType, table.entityId),
+  createdIdx: index('audit_created_idx').on(table.createdAt),
+}));
+
+export const platformSettings = sqliteTable('platform_settings', {
+  id: text('id').primaryKey().default('settings'),
+  ticketPrice: real('ticket_price').default(10.00),
+  platformFee: real('platform_fee').default(0.01),
+  maxEventsPerDay: integer('max_events_per_day').default(10),
+  claimDelayHours: integer('claim_delay_hours').default(0),
+  maintenanceMode: integer('maintenance_mode', { mode: 'boolean' }).default(false),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
+// Event Chat Messages - auto-deleted when event ends
+export const eventMessages = sqliteTable('event_messages', {
+  id: text('id').primaryKey(),
+  eventId: text('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  walletAddress: text('wallet_address').notNull(),
+  message: text('message').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  eventIdx: index('messages_event_idx').on(table.eventId),
+  createdIdx: index('messages_created_idx').on(table.createdAt),
+}));
+
+// Failed Transactions - for admin resolution when ticket creation fails
+export const failedTransactionStatuses = ['pending', 'resolved', 'refunded', 'rejected'] as const;
+export type FailedTransactionStatus = typeof failedTransactionStatuses[number];
+
+export const failedTransactions = sqliteTable('failed_transactions', {
+  id: text('id').primaryKey(),
+  walletAddress: text('wallet_address').notNull(),
+  userId: text('user_id'), // Optional - link to user if known
+  transactionSignature: text('transaction_signature').notNull(),
+  eventId: text('event_id').notNull(),
+  optionId: text('option_id').notNull(),
+  optionLabel: text('option_label'),
+  quantity: integer('quantity').notNull(),
+  amount: real('amount').notNull(), // USD value (legacy)
+  solAmount: real('sol_amount'), // Actual SOL amount
+  chain: text('chain').$type<Chain>().default('SOL'),
+  errorMessage: text('error_message').notNull(),
+  status: text('status').$type<FailedTransactionStatus>().default('pending'),
+  resolvedBy: text('resolved_by'), // Admin ID who resolved
+  resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
+  resolutionNote: text('resolution_note'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  walletIdx: index('failed_tx_wallet_idx').on(table.walletAddress),
+  statusIdx: index('failed_tx_status_idx').on(table.status),
+  createdIdx: index('failed_tx_created_idx').on(table.createdAt),
+}));
+
+// ============================================================================
+// RELATIONS
+// ============================================================================
+
+export const usersRelations = relations(users, ({ many }) => ({
+  tickets: many(tickets),
+  auditLogs: many(adminAuditLogs),
+}));
+
+export const eventsRelations = relations(events, ({ many }) => ({
+  options: many(eventOptions),
+  tickets: many(tickets),
+}));
+
+export const eventOptionsRelations = relations(eventOptions, ({ one, many }) => ({
+  event: one(events, { fields: [eventOptions.eventId], references: [events.id] }),
+  tickets: many(tickets),
+}));
+
+export const ticketsRelations = relations(tickets, ({ one }) => ({
+  event: one(events, { fields: [tickets.eventId], references: [events.id] }),
+  option: one(eventOptions, { fields: [tickets.optionId], references: [eventOptions.id] }),
+  user: one(users, { fields: [tickets.userId], references: [users.id] }),
+}));
+
+export const adminAuditLogsRelations = relations(adminAuditLogs, ({ one }) => ({
+  admin: one(users, { fields: [adminAuditLogs.adminId], references: [users.id] }),
+}));
+
+
+// Notifications table
+export const notificationTypes = ['jackpot_new', 'ticket_won', 'ticket_lost', 'refund_available', 'event_ending', 'new_bet', 'payout_ready'] as const;
+
+export const notifications = sqliteTable('notifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  type: text('type').notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  data: text('data'), // JSON string for additional data
+  isRead: integer('is_read', { mode: 'boolean' }).default(false),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
+
+// Blog posts table
+export const blogCategories = ['announcement', 'tips', 'crypto', 'sports', 'updates'] as const;
+
+export const blogPosts = sqliteTable('blog_posts', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  excerpt: text('excerpt'), // Short preview text
+  content: text('content').notNull(), // Full article content
+  imageUrl: text('image_url'), // Optional featured image
+  category: text('category').default('announcement'),
+  isPublished: integer('is_published', { mode: 'boolean' }).default(false),
+  authorId: text('author_id').references(() => users.id),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  publishedIdx: index('blog_published_idx').on(table.isPublished),
+  categoryIdx: index('blog_category_idx').on(table.category),
+}));
+
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+  author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
+}));
+
+// Resolution Approvals table for two-admin approval workflow
+export const resolutionApprovals = sqliteTable('resolution_approvals', {
+  id: text('id').primaryKey(),
+  eventId: text('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  adminId: text('admin_id').notNull().references(() => users.id),
+  winningOption: text('winning_option').notNull(), // The option this admin selected
+  approved: integer('approved', { mode: 'boolean' }).default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  eventIdx: index('resolution_approvals_event_idx').on(table.eventId),
+  adminIdx: index('resolution_approvals_admin_idx').on(table.adminId),
+}));
+
+export const resolutionApprovalsRelations = relations(resolutionApprovals, ({ one }) => ({
+  event: one(events, { fields: [resolutionApprovals.eventId], references: [events.id] }),
+  admin: one(users, { fields: [resolutionApprovals.adminId], references: [users.id] }),
+}));
+
+// ============================================================================
+// REFERRAL SYSTEM
+// ============================================================================
+
+// Discord roles for referral limits
+export const discordRoles = ['early_contributor', 'og', 'influencer'] as const;
+export type DiscordRole = typeof discordRoles[number];
+
+// Referral limits per role
+export const referralLimits: Record<DiscordRole, number> = {
+  early_contributor: 20,
+  og: 50,
+  influencer: 1000,
+};
+
+// Referrals tracking table
+export const referrals = sqliteTable('referrals', {
+  id: text('id').primaryKey(),
+  referrerId: text('referrer_id').notNull().references(() => users.id),
+  referredUserId: text('referred_user_id').notNull().references(() => users.id),
+  referralCode: text('referral_code').notNull(), // The code that was used
+  discordVerified: integer('discord_verified', { mode: 'boolean' }).default(false),
+  twitterVerified: integer('twitter_verified', { mode: 'boolean' }).default(false),
+  pointsAwarded: integer('points_awarded', { mode: 'boolean' }).default(false),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  verifiedAt: integer('verified_at', { mode: 'timestamp' }),
+}, (table) => ({
+  referrerIdx: index('referrals_referrer_idx').on(table.referrerId),
+  referredIdx: index('referrals_referred_idx').on(table.referredUserId),
+  codeIdx: index('referrals_code_idx').on(table.referralCode),
+}));
+
+export const referralsRelations = relations(referrals, ({ one }) => ({
+  referrer: one(users, { fields: [referrals.referrerId], references: [users.id] }),
+  referredUser: one(users, { fields: [referrals.referredUserId], references: [users.id] }),
+}));
+
+// Twitter verification queue (for admin manual review)
+export const twitterVerificationStatuses = ['pending', 'approved', 'rejected'] as const;
+export type TwitterVerificationStatus = typeof twitterVerificationStatuses[number];
+
+export const twitterVerifications = sqliteTable('twitter_verifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  twitterHandle: text('twitter_handle').notNull(),
+  status: text('status').$type<TwitterVerificationStatus>().default('pending'),
+  reviewedBy: text('reviewed_by').references(() => users.id), // Admin who reviewed
+  reviewedAt: integer('reviewed_at', { mode: 'timestamp' }),
+  adminNote: text('admin_note'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+}, (table) => ({
+  userIdx: index('twitter_verifications_user_idx').on(table.userId),
+  statusIdx: index('twitter_verifications_status_idx').on(table.status),
+}));
+
+export const twitterVerificationsRelations = relations(twitterVerifications, ({ one }) => ({
+  user: one(users, { fields: [twitterVerifications.userId], references: [users.id] }),
+  reviewer: one(users, { fields: [twitterVerifications.reviewedBy], references: [users.id] }),
+}));
