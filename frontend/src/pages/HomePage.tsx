@@ -21,54 +21,109 @@ export function HomePage() {
     setDisplayCount(100);
   };
 
+  // Helper to get cached data from localStorage
+  const getCachedData = (key: string) => {
+    try {
+      const cached = localStorage.getItem(`betpot_cache_${key}`);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        // Use cache if less than 5 minutes old
+        if (Date.now() - timestamp < 5 * 60 * 1000) {
+          return data;
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return undefined;
+  };
+
+  // Helper to save data to localStorage
+  const saveCachedData = (key: string, data: any) => {
+    try {
+      localStorage.setItem(`betpot_cache_${key}`, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
+    } catch (e) { /* ignore */ }
+  };
+
   // ============ SPORTS - Polymarket Sports API ============
   const { data: sportsData, isLoading: loadingSports } = useQuery({
     queryKey: ['all-sports'],
-    queryFn: () => api.getAllFootballEvents(200),
+    queryFn: async () => {
+      const result = await api.getAllFootballEvents(200);
+      saveCachedData('sports', result);
+      return result;
+    },
     staleTime: 60 * 1000,
     refetchInterval: 60 * 1000,
     enabled: activeTab === 'sports',
+    placeholderData: getCachedData('sports'),
   });
 
   // ============ PREDICTIONS - Polymarket Events API ============
   const { data: predictionsData, isLoading: loadingPredictions } = useQuery({
     queryKey: ['predictions-all'],
-    queryFn: () => api.getPolymarketEvents(),
+    queryFn: async () => {
+      const result = await api.getPolymarketEvents();
+      saveCachedData('predictions', result);
+      return result;
+    },
     staleTime: 30 * 1000,
     refetchInterval: 30 * 1000,
     enabled: activeTab === 'predictions',
+    placeholderData: getCachedData('predictions'),
   });
 
   // ============ LIVE NOW - API-Sports Real-time ============
   const { data: liveData, isLoading: loadingLive } = useQuery({
     queryKey: ['live-matches'],
-    queryFn: () => api.getLiveMatches(200),
+    queryFn: async () => {
+      const result = await api.getLiveMatches(200);
+      saveCachedData('live', result);
+      return result;
+    },
     staleTime: 30 * 1000,
     refetchInterval: 30 * 1000,
     enabled: activeTab === 'live',
+    placeholderData: getCachedData('live'),
   });
 
   // ============ ENDING SOON - Internal Events ============
   const { data: eventsData } = useQuery({
     queryKey: ['events-ending-soon'],
-    queryFn: () => api.getEvents({ status: 'open', limit: 4 }),
+    queryFn: async () => {
+      const result = await api.getEvents({ status: 'open', limit: 4 });
+      saveCachedData('ending-soon', result);
+      return result;
+    },
     staleTime: 30 * 1000,
+    placeholderData: getCachedData('ending-soon'),
   });
 
   // ============ NEWS - External News ============
   const { data: newsData, isLoading: loadingNews } = useQuery({
     queryKey: ['external-news'],
-    queryFn: () => api.getNews('sports'),
+    queryFn: async () => {
+      const result = await api.getNews('sports');
+      saveCachedData('news', result);
+      return result;
+    },
     staleTime: 5 * 60 * 1000,
     enabled: activeTab === 'news',
+    placeholderData: getCachedData('news'),
   });
 
   // ============ BETPOT NEWS - Internal Blog ============
   const { data: blogData, isLoading: loadingBlog } = useQuery({
     queryKey: ['betpot-blog'],
-    queryFn: () => api.getBlogPosts(),
+    queryFn: async () => {
+      const result = await api.getBlogPosts();
+      saveCachedData('blog', result);
+      return result;
+    },
     staleTime: 60 * 1000,
     enabled: activeTab === 'betpot-news',
+    placeholderData: getCachedData('blog'),
   });
 
   // Get data based on active tab
