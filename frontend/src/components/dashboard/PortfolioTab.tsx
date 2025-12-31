@@ -363,7 +363,7 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                                         <div className="flex items-center gap-2">
                                             <div className="flex items-center gap-1.5 bg-background-secondary px-2.5 py-1 rounded-lg border border-border">
                                                 <Hash className="w-3.5 h-3.5 text-brand-600" />
-                                                <span className="text-xs font-mono font-semibold text-text-primary">
+                                                <span className="text-xs font-mono font-semibold text-gray-900 dark:text-white">
                                                     {formatTicketId(ticket.id)}
                                                 </span>
                                                 <button
@@ -381,10 +381,10 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
 
                                         <span className={clsx(
                                             'text-xs uppercase font-bold px-2.5 py-1 rounded-full',
-                                            (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-positive-100 text-positive-700 border border-positive-200',
-                                            ticket.status === 'lost' && 'bg-negative-100 text-negative-600 border border-negative-200',
-                                            ticket.status === 'active' && 'bg-brand-100 text-brand-700 border border-brand-200',
-                                            ticket.status === 'refunded' && 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                            (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-positive-100 dark:bg-positive-900/50 text-positive-700 dark:text-positive-300 border border-positive-200 dark:border-positive-700',
+                                            ticket.status === 'lost' && 'bg-negative-100 dark:bg-negative-900/50 text-negative-600 dark:text-negative-300 border border-negative-200 dark:border-negative-700',
+                                            ticket.status === 'active' && 'bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-700',
+                                            ticket.status === 'refunded' && 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700'
                                         )}>
                                             {ticket.status === 'claimed' ? 'WON' : ticket.status}
                                         </span>
@@ -394,9 +394,9 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                                         <div className="flex items-start sm:items-center gap-3">
                                             <div className={clsx(
                                                 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-gradient-to-br from-positive-100 to-positive-50 border border-positive-200',
-                                                ticket.status === 'lost' && 'bg-gradient-to-br from-negative-100 to-negative-50 border border-negative-200',
-                                                ticket.status === 'active' && 'bg-gradient-to-br from-brand-100 to-brand-50 border border-brand-200'
+                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'bg-gradient-to-br from-positive-100 to-positive-50 dark:from-positive-900/40 dark:to-positive-800/40 border border-positive-200 dark:border-positive-700',
+                                                ticket.status === 'lost' && 'bg-gradient-to-br from-negative-100 to-negative-50 dark:from-negative-900/40 dark:to-negative-800/40 border border-negative-200 dark:border-negative-700',
+                                                ticket.status === 'active' && 'bg-gradient-to-br from-brand-100 to-brand-50 dark:from-brand-900/40 dark:to-brand-800/40 border border-brand-200 dark:border-brand-700'
                                             )}>
                                                 {(ticket.status === 'won' || ticket.status === 'claimed') && <Trophy className="w-5 h-5 text-positive-600" />}
                                                 {ticket.status === 'lost' && <XCircle className="w-5 h-5 text-negative-500" />}
@@ -407,9 +407,9 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                                                 <p className="text-text-primary dark:text-white font-semibold truncate text-sm">
                                                     {ticket.event?.title || 'Unknown Event'}
                                                 </p>
-                                                <div className="flex flex-wrap items-center gap-x-2 text-xs text-text-secondary mt-1">
-                                                    <span>Pick: <span className="font-medium text-text-primary">{ticket.optionLabel}</span></span>
-                                                    <span className="text-text-muted">{format(new Date(ticket.createdAt), 'MMM dd, yyyy')}</span>
+                                                <div className="flex flex-wrap items-center gap-x-2 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                                    <span>Pick: <span className="font-medium text-gray-900 dark:text-white">{ticket.optionLabel}</span></span>
+                                                    <span className="text-gray-500 dark:text-gray-500">{format(new Date(ticket.createdAt), 'MMM dd, yyyy')}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -417,9 +417,9 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                                         <div className="text-right">
                                             <p className={clsx(
                                                 'text-lg font-bold',
-                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600',
-                                                ticket.status === 'lost' && 'text-negative-500',
-                                                ticket.status === 'active' && 'text-text-primary'
+                                                (ticket.status === 'won' || ticket.status === 'claimed') && 'text-positive-600 dark:text-positive-400',
+                                                ticket.status === 'lost' && 'text-negative-500 dark:text-negative-400',
+                                                ticket.status === 'active' && 'text-gray-900 dark:text-white'
                                             )}>
                                                 {(ticket.status === 'won' || ticket.status === 'claimed') && `+${usdToSol(ticket.payoutAmount || ticket.purchasePrice).toFixed(4)} SOL`}
                                                 {ticket.status === 'lost' && `-${usdToSol(ticket.purchasePrice).toFixed(4)} SOL`}
