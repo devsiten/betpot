@@ -652,8 +652,12 @@ export function HomePage() {
                   }}
                   className="card overflow-hidden hover:border-brand-300 dark:hover:border-brand-600 transition-all group"
                 >
-                  {item.imageUrl && (
+                  {item.imageUrl ? (
                     <img src={item.imageUrl} alt="" className="w-full h-32 object-cover" />
+                  ) : (
+                    <div className="w-full h-32 bg-gradient-to-br from-brand-600 via-brand-500 to-positive-500 flex items-center justify-center">
+                      <span className="text-white text-2xl font-bold opacity-80">⚽ SPORTS</span>
+                    </div>
                   )}
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-2">
