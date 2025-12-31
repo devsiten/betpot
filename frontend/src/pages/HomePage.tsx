@@ -590,7 +590,9 @@ export function HomePage() {
                   onClick={(e) => {
                     if (activeTab === 'news') {
                       e.preventDefault();
-                      window.open(item.url, '_blank');
+                      if (item.url) {
+                        window.open(item.url, '_blank');
+                      }
                     }
                   }}
                   className="card overflow-hidden hover:border-brand-300 dark:hover:border-brand-600 transition-all group"

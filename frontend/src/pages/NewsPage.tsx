@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Newspaper, ArrowLeft, Clock, ExternalLink, RefreshCw, TrendingUp, Globe, Tv, Bitcoin, DollarSign } from 'lucide-react';
+import { Newspaper, ArrowLeft, Clock, ExternalLink, RefreshCw, TrendingUp, Globe, Tv, Bitcoin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
@@ -8,7 +8,6 @@ import clsx from 'clsx';
 
 const categories = [
     { id: 'sports', label: '⚽ Football', icon: TrendingUp },
-    { id: 'forex', label: 'Forex', icon: DollarSign },
     { id: 'crypto', label: 'Crypto', icon: Bitcoin },
     { id: 'politics', label: 'Politics', icon: Globe },
     { id: 'entertainment', label: 'Entertainment', icon: Tv },
