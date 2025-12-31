@@ -398,6 +398,28 @@ class ApiService {
     return data;
   }
 
+  // Verify payment and claim ticket if paid but not issued
+  async verifyPayment(params: {
+    transactionSignature: string;
+    eventId: string;
+    optionId: string;
+    walletAddress: string;
+  }): Promise<ApiResponse<{
+    ticket: {
+      id: string;
+      serialNumber: string;
+      eventId: string;
+      eventTitle: string;
+      optionLabel: string;
+      purchasePrice: number;
+      status: string;
+    };
+    message: string;
+  }>> {
+    const { data } = await this.client.post('/tickets/verify-payment', params);
+    return data;
+  }
+
   // ========== ADMIN ==========
 
   async getAdminDashboard() {

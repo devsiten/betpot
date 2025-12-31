@@ -25,6 +25,11 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
     const [isClaiming, setIsClaiming] = useState(false);
     const [statusFilter, setStatusFilter] = useState<'active' | 'won' | 'lost'>('active');
     const [solPrice, setSolPrice] = useState<number>(125);
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
+    const [verifyTx, setVerifyTx] = useState('');
+    const [verifyEventId, setVerifyEventId] = useState('');
+    const [verifyOptionId, setVerifyOptionId] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
 
     useEffect(() => {
         getSolPrice().then(setSolPrice);
@@ -104,6 +109,39 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
             toast.error(error.response?.data?.error || 'Failed to claim');
         } finally {
             setIsClaiming(false);
+        }
+    };
+
+    const handleVerifyPayment = async () => {
+        if (!publicKey || !verifyTx.trim() || !verifyEventId.trim() || !verifyOptionId.trim()) {
+            toast.error('Please fill in all fields');
+            return;
+        }
+
+        setIsVerifying(true);
+        try {
+            const result = await api.verifyPayment({
+                transactionSignature: verifyTx.trim(),
+                eventId: verifyEventId.trim(),
+                optionId: verifyOptionId.trim(),
+                walletAddress: publicKey.toBase58(),
+            });
+
+            if (result.success) {
+                toast.success(result.data?.message || 'Ticket issued successfully!');
+                setShowVerifyModal(false);
+                setVerifyTx('');
+                setVerifyEventId('');
+                setVerifyOptionId('');
+                queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
+                queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+            } else {
+                toast.error(result.error || 'Verification failed');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Failed to verify payment');
+        } finally {
+            setIsVerifying(false);
         }
     };
 
@@ -472,6 +510,108 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                     </>
                 )}
             </div>
+
+            {/* Verify Payment Button */}
+            <div className="bg-background-card dark:bg-gray-900 rounded-2xl border border-border dark:border-gray-800 p-4 sm:p-5 shadow-card">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="font-semibold text-text-primary dark:text-white">Having payment issues?</h3>
+                        <p className="text-sm text-text-muted dark:text-gray-400">Paid but didn't receive your ticket? Verify your payment here.</p>
+                    </div>
+                    <button
+                        onClick={() => setShowVerifyModal(true)}
+                        className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors"
+                    >
+                        Verify Payment
+                    </button>
+                </div>
+            </div>
+
+            {/* Verify Payment Modal */}
+            {showVerifyModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-xl border border-gray-200 dark:border-gray-700">
+                        <div className="p-5 border-b border-gray-200 dark:border-gray-700">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Verify Your Payment</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Enter your transaction details to claim your ticket
+                            </p>
+                        </div>
+
+                        <div className="p-5 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Transaction Signature
+                                </label>
+                                <input
+                                    type="text"
+                                    value={verifyTx}
+                                    onChange={(e) => setVerifyTx(e.target.value)}
+                                    placeholder="e.g., 5xY8k2..."
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:border-brand-500"
+                                />
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Find this in your wallet transaction history
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Event ID
+                                </label>
+                                <input
+                                    type="text"
+                                    value={verifyEventId}
+                                    onChange={(e) => setVerifyEventId(e.target.value)}
+                                    placeholder="Event ID from the event page URL"
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:border-brand-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Option ID (A, B, C...)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={verifyOptionId}
+                                    onChange={(e) => setVerifyOptionId(e.target.value.toUpperCase())}
+                                    placeholder="e.g., A or B"
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:border-brand-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="p-5 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
+                            <button
+                                onClick={() => {
+                                    setShowVerifyModal(false);
+                                    setVerifyTx('');
+                                    setVerifyEventId('');
+                                    setVerifyOptionId('');
+                                }}
+                                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleVerifyPayment}
+                                disabled={isVerifying || !verifyTx.trim() || !verifyEventId.trim() || !verifyOptionId.trim()}
+                                className="px-4 py-2 bg-brand-500 hover:bg-brand-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                            >
+                                {isVerifying ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Verifying...
+                                    </>
+                                ) : (
+                                    'Verify & Claim Ticket'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
