@@ -88,9 +88,26 @@ function EventCard({ event, variant = 'default', solPrice }: { event: any; varia
             </h3>
 
             {/* Event Time */}
-            <div className="flex items-center gap-2 text-text-secondary dark:text-gray-300 text-xs md:text-sm font-medium mb-3">
+            <div className="flex items-center gap-2 text-text-secondary dark:text-gray-300 text-xs md:text-sm font-medium mb-2">
                 <Clock className="w-3 h-3 md:w-4 md:h-4" />
                 {format(new Date(event.eventTime), 'MMM dd, yyyy HH:mm')}
+            </div>
+
+            {/* Event ID - for verify payment */}
+            <div
+                className="flex items-center gap-1 text-xs text-text-muted dark:text-gray-500 mb-3 cursor-pointer hover:text-brand-500 dark:hover:text-brand-400 transition-colors"
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(event.id);
+                    alert('Event ID copied!');
+                }}
+                title="Click to copy Event ID"
+            >
+                <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-[10px]">
+                    ID: {event.id.slice(0, 8)}...
+                </span>
+                <span className="text-[10px]">📋</span>
             </div>
 
             {/* Countdown (only for live/upcoming) */}
