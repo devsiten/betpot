@@ -35,6 +35,28 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
         getSolPrice().then(setSolPrice);
     }, []);
 
+    // Safe error message extraction helper
+    const getErrorMessage = (error: any, fallback: string): string => {
+        try {
+            // Check axios response error
+            if (error?.response?.data?.error) {
+                const errData = error.response.data.error;
+                return typeof errData === 'string' ? errData : fallback;
+            }
+            // Check axios response message
+            if (error?.response?.data?.message) {
+                return String(error.response.data.message);
+            }
+            // Check direct message (but skip generic "Request failed" messages)
+            if (error?.message && typeof error.message === 'string' && !error.message.includes('Request failed')) {
+                return error.message;
+            }
+            return fallback;
+        } catch {
+            return fallback;
+        }
+    };
+
     const usdToSol = (usd: number) => usd / solPrice;
 
     // Fetch user stats
@@ -106,7 +128,7 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                 toast.error(result.error || 'Failed to claim');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to claim');
+            toast.error(getErrorMessage(error, 'Failed to claim'));
         } finally {
             setIsClaiming(false);
         }
@@ -139,7 +161,7 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
                 toast.error(result.error || 'Verification failed');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to verify payment');
+            toast.error(getErrorMessage(error, 'Failed to verify payment'));
         } finally {
             setIsVerifying(false);
         }

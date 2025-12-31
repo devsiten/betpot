@@ -132,7 +132,15 @@ export function EventDetailPage() {
       if (error.message?.includes('User rejected')) {
         toast.error('Transaction cancelled');
       } else {
-        toast.error(error.response?.data?.error || 'Purchase failed');
+        // Extract user-friendly error message
+        let errorMsg = 'Purchase failed. Please try again.';
+        if (error?.response?.data?.error) {
+          const errData = error.response.data.error;
+          errorMsg = typeof errData === 'string' ? errData : errorMsg;
+        } else if (error?.response?.data?.message) {
+          errorMsg = String(error.response.data.message);
+        }
+        toast.error(errorMsg);
       }
     } finally {
       setIsPurchasing(false);
