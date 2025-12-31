@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Zap, Clock, TrendingUp, Newspaper, Edit2 } from 'lucide-react';
+import { Trophy, Zap, Clock, TrendingUp } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 import clsx from 'clsx';
@@ -533,7 +533,7 @@ export function HomePage() {
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
-              <Edit2 className="w-4 h-4" /> BetPot News/Blog
+              BetPot News
             </button>
           </div>
           <Link to="/events" className="btn btn-ghost text-sm">
@@ -578,7 +578,6 @@ export function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayedEvents.length === 0 ? (
               <div className="col-span-full text-center py-16 card">
-                <Newspaper className="w-12 h-12 mx-auto mb-4 text-text-muted dark:text-gray-600" />
                 <p className="text-text-secondary text-lg font-bold">
                   {activeTab === 'news' ? 'No news available' : 'No blog posts yet'}
                 </p>
