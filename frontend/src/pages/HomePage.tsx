@@ -522,7 +522,7 @@ export function HomePage() {
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
-              <Newspaper className="w-4 h-4" /> News
+              News
             </button>
             <button
               onClick={() => handleTabChange('betpot-news')}
