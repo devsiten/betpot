@@ -120,7 +120,7 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
             const result = await api.claimAllTickets(publicKey.toBase58(), signatureBase64);
 
             if (result.success) {
-                toast.success(`Claimed ${usdToSol(result.data?.totalPayout || 0).toFixed(4)} SOL from ${result.data?.claimedCount} tickets!`);
+                toast.success(`Successfully claimed ${(result.data?.totalPayout || 0).toFixed(4)} SOL from ${result.data?.claimedCount} ticket(s)!`);
                 refetchClaimable();
                 queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
                 queryClient.invalidateQueries({ queryKey: ['user-stats'] });
