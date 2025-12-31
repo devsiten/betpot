@@ -108,6 +108,7 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
             try {
                 signature = await signMessage(message);
             } catch (signError: any) {
+                setIsClaiming(false); // IMPORTANT: Reset state on signing failure
                 if (signError.message?.includes('rejected')) {
                     toast.error('Signing cancelled');
                 } else {
