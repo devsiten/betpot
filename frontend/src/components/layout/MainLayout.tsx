@@ -16,6 +16,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { useWallet } from '@/providers/SolanaProvider';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import clsx from 'clsx';
 import bs58 from 'bs58';
 import { useAuthStore } from '@/stores/authStore';
@@ -24,33 +25,18 @@ import { MyBetsDropdown } from '@/components/MyBetsDropdown';
 import { useTheme } from '@/context/ThemeContext';
 import toast from 'react-hot-toast';
 
-import { WalletSelectModal } from '@/components/WalletSelectModal';
-
-// Custom Connect Wallet button - shows our custom modal
+// Standard Solana Wallet Connect Button - works on all devices
 function ConnectButton() {
-  const { connected, connecting } = useWallet();
-  const [showModal, setShowModal] = useState(false);
+  const { connected } = useWallet();
 
   if (connected) {
     return null; // Don't show if connected - we handle connected state elsewhere
   }
 
   return (
-    <>
-      <button
-        onClick={() => setShowModal(true)}
-        disabled={connecting}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-all disabled:opacity-50 border border-gray-200 dark:border-gray-700 whitespace-nowrap"
-      >
-        <Wallet className="w-4 h-4" />
-        {connecting ? 'Connecting...' : 'Connect Wallet'}
-      </button>
-
-      <WalletSelectModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-      />
-    </>
+    <WalletMultiButton
+      className="!bg-brand-600 hover:!bg-brand-700 !rounded-lg !font-semibold !text-sm !px-4 !py-2.5 !h-auto !transition-all"
+    />
   );
 }
 
