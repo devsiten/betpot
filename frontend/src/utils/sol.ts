@@ -27,7 +27,6 @@ export async function getSolPrice(): Promise<number> {
 
         // Cache the price
         cachedSolPrice = { price, timestamp: Date.now() };
-        console.log('SOL price fetched:', price, 'USD');
 
         return price;
     } catch (error) {

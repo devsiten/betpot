@@ -126,10 +126,10 @@ export function EventChatPage() {
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                <AlertCircle className="w-16 h-16 text-red-400 mb-4" />
-                <h2 className="text-xl font-bold text-white mb-2">Failed to Load Chat</h2>
-                <p className="text-gray-400 mb-4">{error}</p>
-                <Link to="/events" className="text-teal-400 hover:underline">
+                <AlertCircle className="w-16 h-16 text-negative-500 mb-4" />
+                <h2 className="text-xl font-bold text-text-primary mb-2">Failed to Load Chat</h2>
+                <p className="text-text-secondary mb-4">{error}</p>
+                <Link to="/events" className="text-brand-500 hover:underline">
                     ← Back to Events
                 </Link>
             </div>
@@ -141,7 +141,7 @@ export function EventChatPage() {
             {/* Header */}
             <div className="p-4 border-b border-white/10">
                 <div className="flex items-center gap-4">
-                    <Link to="/jackpot" className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
+                    <Link to="/jackpot" className="p-2 rounded-lg hover:bg-background-secondary text-text-muted hover:text-text-primary">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div className="flex-1">
@@ -162,7 +162,7 @@ export function EventChatPage() {
                         </Link>
                         <button
                             onClick={fetchMessages}
-                            className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
+                            className="p-2 rounded-lg hover:bg-background-secondary text-text-muted hover:text-text-primary"
                             title="Refresh"
                         >
                             <RefreshCw className="w-5 h-5" />
@@ -175,8 +175,8 @@ export function EventChatPage() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {chatData?.messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
-                        <MessageCircle className="w-16 h-16 text-gray-600 mb-4" />
-                        <p className="text-gray-400">No messages yet. Be the first to chat!</p>
+                        <MessageCircle className="w-16 h-16 text-text-muted mb-4" />
+                        <p className="text-text-secondary">No messages yet. Be the first to chat!</p>
                     </div>
                 ) : (
                     chatData?.messages.map((msg) => {
@@ -188,8 +188,8 @@ export function EventChatPage() {
                             >
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${isMe
-                                        ? 'bg-teal-500/20 border border-teal-500/30'
-                                        : 'bg-white/5 border border-white/10'
+                                        ? 'bg-brand-500/20 border border-brand-500/30'
+                                        : 'bg-background-secondary border border-border'
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">

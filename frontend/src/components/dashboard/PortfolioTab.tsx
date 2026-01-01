@@ -102,16 +102,13 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
         }
 
         setIsClaiming(true);
-        console.log('[CLAIM] Starting claim process...');
 
         try {
             // Step 1: Sign message
-            console.log('[CLAIM] Requesting wallet signature...');
             const message = new TextEncoder().encode(`Claim all winnings: ${Date.now()}`);
             let signature;
             try {
                 signature = await signMessage(message);
-                console.log('[CLAIM] Wallet signed successfully');
             } catch (signError: any) {
                 console.error('[CLAIM] Signing failed:', signError);
                 setIsClaiming(false);
@@ -126,16 +123,13 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
             const signatureBase64 = Buffer.from(signature).toString('base64');
 
             // Step 2: Call API with timeout protection
-            console.log('[CLAIM] Sending claim request to API...');
             const result = await api.claimAllTickets(publicKey.toBase58(), signatureBase64);
-            console.log('[CLAIM] API response received:', result);
 
             // Step 3: Show feedback based on result
             if (result && result.success) {
                 const amount = result.data?.totalPayout || 0;
                 const count = result.data?.claimedCount || 0;
                 const message = `🎉 Successfully claimed ${amount.toFixed(4)} SOL from ${count} ticket(s)!`;
-                console.log('[CLAIM] SUCCESS:', message);
                 toast.success(message, { duration: 5000 });
                 refetchClaimable();
                 queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
@@ -150,7 +144,6 @@ export function PortfolioTab({ publicKey, connected }: PortfolioTabProps) {
             const errorMsg = getErrorMessage(error, 'Claim failed. Please refresh and try again.');
             toast.error(errorMsg, { duration: 5000 });
         } finally {
-            console.log('[CLAIM] Resetting claiming state');
             setIsClaiming(false);
         }
     };

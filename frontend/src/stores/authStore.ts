@@ -66,7 +66,6 @@ export const useAuthStore = create<AuthStore>()(
 
         // Only logout if MORE than 2 hours have passed
         if (timeSinceActivity > SESSION_TIMEOUT) {
-          console.log('Session expired after', Math.round(timeSinceActivity / 1000 / 60), 'minutes');
           logout();
           return true; // Session was expired
         }
@@ -174,7 +173,6 @@ export const useAuthStore = create<AuthStore>()(
           // For other errors (network, 500, etc.), keep the session alive
           const status = error?.response?.status;
           if (status === 401) {
-            console.log('Token invalid, logging out');
             localStorage.removeItem('betpot_token');
             set({
               user: null,
@@ -185,7 +183,6 @@ export const useAuthStore = create<AuthStore>()(
             });
           } else {
             // Network error or server error - keep session, just stop loading
-            console.log('API error but keeping session:', error?.message || 'Unknown error');
             set({ isLoading: false });
           }
         }
@@ -205,16 +202,10 @@ export const useAuthStore = create<AuthStore>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => {
-        console.log('Zustand auth store hydrating...');
         return (state, error) => {
           if (error) {
             console.error('Zustand hydration failed:', error);
           } else {
-            console.log('Zustand hydrated with:', {
-              hasUser: !!state?.user,
-              isAuthenticated: state?.isAuthenticated,
-              hasToken: !!state?.token
-            });
             // After hydration, set isLoading to false
             if (state) {
               state.isLoading = false;

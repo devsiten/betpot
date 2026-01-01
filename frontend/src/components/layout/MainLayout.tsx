@@ -162,7 +162,6 @@ export function MainLayout() {
   // Only logout when wallet DISCONNECTS (was connected, now isn't)
   useEffect(() => {
     if (wasConnected && !connected && isAuthenticated) {
-      console.log('Wallet disconnected, logging out');
       logout();
       localStorage.removeItem('betpot_wallet');
       localStorage.removeItem('betpot_token');

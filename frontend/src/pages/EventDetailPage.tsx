@@ -53,10 +53,7 @@ export function EventDetailPage() {
   // Fetch SOL balance and price when wallet connects
   useEffect(() => {
     if (publicKey && connection) {
-      console.log('=== SOL Balance Check ===');
-      console.log('Wallet:', publicKey.toBase58());
       getSolBalance(connection, publicKey).then(balance => {
-        console.log('SOL Balance:', balance);
         setSolBalance(balance);
       }).catch(err => {
         console.error('Balance fetch error:', err);
@@ -64,7 +61,6 @@ export function EventDetailPage() {
       });
       // Fetch SOL price
       getSolPrice().then(price => {
-        console.log('SOL Price:', price);
         setSolPrice(price);
       });
     }
@@ -325,17 +321,8 @@ export function EventDetailPage() {
               <button
                 key={optId}
                 onClick={() => {
-                  console.log('BUTTON CLICKED!', {
-                    optId,
-                    label: option.label,
-                    isOpen,
-                    currentSelected: selectedOption
-                  });
                   if (isOpen) {
                     setSelectedOption(isSelected ? null : optId);
-                    console.log('Option selected:', optId, option.label);
-                  } else {
-                    console.error('Cannot click - event is not open! Status:', event.status);
                   }
                 }}
                 disabled={!isOpen}

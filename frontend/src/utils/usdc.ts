@@ -53,13 +53,11 @@ export async function getUSDCBalance(
         // Check if account exists first
         const accountInfo = await connection.getAccountInfo(tokenAccount);
         if (!accountInfo) {
-            console.log('USDC token account does not exist yet - balance is 0');
             return 0;
         }
 
         const account = await getAccount(connection, tokenAccount);
         const balance = Number(account.amount) / Math.pow(10, USDC_DECIMALS);
-        console.log('USDC Balance detected:', balance, 'USDC');
         return balance;
     } catch (error: any) {
         console.error('Error getting USDC balance:', error.message || error);
@@ -67,7 +65,6 @@ export async function getUSDCBalance(
         if (error.message?.includes('could not find account') ||
             error.message?.includes('Invalid') ||
             error.name === 'TokenAccountNotFoundError') {
-            console.log('Token account not found - returning 0');
             return 0;
         }
         return 0;

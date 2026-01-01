@@ -184,9 +184,6 @@ export function AdminMarkets() {
                 externalData: event,
             };
 
-            // Debug log
-            console.log('Creating jackpot with payload:', JSON.stringify(payload, null, 2));
-
             // Create event from external data with jackpot flag
             return api.createJackpotFromExternal(payload);
         },

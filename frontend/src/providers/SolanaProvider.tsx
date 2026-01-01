@@ -170,7 +170,6 @@ export function useWallet() {
         while (!adapterSignMessage && attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, delayMs));
             attempts++;
-            console.log(`Waiting for signMessage... attempt ${attempts}/${maxAttempts}`);
         }
 
         if (!adapterSignMessage) {
