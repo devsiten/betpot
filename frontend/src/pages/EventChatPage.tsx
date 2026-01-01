@@ -139,7 +139,7 @@ export function EventChatPage() {
     return (
         <div className="flex flex-col h-[calc(100vh-100px)] max-w-4xl mx-auto">
             {/* Header */}
-            <div className="p-4 border-b border-white/10">
+            <div className="p-4 border-b border-border">
                 <div className="flex items-center gap-4">
                     <Link to="/jackpot" className="p-2 rounded-lg hover:bg-background-secondary text-text-muted hover:text-text-primary">
                         <ArrowLeft className="w-5 h-5" />
@@ -210,7 +210,7 @@ export function EventChatPage() {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-border">
                 {!connected || !isAuthenticated ? (
                     <div className="text-center py-4">
                         <p className="text-text-secondary text-sm">

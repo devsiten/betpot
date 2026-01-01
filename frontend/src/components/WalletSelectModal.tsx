@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Smartphone, Monitor } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { X, Smartphone, Monitor, Loader2 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 interface WalletSelectModalProps {
@@ -37,12 +37,15 @@ function getSolflareDeepLink(): string {
 }
 
 export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
-    const { select, wallets, connecting } = useWallet();
+    const { select, wallets, connecting, connected, wallet } = useWallet();
     const [detectedWallets, setDetectedWallets] = useState({ phantom: false, solflare: false });
     const [isOnMobile, setIsOnMobile] = useState(false);
+    const [pendingWallet, setPendingWallet] = useState<string | null>(null);
 
+    // Check wallet availability
     useEffect(() => {
-        // Check wallet availability after mount
+        if (!isOpen) return;
+
         const checkWallets = () => {
             setDetectedWallets({
                 phantom: hasPhantom(),
@@ -52,14 +55,39 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
         };
 
         checkWallets();
-        // Re-check after delay (wallets may inject late)
         const timer = setTimeout(checkWallets, 500);
         return () => clearTimeout(timer);
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    // When wallet is selected and adapter is ready, trigger connect
+    useEffect(() => {
+        if (pendingWallet && wallet && wallet.adapter.name.toLowerCase().includes(pendingWallet.toLowerCase())) {
+            // Adapter is ready, now connect
+            const doConnect = async () => {
+                try {
+                    await wallet.adapter.connect();
+                    onClose();
+                } catch (error: any) {
+                    // User rejected or error
+                    if (!error?.message?.includes('User rejected')) {
+                        console.error('Connection failed:', error);
+                    }
+                } finally {
+                    setPendingWallet(null);
+                }
+            };
+            doConnect();
+        }
+    }, [wallet, pendingWallet, onClose]);
 
-    const handleWalletSelect = async (walletName: 'Phantom' | 'Solflare') => {
+    // Close modal when connected
+    useEffect(() => {
+        if (connected && isOpen) {
+            onClose();
+        }
+    }, [connected, isOpen, onClose]);
+
+    const handleWalletSelect = useCallback(async (walletName: 'Phantom' | 'Solflare') => {
         const mobile = isMobile();
         const phantom = hasPhantom();
         const solflare = hasSolflare();
@@ -77,18 +105,14 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
         }
 
         // Find the wallet adapter
-        const wallet = wallets.find(w =>
+        const targetWallet = wallets.find(w =>
             w.adapter.name.toLowerCase().includes(walletName.toLowerCase())
         );
 
-        if (wallet) {
-            try {
-                // Select the wallet - this triggers the extension popup
-                select(wallet.adapter.name);
-                onClose();
-            } catch (error) {
-                console.error('Failed to select wallet:', error);
-            }
+        if (targetWallet) {
+            // Set pending wallet and select - useEffect will handle connect
+            setPendingWallet(walletName);
+            select(targetWallet.adapter.name);
         } else {
             // Wallet not found/installed - redirect to install page
             if (walletName === 'Phantom') {
@@ -97,16 +121,19 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
                 window.open('https://solflare.com/', '_blank');
             }
         }
-    };
+    }, [wallets, select]);
+
+    if (!isOpen) return null;
 
     const needsInstall = !detectedWallets.phantom && !detectedWallets.solflare && !isOnMobile;
+    const isLoading = connecting || !!pendingWallet;
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-                onClick={onClose}
+                onClick={isLoading ? undefined : onClose}
             />
 
             {/* Modal */}
@@ -124,13 +151,14 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
                         <div>
                             <h3 className="font-bold text-text-primary dark:text-white">Connect Wallet</h3>
                             <p className="text-xs text-text-muted dark:text-gray-400">
-                                {isOnMobile ? 'Choose your wallet app' : 'Select a wallet'}
+                                {isLoading ? 'Connecting...' : isOnMobile ? 'Choose your wallet app' : 'Select a wallet'}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-muted"
+                        disabled={isLoading}
+                        className="p-2 rounded-lg hover:bg-background-secondary dark:hover:bg-gray-800 text-text-muted disabled:opacity-50"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -141,51 +169,63 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
                     {/* Phantom */}
                     <button
                         onClick={() => handleWalletSelect('Phantom')}
-                        disabled={connecting}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl border border-border dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group disabled:opacity-50"
+                        disabled={isLoading}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl border border-border dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group disabled:opacity-50 disabled:cursor-wait"
                     >
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
-                            <span className="text-white text-xl font-bold">P</span>
+                            {pendingWallet === 'Phantom' ? (
+                                <Loader2 className="w-6 h-6 text-white animate-spin" />
+                            ) : (
+                                <span className="text-white text-xl font-bold">P</span>
+                            )}
                         </div>
                         <div className="flex-1 text-left">
                             <p className="font-semibold text-text-primary dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400">
                                 Phantom
                             </p>
                             <p className="text-xs text-text-muted dark:text-gray-400">
-                                {detectedWallets.phantom ? 'Detected' : isOnMobile ? 'Open in app' : 'Not detected'}
+                                {pendingWallet === 'Phantom' ? 'Check your wallet...' : detectedWallets.phantom ? 'Detected' : isOnMobile ? 'Open in app' : 'Click to install'}
                             </p>
                         </div>
                         {detectedWallets.phantom && (
-                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span className="w-2 h-2 rounded-full bg-positive-500"></span>
                         )}
                     </button>
 
                     {/* Solflare */}
                     <button
                         onClick={() => handleWalletSelect('Solflare')}
-                        disabled={connecting}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl border border-border dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all group disabled:opacity-50"
+                        disabled={isLoading}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl border border-border dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all group disabled:opacity-50 disabled:cursor-wait"
                     >
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center shadow-lg">
-                            <span className="text-white text-xl font-bold">S</span>
+                            {pendingWallet === 'Solflare' ? (
+                                <Loader2 className="w-6 h-6 text-white animate-spin" />
+                            ) : (
+                                <span className="text-white text-xl font-bold">S</span>
+                            )}
                         </div>
                         <div className="flex-1 text-left">
                             <p className="font-semibold text-text-primary dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400">
                                 Solflare
                             </p>
                             <p className="text-xs text-text-muted dark:text-gray-400">
-                                {detectedWallets.solflare ? 'Detected' : isOnMobile ? 'Open in app' : 'Not detected'}
+                                {pendingWallet === 'Solflare' ? 'Check your wallet...' : detectedWallets.solflare ? 'Detected' : isOnMobile ? 'Open in app' : 'Click to install'}
                             </p>
                         </div>
                         {detectedWallets.solflare && (
-                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span className="w-2 h-2 rounded-full bg-positive-500"></span>
                         )}
                     </button>
                 </div>
 
                 {/* Footer */}
                 <div className="p-4 border-t border-border dark:border-gray-800">
-                    {needsInstall ? (
+                    {isLoading ? (
+                        <p className="text-xs text-brand-500 text-center">
+                            Please approve the connection in your wallet popup...
+                        </p>
+                    ) : needsInstall ? (
                         <p className="text-xs text-negative-500 dark:text-negative-400 text-center">
                             No wallet detected. Click to install Phantom or Solflare.
                         </p>
