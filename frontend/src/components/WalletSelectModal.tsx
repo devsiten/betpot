@@ -54,9 +54,17 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
             setIsOnMobile(isMobile());
         };
 
+        // Check immediately and then at intervals (wallets may inject late)
         checkWallets();
-        const timer = setTimeout(checkWallets, 500);
-        return () => clearTimeout(timer);
+        const timer1 = setTimeout(checkWallets, 300);
+        const timer2 = setTimeout(checkWallets, 700);
+        const timer3 = setTimeout(checkWallets, 1500);
+
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+            clearTimeout(timer3);
+        };
     }, [isOpen]);
 
     // When wallet is selected and adapter is ready, trigger connect
@@ -110,9 +118,22 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
         );
 
         if (targetWallet) {
-            // Set pending wallet and select - useEffect will handle connect
-            setPendingWallet(walletName);
-            select(targetWallet.adapter.name);
+            try {
+                // If already selected, connect directly
+                if (wallet?.adapter.name === targetWallet.adapter.name) {
+                    setPendingWallet(walletName);
+                    await wallet.adapter.connect();
+                    onClose();
+                } else {
+                    // Select first, then the useEffect will handle connect
+                    setPendingWallet(walletName);
+                    select(targetWallet.adapter.name);
+                }
+            } catch (error: any) {
+                console.error('Wallet selection error:', error);
+                setPendingWallet(null);
+                // If user rejected or popup didn't appear, we keep modal open
+            }
         } else {
             // Wallet not found/installed - redirect to install page
             if (walletName === 'Phantom') {
@@ -121,7 +142,7 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
                 window.open('https://solflare.com/', '_blank');
             }
         }
-    }, [wallets, select]);
+    }, [wallets, select, wallet, onClose]);
 
     if (!isOpen) return null;
 
