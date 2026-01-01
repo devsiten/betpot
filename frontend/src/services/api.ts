@@ -896,6 +896,27 @@ class ApiService {
     const { data } = await this.client.post<ApiResponse<{ message: string }>>(`/admin/twitter-verifications/${id}/reject`, { reason });
     return data;
   }
+
+  // ============================================================================
+  // LEADERBOARD
+  // ============================================================================
+
+  async getLeaderboard() {
+    const { data } = await this.client.get<ApiResponse<{
+      leaderboard: Array<{
+        rank: number;
+        displayName: string;
+        walletAddress: string;
+        volumePoints: number;
+      }>;
+      userRank: {
+        rank: number;
+        volumePoints: number;
+        totalUsers: number;
+      } | null;
+    }>>('/referrals/leaderboard');
+    return data;
+  }
 }
 
 export const api = new ApiService();

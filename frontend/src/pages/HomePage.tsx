@@ -8,7 +8,7 @@ import clsx from 'clsx';
 import { EventCountdown } from '@/components/CountdownTimer';
 
 // Tab types
-type TabType = 'sports' | 'predictions' | 'live' | 'news' | 'betpot-news';
+type TabType = 'sports' | 'predictions' | 'live' | 'news' | 'betpot-news' | 'leaderboard';
 
 export function HomePage() {
   // Active tab state
@@ -126,6 +126,19 @@ export function HomePage() {
     placeholderData: getCachedData('blog'),
   });
 
+  // ============ LEADERBOARD ============
+  const { data: leaderboardData, isLoading: loadingLeaderboard } = useQuery({
+    queryKey: ['leaderboard'],
+    queryFn: async () => {
+      const result = await api.getLeaderboard();
+      saveCachedData('leaderboard', result);
+      return result;
+    },
+    staleTime: 30 * 1000,
+    enabled: activeTab === 'leaderboard',
+    placeholderData: getCachedData('leaderboard'),
+  });
+
   // Get data based on active tab
   const getCurrentData = () => {
     switch (activeTab) {
@@ -148,7 +161,8 @@ export function HomePage() {
     : activeTab === 'predictions' ? loadingPredictions
       : activeTab === 'live' ? loadingLive
         : activeTab === 'news' ? loadingNews
-          : loadingBlog;
+          : activeTab === 'leaderboard' ? loadingLeaderboard
+            : loadingBlog;
 
   // Get raw events and apply FRONTEND DEDUPLICATION for sports
   const rawEvents = getCurrentData();
@@ -590,6 +604,17 @@ export function HomePage() {
             >
               BetPot News
             </button>
+            <button
+              onClick={() => handleTabChange('leaderboard')}
+              className={clsx(
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
+                activeTab === 'leaderboard'
+                  ? 'bg-gradient-to-r from-yellow-500 to-amber-400 text-white shadow-soft'
+                  : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
+              )}
+            >
+              🏆 Leaderboard
+            </button>
           </div>
           <Link to="/events" className="btn btn-ghost text-sm">
             View All →
@@ -627,6 +652,64 @@ export function HomePage() {
             <p className="text-text-muted text-sm mt-1">
               {activeTab === 'live' && 'Check back during match times!'}
             </p>
+          </div>
+        ) : activeTab === 'leaderboard' ? (
+          /* Leaderboard Table */
+          <div className="bg-background-card dark:bg-gray-900 rounded-2xl border border-border dark:border-gray-800 overflow-hidden">
+            <div className="p-4 border-b border-border dark:border-gray-800 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20">
+              <h3 className="text-lg font-bold text-text-primary dark:text-white flex items-center gap-2">
+                🏆 Top 100 Volume Leaders
+              </h3>
+              {leaderboardData?.data?.userRank && (
+                <p className="text-sm text-text-secondary dark:text-gray-400 mt-1">
+                  Your rank: <span className="font-bold text-brand-600 dark:text-brand-400">#{leaderboardData.data.userRank.rank}</span> of {leaderboardData.data.userRank.totalUsers.toLocaleString()} users
+                </p>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-background-secondary dark:bg-gray-800 text-left">
+                    <th className="px-4 py-3 text-xs font-bold text-text-muted dark:text-gray-400 uppercase tracking-wider">Rank</th>
+                    <th className="px-4 py-3 text-xs font-bold text-text-muted dark:text-gray-400 uppercase tracking-wider">User</th>
+                    <th className="px-4 py-3 text-xs font-bold text-text-muted dark:text-gray-400 uppercase tracking-wider text-right">Volume Points</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border dark:divide-gray-800">
+                  {leaderboardData?.data?.leaderboard?.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-12 text-center text-text-muted dark:text-gray-500">
+                        No users on leaderboard yet. Be the first!
+                      </td>
+                    </tr>
+                  ) : (
+                    leaderboardData?.data?.leaderboard?.map((user) => (
+                      <tr key={user.walletAddress} className="hover:bg-background-secondary/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td className="px-4 py-3">
+                          <span className={clsx(
+                            'inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm',
+                            user.rank === 1 && 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+                            user.rank === 2 && 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                            user.rank === 3 && 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+                            user.rank > 3 && 'bg-background-secondary dark:bg-gray-800 text-text-secondary dark:text-gray-400'
+                          )}>
+                            {user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : user.rank === 3 ? '🥉' : user.rank}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-text-primary dark:text-white">{user.displayName}</p>
+                          <p className="text-xs text-text-muted dark:text-gray-500 font-mono">{user.walletAddress.slice(0, 4)}...{user.walletAddress.slice(-4)}</p>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="font-bold text-brand-600 dark:text-brand-400">{user.volumePoints.toLocaleString()}</span>
+                          <span className="text-xs text-text-muted dark:text-gray-500 ml-1">pts</span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : activeTab === 'news' || activeTab === 'betpot-news' ? (
           /* News/Blog Grid */

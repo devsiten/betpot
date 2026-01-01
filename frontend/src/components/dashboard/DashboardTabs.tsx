@@ -1,4 +1,4 @@
-import { Briefcase, Users, Settings } from 'lucide-react';
+import { Briefcase, Trophy, Settings } from 'lucide-react';
 import clsx from 'clsx';
 
 interface Tab {
@@ -9,7 +9,7 @@ interface Tab {
 
 const tabs: Tab[] = [
     { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
-    { id: 'referrals', label: 'Referrals', icon: Users },
+    { id: 'referrals', label: 'Points System', icon: Trophy },
     { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

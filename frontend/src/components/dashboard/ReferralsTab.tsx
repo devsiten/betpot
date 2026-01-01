@@ -144,7 +144,7 @@ export function ReferralsTab() {
                     <div className="bg-brand-50 dark:bg-brand-900/20 rounded-xl p-4 border border-brand-200 dark:border-brand-800">
                         <p className="text-xs text-brand-600 dark:text-brand-400 uppercase tracking-wider font-medium mb-1">Volume Points</p>
                         <p className="text-2xl font-bold text-brand-700 dark:text-brand-300">{stats.volumePoints.toLocaleString()}</p>
-                        <p className="text-xs text-brand-500 dark:text-brand-500 mt-1">100 pts per SOL spent, 1 pt per SOL claimed</p>
+                        <p className="text-xs text-brand-500 dark:text-brand-500 mt-1">100 pts per SOL spent or claimed</p>
                     </div>
 
                     {/* Referral Points */}

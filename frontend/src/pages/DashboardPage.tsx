@@ -64,7 +64,7 @@ export function DashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-text-primary dark:text-white">Dashboard</h1>
-                    <p className="text-text-secondary dark:text-gray-300 text-sm sm:text-base">Manage your bets, referrals, and settings</p>
+                    <p className="text-text-secondary dark:text-gray-300 text-sm sm:text-base">Manage your bets, points, and settings</p>
                 </div>
 
                 <button
