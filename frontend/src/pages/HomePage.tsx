@@ -14,11 +14,33 @@ export function HomePage() {
   // Active tab state
   const [activeTab, setActiveTab] = useState<TabType>('sports');
   const [displayCount, setDisplayCount] = useState(100);
+  const [searchWallet, setSearchWallet] = useState('');
+  const [searchResult, setSearchResult] = useState<{ rank: number; volumePoints: number; displayName: string } | null>(null);
+  const [searching, setSearching] = useState(false);
 
   // Reset display count when tab changes
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     setDisplayCount(100);
+    setSearchWallet('');
+    setSearchResult(null);
+  };
+
+  // Search for user rank by wallet
+  const handleSearch = async () => {
+    if (!searchWallet.trim()) return;
+    setSearching(true);
+    setSearchResult(null);
+    try {
+      const result = await api.searchUserRank(searchWallet.trim());
+      if (result.success && result.data) {
+        setSearchResult(result.data);
+      }
+    } catch (error) {
+      console.error('Search failed:', error);
+    } finally {
+      setSearching(false);
+    }
   };
 
   // Helper to get cached data from localStorage
@@ -631,39 +653,47 @@ export function HomePage() {
               </div>
             ))}
           </div>
-        ) : displayedEvents.length === 0 ? (
-          <div className="text-center py-16 card">
-            <div className="w-16 h-16 rounded-2xl bg-background-secondary flex items-center justify-center mx-auto mb-4">
-              {activeTab === 'live' ? (
-                <span className="text-2xl">🔴</span>
-              ) : activeTab === 'sports' ? (
-                <span className="text-2xl">⚽</span>
-              ) : (
-                <TrendingUp className="w-8 h-8 text-text-muted" />
-              )}
-            </div>
-            <p className="text-text-secondary text-lg font-bold">
-              {activeTab === 'live'
-                ? 'No live matches right now'
-                : activeTab === 'sports'
-                  ? 'No sports events available'
-                  : 'No predictions available'}
-            </p>
-            <p className="text-text-muted text-sm mt-1">
-              {activeTab === 'live' && 'Check back during match times!'}
-            </p>
-          </div>
         ) : activeTab === 'leaderboard' ? (
           /* Leaderboard Table */
           <div className="bg-background-card dark:bg-gray-900 rounded-2xl border border-border dark:border-gray-800 overflow-hidden">
             <div className="p-4 border-b border-border dark:border-gray-800 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20">
-              <h3 className="text-lg font-bold text-text-primary dark:text-white flex items-center gap-2">
-                🏆 Top 100 Volume Leaders
+              <h3 className="text-lg font-bold text-text-primary dark:text-white">
+                Top 100 Volume Leaders
               </h3>
               {leaderboardData?.data?.userRank && (
                 <p className="text-sm text-text-secondary dark:text-gray-400 mt-1">
                   Your rank: <span className="font-bold text-brand-600 dark:text-brand-400">#{leaderboardData.data.userRank.rank}</span> of {leaderboardData.data.userRank.totalUsers.toLocaleString()} users
                 </p>
+              )}
+            </div>
+
+            {/* Search Section */}
+            <div className="p-4 border-b border-border dark:border-gray-800 bg-background-secondary/50 dark:bg-gray-800/50">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={searchWallet}
+                  onChange={(e) => setSearchWallet(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search by wallet address..."
+                  className="flex-1 px-4 py-2 bg-background-card dark:bg-gray-900 border border-border dark:border-gray-700 rounded-lg text-text-primary dark:text-white placeholder-text-muted dark:placeholder-gray-500 focus:outline-none focus:border-brand-500 text-sm"
+                />
+                <button
+                  onClick={handleSearch}
+                  disabled={searching || !searchWallet.trim()}
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white rounded-lg font-medium text-sm transition-colors"
+                >
+                  {searching ? 'Searching...' : 'Search'}
+                </button>
+              </div>
+              {searchResult && (
+                <div className="mt-3 p-3 bg-positive-50 dark:bg-positive-900/20 border border-positive-200 dark:border-positive-800 rounded-lg">
+                  <p className="text-sm text-text-primary dark:text-white">
+                    <span className="font-medium">{searchResult.displayName}</span> -
+                    Rank <span className="font-bold text-brand-600 dark:text-brand-400">#{searchResult.rank}</span> with
+                    <span className="font-bold text-positive-600 dark:text-positive-400"> {searchResult.volumePoints.toLocaleString()}</span> pts
+                  </p>
+                </div>
               )}
             </div>
             <div className="overflow-x-auto">
@@ -765,6 +795,29 @@ export function HomePage() {
                 </Link>
               ))
             )}
+          </div>
+        ) : displayedEvents.length === 0 ? (
+          /* Empty State for Sports/Predictions/Live */
+          <div className="text-center py-16 card">
+            <div className="w-16 h-16 rounded-2xl bg-background-secondary flex items-center justify-center mx-auto mb-4">
+              {activeTab === 'live' ? (
+                <span className="text-2xl">LIVE</span>
+              ) : activeTab === 'sports' ? (
+                <span className="text-2xl">SPORTS</span>
+              ) : (
+                <TrendingUp className="w-8 h-8 text-text-muted" />
+              )}
+            </div>
+            <p className="text-text-secondary text-lg font-bold">
+              {activeTab === 'live'
+                ? 'No live matches right now'
+                : activeTab === 'sports'
+                  ? 'No sports events available'
+                  : 'No predictions available'}
+            </p>
+            <p className="text-text-muted text-sm mt-1">
+              {activeTab === 'live' && 'Check back during match times!'}
+            </p>
           </div>
         ) : (
           /* Events Grid - Responsive for all devices */

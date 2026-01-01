@@ -917,6 +917,15 @@ class ApiService {
     }>>('/referrals/leaderboard');
     return data;
   }
+
+  async searchUserRank(walletAddress: string) {
+    const { data } = await this.client.get<ApiResponse<{
+      rank: number;
+      volumePoints: number;
+      displayName: string;
+    }>>(`/referrals/leaderboard/search?wallet=${encodeURIComponent(walletAddress)}`);
+    return data;
+  }
 }
 
 export const api = new ApiService();
