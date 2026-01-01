@@ -144,7 +144,7 @@ export function TestnetGuidePage() {
                     </li>
                     <li className="flex items-start gap-2">
                         <span className="text-brand-600">•</span>
-                        <span>Make sure your wallet is set to <strong className="text-text-primary dark:text-white">Devnet</strong> network</span>
+                        <span>Make sure your wallet is set to <strong className="text-text-primary dark:text-white">Devnet</strong> network before connecting</span>
                     </li>
                     <li className="flex items-start gap-2">
                         <span className="text-brand-600">•</span>
@@ -159,6 +159,72 @@ export function TestnetGuidePage() {
                         <span>Sessions expire after <strong className="text-text-primary dark:text-white">2 hours</strong> of inactivity for security</span>
                     </li>
                 </ul>
+            </section>
+
+            {/* How to Switch to Devnet */}
+            <section className="bg-gradient-to-r from-positive-50 to-brand-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 md:p-8 border border-positive-200 dark:border-gray-700 mb-8">
+                <h2 className="text-xl font-bold text-text-primary dark:text-white mb-6 flex items-center gap-2">
+                    <Wallet className="w-5 h-5 text-positive-600 dark:text-positive-400" />
+                    How to Switch to Devnet
+                </h2>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    {/* Phantom Instructions */}
+                    <div className="bg-background-card dark:bg-gray-900 rounded-xl p-5 border border-border dark:border-gray-800">
+                        <h3 className="font-bold text-text-primary dark:text-white mb-3 flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xs font-bold text-purple-700 dark:text-purple-400">P</span>
+                            Phantom Wallet
+                        </h3>
+                        <ol className="space-y-2 text-text-secondary dark:text-gray-400 text-sm">
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">1.</span>
+                                <span>Go to <strong className="text-text-primary dark:text-white">Settings</strong></span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">2.</span>
+                                <span>Click <strong className="text-text-primary dark:text-white">Developer Settings</strong></span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">3.</span>
+                                <span>Click <strong className="text-text-primary dark:text-white">Solana</strong></span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">4.</span>
+                                <span>Select <strong className="text-text-primary dark:text-white">Devnet</strong></span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    {/* Solflare Instructions */}
+                    <div className="bg-background-card dark:bg-gray-900 rounded-xl p-5 border border-border dark:border-gray-800">
+                        <h3 className="font-bold text-text-primary dark:text-white mb-3 flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xs font-bold text-orange-700 dark:text-orange-400">S</span>
+                            Solflare Wallet
+                        </h3>
+                        <ol className="space-y-2 text-text-secondary dark:text-gray-400 text-sm">
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">1.</span>
+                                <span>Go to <strong className="text-text-primary dark:text-white">Settings</strong></span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">2.</span>
+                                <span>Click <strong className="text-text-primary dark:text-white">General</strong></span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">3.</span>
+                                <span>Click <strong className="text-text-primary dark:text-white">Network</strong></span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-brand-600 dark:text-brand-400">4.</span>
+                                <span>Select <strong className="text-text-primary dark:text-white">Devnet</strong></span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <p className="text-sm text-text-muted dark:text-gray-500 mt-4 text-center">
+                    After switching to Devnet, connect your wallet and sign in to the platform.
+                </p>
             </section>
 
             {/* Supported Wallets */}
