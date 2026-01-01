@@ -613,7 +613,7 @@ export function HomePage() {
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
-              🏆 Leaderboard
+              Leaderboard
             </button>
           </div>
           <Link to="/events" className="btn btn-ghost text-sm">
@@ -693,7 +693,7 @@ export function HomePage() {
                             user.rank === 3 && 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
                             user.rank > 3 && 'bg-background-secondary dark:bg-gray-800 text-text-secondary dark:text-gray-400'
                           )}>
-                            {user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : user.rank === 3 ? '🥉' : user.rank}
+                            {user.rank}
                           </span>
                         </td>
                         <td className="px-4 py-3">
