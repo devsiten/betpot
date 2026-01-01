@@ -37,7 +37,7 @@ function getSolflareDeepLink(): string {
 }
 
 export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
-    const { select, wallets, connecting, connected, wallet } = useWallet();
+    const { select, wallets, connecting, connected } = useWallet();
     const [detectedWallets, setDetectedWallets] = useState({ phantom: false, solflare: false });
     const [isOnMobile, setIsOnMobile] = useState(false);
     const [pendingWallet, setPendingWallet] = useState<string | null>(null);
@@ -66,27 +66,6 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
             clearTimeout(timer3);
         };
     }, [isOpen]);
-
-    // When wallet is selected and adapter is ready, trigger connect
-    useEffect(() => {
-        if (pendingWallet && wallet && wallet.adapter.name.toLowerCase().includes(pendingWallet.toLowerCase())) {
-            // Adapter is ready, now connect
-            const doConnect = async () => {
-                try {
-                    await wallet.adapter.connect();
-                    onClose();
-                } catch (error: any) {
-                    // User rejected or error
-                    if (!error?.message?.includes('User rejected')) {
-                        console.error('Connection failed:', error);
-                    }
-                } finally {
-                    setPendingWallet(null);
-                }
-            };
-            doConnect();
-        }
-    }, [wallet, pendingWallet, onClose]);
 
     // Close modal when connected
     useEffect(() => {
@@ -117,32 +96,39 @@ export function WalletSelectModal({ isOpen, onClose }: WalletSelectModalProps) {
             w.adapter.name.toLowerCase().includes(walletName.toLowerCase())
         );
 
-        if (targetWallet) {
-            try {
-                // If already selected, connect directly
-                if (wallet?.adapter.name === targetWallet.adapter.name) {
-                    setPendingWallet(walletName);
-                    await wallet.adapter.connect();
-                    onClose();
-                } else {
-                    // Select first, then the useEffect will handle connect
-                    setPendingWallet(walletName);
-                    select(targetWallet.adapter.name);
-                }
-            } catch (error: any) {
-                console.error('Wallet selection error:', error);
-                setPendingWallet(null);
-                // If user rejected or popup didn't appear, we keep modal open
-            }
-        } else {
+        if (!targetWallet) {
             // Wallet not found/installed - redirect to install page
             if (walletName === 'Phantom') {
                 window.open('https://phantom.app/', '_blank');
             } else {
                 window.open('https://solflare.com/', '_blank');
             }
+            return;
         }
-    }, [wallets, select, wallet, onClose]);
+
+        setPendingWallet(walletName);
+
+        try {
+            // Select the wallet first
+            select(targetWallet.adapter.name);
+
+            // Small delay to let the adapter register
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Now connect - this should trigger the wallet popup
+            await targetWallet.adapter.connect();
+
+            onClose();
+        } catch (error: any) {
+            console.error('Wallet connection error:', error);
+            // Don't show error for user rejection
+            if (!error?.message?.includes('User rejected') && !error?.message?.includes('cancelled')) {
+                console.error('Connection failed:', error);
+            }
+        } finally {
+            setPendingWallet(null);
+        }
+    }, [wallets, select, onClose]);
 
     if (!isOpen) return null;
 
