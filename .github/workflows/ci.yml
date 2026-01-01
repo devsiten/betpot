@@ -7,34 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test-backend:
-    name: Test Backend
-    runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run TypeScript check
-        run: npx tsc --noEmit
-        continue-on-error: true  # Don't fail on existing TS warnings
-
-      - name: Run tests
-        run: npm test
+  # NOTE: Backend tests run locally only (backend not in this repo)
+  # Run locally with: cd backend && npm test
 
   test-frontend:
     name: Test Frontend
