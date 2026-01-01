@@ -189,18 +189,18 @@ export function EventChatPage() {
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${isMe
                                         ? 'bg-brand-500 text-white'
-                                        : 'bg-background-secondary dark:bg-gray-800 border border-border'
+                                        : 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className={`text-xs font-medium ${isMe ? 'text-white/80' : 'text-text-secondary'}`}>
+                                        <span className={`text-xs font-medium ${isMe ? 'text-white/80' : 'text-gray-600 dark:text-gray-300'}`}>
                                             {isMe ? 'You' : formatAddress(msg.walletAddress)}
                                         </span>
-                                        <span className={`text-xs ${isMe ? 'text-white/60' : 'text-text-muted'}`}>
+                                        <span className={`text-xs ${isMe ? 'text-white/60' : 'text-gray-500 dark:text-gray-400'}`}>
                                             {formatTime(msg.createdAt)}
                                         </span>
                                     </div>
-                                    <p className={`text-sm break-words ${isMe ? 'text-white' : 'text-text-primary'}`}>{msg.message}</p>
+                                    <p className={`text-sm break-words ${isMe ? 'text-white' : 'text-gray-900 dark:text-white'}`}>{msg.message}</p>
                                 </div>
                             </div>
                         );
