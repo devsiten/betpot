@@ -64,10 +64,12 @@ function JackpotEventCard({ event, variant = 'default' }: { event: any; variant?
       </h3>
 
       {/* Event Time */}
-      <div className="flex items-center gap-2 text-text-secondary dark:text-gray-300 text-xs md:text-sm font-medium mb-2">
-        <Clock className="w-3 h-3 md:w-4 md:h-4" />
-        {format(new Date(event.eventTime), 'MMM dd, yyyy HH:mm')}
-      </div>
+      {(event.eventTime || event.resolvedAt) && (
+        <div className="flex items-center gap-2 text-text-secondary dark:text-gray-300 text-xs md:text-sm font-medium mb-2">
+          <Clock className="w-3 h-3 md:w-4 md:h-4" />
+          {format(new Date(event.eventTime || event.resolvedAt), 'MMM dd, yyyy HH:mm')}
+        </div>
+      )}
 
       {/* Countdown (only for live/upcoming) */}
       {!isLocked && !isResult && (
