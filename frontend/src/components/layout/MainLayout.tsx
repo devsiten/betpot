@@ -37,11 +37,17 @@ function ConnectButton() {
     <WalletMultiButton
       style={{
         whiteSpace: 'nowrap',
-        minWidth: 'fit-content'
+        background: '#FFFFFF',
+        color: '#1a1a2e',
+        fontWeight: 600,
+        borderRadius: '8px',
+        padding: '8px 16px',
+        fontSize: '14px',
+        height: 'auto',
+        minWidth: 'max-content'
       }}
-      className="!bg-brand-600 hover:!bg-brand-700 !rounded-lg !font-semibold !text-sm !px-3 !py-2 !h-auto !transition-all !text-white"
     >
-      Connect
+      Connect Wallet
     </WalletMultiButton>
   );
 }
