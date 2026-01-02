@@ -44,7 +44,14 @@ function ConnectButton() {
         padding: '8px 16px',
         fontSize: '14px',
         height: 'auto',
-        minWidth: 'max-content'
+        minWidth: 'max-content',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 0,
+        border: 'none',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        lineHeight: 1.2
       }}
     >
       Connect Wallet
