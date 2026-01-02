@@ -1,14 +1,285 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Zap, Clock, TrendingUp } from 'lucide-react';
+import { Trophy, Zap, Clock, Lock, CheckCircle, Calendar } from 'lucide-react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { EventCountdown } from '@/components/CountdownTimer';
 
 // Tab types
-type TabType = 'sports' | 'predictions' | 'live' | 'news' | 'betpot-news' | 'leaderboard';
+type TabType = 'sports' | 'jackpot' | 'live' | 'news' | 'betpot-news' | 'leaderboard';
+
+// Jackpot sub-tab types
+type JackpotSubTab = 'live' | 'upcoming' | 'locked' | 'results';
+
+const JACKPOT_TABS: { id: JackpotSubTab; label: string; icon: React.ElementType; description: string }[] = [
+  { id: 'live', label: 'Live Events', icon: Zap, description: 'Open for betting now' },
+  { id: 'upcoming', label: 'Upcoming', icon: Calendar, description: 'Coming soon' },
+  { id: 'locked', label: 'Locked', icon: Lock, description: 'Waiting for results' },
+  { id: 'results', label: 'Results', icon: CheckCircle, description: 'Completed events' },
+];
+
+// Jackpot Event Card Component
+function JackpotEventCard({ event, variant = 'default' }: { event: any; variant?: 'default' | 'locked' | 'result' }) {
+  const isLocked = variant === 'locked';
+  const isResult = variant === 'result';
+
+  return (
+    <Link
+      to={`/events/${event.id}`}
+      className={clsx(
+        'card p-4 md:p-6 transition-all group cursor-pointer shadow-card',
+        isLocked && 'opacity-80 bg-gradient-to-br from-yellow-50 to-background-card dark:from-yellow-900/20 dark:to-gray-900 border-yellow-200 dark:border-yellow-800',
+        isResult && 'bg-gradient-to-br from-green-50 to-background-card dark:from-green-900/20 dark:to-gray-900 border-green-200 dark:border-green-800',
+        !isLocked && !isResult && 'hover:border-brand-300 dark:hover:border-brand-600 bg-gradient-to-br from-brand-50 to-background-card dark:from-gray-800 dark:to-gray-900'
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Trophy className={clsx(
+            'w-4 h-4 md:w-5 md:h-5',
+            isResult ? 'text-green-600 dark:text-green-400' :
+              isLocked ? 'text-yellow-600 dark:text-yellow-400' :
+                'text-brand-600 dark:text-brand-400'
+          )} />
+          <span className={clsx(
+            'text-xs font-medium uppercase',
+            isResult ? 'text-green-600 dark:text-green-400' :
+              isLocked ? 'text-yellow-600 dark:text-yellow-400' :
+                'text-brand-600 dark:text-brand-400'
+          )}>
+            {isResult ? 'Completed' : isLocked ? 'Locked' : 'Jackpot'}
+          </span>
+        </div>
+        <span className="text-xs text-text-secondary dark:text-gray-400 font-medium">
+          {event.category}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h3 className="text-base md:text-lg font-bold text-text-primary dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors mb-2 line-clamp-2">
+        {event.title}
+      </h3>
+
+      {/* Event Time */}
+      <div className="flex items-center gap-2 text-text-secondary dark:text-gray-300 text-xs md:text-sm font-medium mb-2">
+        <Clock className="w-3 h-3 md:w-4 md:h-4" />
+        {format(new Date(event.eventTime), 'MMM dd, yyyy HH:mm')}
+      </div>
+
+      {/* Countdown (only for live/upcoming) */}
+      {!isLocked && !isResult && (
+        <div className="mb-3">
+          <EventCountdown
+            startTime={event.startTime}
+            lockTime={event.lockTime}
+            eventTime={event.eventTime}
+            status={event.status}
+          />
+        </div>
+      )}
+
+      {/* Prize Pool */}
+      <div className={clsx(
+        'rounded-lg p-3 md:p-4 mb-3',
+        isResult ? 'bg-green-100/50 dark:bg-green-900/30' :
+          isLocked ? 'bg-yellow-100/50 dark:bg-yellow-900/30' :
+            'bg-background-secondary dark:bg-gray-800'
+      )}>
+        <p className="text-xs text-text-muted dark:text-gray-400 font-medium mb-1">Prize Pool</p>
+        <p className={clsx(
+          'text-xl md:text-2xl font-bold',
+          isResult ? 'text-green-700 dark:text-green-300' :
+            isLocked ? 'text-yellow-700 dark:text-yellow-300' :
+              'text-text-primary dark:text-white'
+        )}>
+          ${(event.totalPool || 0).toLocaleString()}
+        </p>
+        <p className="text-xs text-text-muted dark:text-gray-400 font-medium mt-1">
+          {event.ticketCount || 0} bets
+        </p>
+      </div>
+
+      {/* Options Preview */}
+      {!isResult && event.options && (
+        <div className="grid grid-cols-2 gap-2">
+          {event.options.slice(0, 2).map((option: any, idx: number) => {
+            const label = option.label?.toLowerCase() || '';
+            const isPositive = label === 'yes' || label === 'home' || idx === 0;
+            const bgColor = isPositive
+              ? 'bg-positive-100 dark:bg-positive-900/30 border-positive-300 dark:border-positive-700'
+              : 'bg-negative-100 dark:bg-negative-900/30 border-negative-300 dark:border-negative-700';
+            const textColor = isPositive
+              ? 'text-positive-700 dark:text-positive-300'
+              : 'text-negative-700 dark:text-negative-300';
+
+            return (
+              <div key={option.id} className={`rounded-lg p-2 text-center border ${bgColor}`}>
+                <p className={`text-xs md:text-sm font-medium truncate ${textColor}`}>{option.label}</p>
+                <p className="text-xs text-text-muted dark:text-gray-400">{option.ticketsSold || 0} bets</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Status Button */}
+      <div className={clsx(
+        'w-full mt-4 py-2 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center gap-2 transition-colors',
+        isResult ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' :
+          isLocked ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300' :
+            'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 group-hover:bg-brand-200 dark:group-hover:bg-brand-800/40'
+      )}>
+        {isResult ? (
+          <>
+            <CheckCircle className="w-4 h-4" />
+            View Results
+          </>
+        ) : isLocked ? (
+          <>
+            <Lock className="w-4 h-4" />
+            Results Coming Soon
+          </>
+        ) : (
+          <>
+            <Zap className="w-4 h-4" />
+            Place Bet
+          </>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+// Jackpot Tab Content Component
+function JackpotTabContent({
+  jackpotData,
+  jackpotResultsData,
+  loadingResults
+}: {
+  jackpotData: any;
+  jackpotResultsData: any;
+  loadingResults: boolean;
+}) {
+  const [activeSubTab, setActiveSubTab] = useState<JackpotSubTab>('live');
+
+  const allJackpots = jackpotData?.jackpots || [];
+
+  // Filter events by status
+  const liveEvents = useMemo(() => allJackpots.filter((j: any) => j.status === 'open'), [allJackpots]);
+  const upcomingEvents = useMemo(() => allJackpots.filter((j: any) => j.status === 'upcoming'), [allJackpots]);
+  const lockedEvents = useMemo(() => allJackpots.filter((j: any) => j.status === 'locked'), [allJackpots]);
+  const resolvedEvents = jackpotResultsData?.data || [];
+
+  const tabCounts: Record<JackpotSubTab, number> = {
+    live: liveEvents.length,
+    upcoming: upcomingEvents.length,
+    locked: lockedEvents.length,
+    results: resolvedEvents.length,
+  };
+
+  const renderSubTabContent = () => {
+    if (activeSubTab === 'results' && loadingResults) {
+      return (
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full"></div>
+        </div>
+      );
+    }
+
+    const getEvents = () => {
+      switch (activeSubTab) {
+        case 'live': return liveEvents;
+        case 'upcoming': return upcomingEvents;
+        case 'locked': return lockedEvents;
+        case 'results': return resolvedEvents;
+        default: return [];
+      }
+    };
+
+    const events = getEvents();
+    const variant = activeSubTab === 'locked' ? 'locked' : activeSubTab === 'results' ? 'result' : 'default';
+
+    if (events.length === 0) {
+      const emptyMessages: Record<JackpotSubTab, { icon: React.ElementType; title: string; desc: string }> = {
+        live: { icon: Zap, title: 'No Live Events', desc: 'Check back soon or browse upcoming events' },
+        upcoming: { icon: Calendar, title: 'No Upcoming Events', desc: 'New events will be scheduled soon' },
+        locked: { icon: Lock, title: 'No Locked Events', desc: 'Events waiting for results will appear here' },
+        results: { icon: CheckCircle, title: 'No Results Yet', desc: 'Completed events will appear here' },
+      };
+      const msg = emptyMessages[activeSubTab];
+      const Icon = msg.icon;
+
+      return (
+        <div className="text-center py-12">
+          <Icon className="w-12 h-12 text-text-muted dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-2">{msg.title}</h3>
+          <p className="text-text-secondary dark:text-gray-400">{msg.desc}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {events.map((event: any) => (
+          <JackpotEventCard key={event.id} event={event} variant={variant} />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {/* Sub-Tab Navigation */}
+      <div className="mb-6">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+          {JACKPOT_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeSubTab === tab.id;
+            const count = tabCounts[tab.id];
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveSubTab(tab.id)}
+                className={clsx(
+                  'flex items-center gap-2 px-3 md:px-5 py-2 md:py-3 rounded-xl font-medium text-xs md:text-sm transition-all',
+                  isActive
+                    ? 'bg-brand-600 dark:bg-brand-500 text-white shadow-lg shadow-brand-500/25'
+                    : 'bg-background-secondary dark:bg-gray-800 text-text-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-text-primary dark:hover:text-white'
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                {count > 0 && (
+                  <span className={clsx(
+                    'px-1.5 py-0.5 rounded-full text-xs font-bold',
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400'
+                  )}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-center text-text-muted dark:text-gray-500 text-xs md:text-sm mt-3">
+          {JACKPOT_TABS.find(t => t.id === activeSubTab)?.description}
+        </p>
+      </div>
+
+      {/* Sub-Tab Content */}
+      <div className="min-h-[400px]">
+        {renderSubTabContent()}
+      </div>
+    </div>
+  );
+}
 
 export function HomePage() {
   // Active tab state
@@ -82,18 +353,20 @@ export function HomePage() {
     placeholderData: getCachedData('sports'),
   });
 
-  // ============ PREDICTIONS - Polymarket Events API ============
-  const { data: predictionsData, isLoading: loadingPredictions } = useQuery({
-    queryKey: ['predictions-all'],
-    queryFn: async () => {
-      const result = await api.getPolymarketEvents();
-      saveCachedData('predictions', result);
-      return result;
-    },
+  // ============ JACKPOT - Internal Jackpot Events ============
+  const { data: jackpotData, isLoading: loadingJackpots } = useQuery({
+    queryKey: ['jackpot'],
+    queryFn: () => api.getJackpot(),
     staleTime: 30 * 1000,
     refetchInterval: 30 * 1000,
-    enabled: activeTab === 'predictions',
-    placeholderData: getCachedData('predictions'),
+    enabled: activeTab === 'jackpot',
+  });
+
+  // Fetch resolved jackpots for results tab
+  const { data: jackpotResultsData, isLoading: loadingJackpotResults } = useQuery({
+    queryKey: ['jackpot-results'],
+    queryFn: () => api.getJackpotResults(),
+    enabled: activeTab === 'jackpot',
   });
 
   // ============ LIVE NOW - API-Sports Real-time ============
@@ -166,8 +439,8 @@ export function HomePage() {
     switch (activeTab) {
       case 'sports':
         return sportsData?.data || [];
-      case 'predictions':
-        return predictionsData?.data || [];
+      case 'jackpot':
+        return []; // Jackpot has special rendering
       case 'live':
         return liveData?.data || [];
       case 'news':
@@ -180,7 +453,7 @@ export function HomePage() {
   };
 
   const isLoading = activeTab === 'sports' ? loadingSports
-    : activeTab === 'predictions' ? loadingPredictions
+    : activeTab === 'jackpot' ? loadingJackpots
       : activeTab === 'live' ? loadingLive
         : activeTab === 'news' ? loadingNews
           : activeTab === 'leaderboard' ? loadingLeaderboard
@@ -231,8 +504,6 @@ export function HomePage() {
   const renderCard = (event: any) => {
     if (activeTab === 'sports') {
       return renderSportsCard(event);
-    } else if (activeTab === 'predictions') {
-      return renderPredictionCard(event);
     } else {
       return renderLiveCard(event);
     }
@@ -307,91 +578,6 @@ export function HomePage() {
             </div>
           ) : (
             <div className="text-center text-xs text-text-muted dark:text-gray-500 py-2">No odds available</div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-
-  // Render prediction card (Yes/No button format)
-  const renderPredictionCard = (event: any) => {
-    // Get options - handle both array and nested formats
-    let options = event.options || [];
-    if ((!options || options.length === 0) && event.rawData?.markets?.[0]) {
-      const firstMarket = event.rawData.markets[0];
-      if (firstMarket.outcomes && firstMarket.outcomePrices) {
-        try {
-          const outcomes = JSON.parse(firstMarket.outcomes);
-          const prices = JSON.parse(firstMarket.outcomePrices);
-          options = outcomes.map((label: string, i: number) => ({
-            label,
-            percentage: Math.round(parseFloat(prices[i] || '0') * 100)
-          }));
-        } catch (e) {
-          options = [];
-        }
-      }
-    }
-
-    return (
-      <div key={event.id} className="card p-0 overflow-hidden">
-        {/* Event Image */}
-        {event.image && (
-          <div className="h-24 bg-gradient-to-br from-positive-100 to-brand-100 relative overflow-hidden">
-            <img
-              src={event.image}
-              alt={event.title}
-              className="w-full h-full object-cover opacity-90"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-            />
-          </div>
-        )}
-
-        <div className="p-4 dark:bg-gray-900">
-          <div className="flex items-center justify-between mb-2">
-            {event.tags?.[0] && (
-              <span className="badge badge-primary text-[9px] bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">{event.tags[0]}</span>
-            )}
-            {event.endTime && (
-              <span className="text-[10px] text-text-muted dark:text-gray-400 font-mono">
-                Ends {format(new Date(event.endTime), 'MMM dd')}
-              </span>
-            )}
-          </div>
-
-          <h4 className="text-sm font-bold text-text-primary dark:text-white line-clamp-2 mb-3">
-            {event.title}
-          </h4>
-
-          {/* Yes/No Button Format (instead of progress bars) */}
-          {options.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {options.slice(0, 2).map((opt: any, idx: number) => (
-                <div
-                  key={idx}
-                  className={clsx(
-                    'p-3 rounded-lg border text-center transition-all hover:scale-[1.02]',
-                    idx === 0
-                      ? 'bg-positive-50 dark:bg-positive-900/30 border-positive-300 dark:border-positive-700'
-                      : 'bg-negative-50 dark:bg-negative-900/30 border-negative-300 dark:border-negative-700'
-                  )}
-                >
-                  <span className={clsx(
-                    'block text-xs font-bold uppercase mb-1',
-                    idx === 0 ? 'text-positive-700 dark:text-positive-400' : 'text-negative-600 dark:text-negative-400'
-                  )}>
-                    {opt.label === 'Yes' ? '✓ Yes' : opt.label === 'No' ? '✗ No' : opt.label}
-                  </span>
-                  <span className={clsx(
-                    'block text-lg font-black',
-                    idx === 0 ? 'text-positive-600 dark:text-positive-300' : 'text-negative-500 dark:text-negative-300'
-                  )}>
-                    {opt.percentage}%
-                  </span>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       </div>
@@ -480,16 +666,6 @@ export function HomePage() {
               <p className="text-lg sm:text-xl text-text-secondary dark:text-gray-300 mb-8 font-medium backdrop-blur-sm bg-background-card/30 dark:bg-gray-800/50 p-4 rounded-xl border border-border/50 dark:border-gray-700/50 shadow-soft">
                 BetPot is a prediction jackpot platform where everyone who picks the right outcome splits the prize pool.
               </p>
-
-              <div className="flex items-center gap-4">
-                <Link to="/jackpot" className="btn btn-primary">
-                  <Trophy className="w-4 h-4" />
-                  Jackpot
-                </Link>
-                <Link to="/events" className="btn btn-secondary">
-                  Browse Markets
-                </Link>
-              </div>
             </div>
 
             {/* Right - Ending Soon */}
@@ -579,15 +755,15 @@ export function HomePage() {
               <span>⚽</span> Sports
             </button>
             <button
-              onClick={() => handleTabChange('predictions')}
+              onClick={() => handleTabChange('jackpot')}
               className={clsx(
                 'flex items-center gap-2 px-4 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex-shrink-0 whitespace-nowrap',
-                activeTab === 'predictions'
+                activeTab === 'jackpot'
                   ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
                   : 'bg-background-secondary text-text-secondary hover:text-text-primary border border-border hover:border-border-dark'
               )}
             >
-              <TrendingUp className="w-4 h-4" /> Predictions
+              <Trophy className="w-4 h-4" /> Jackpot
             </button>
             <button
               onClick={() => handleTabChange('live')}
@@ -653,6 +829,13 @@ export function HomePage() {
               </div>
             ))}
           </div>
+        ) : activeTab === 'jackpot' ? (
+          /* Jackpot Content - Full page experience */
+          <JackpotTabContent
+            jackpotData={jackpotData}
+            jackpotResultsData={jackpotResultsData}
+            loadingResults={loadingJackpotResults}
+          />
         ) : activeTab === 'leaderboard' ? (
           /* Leaderboard Table */
           <div className="bg-background-card dark:bg-gray-900 rounded-2xl border border-border dark:border-gray-800 overflow-hidden">
@@ -805,7 +988,7 @@ export function HomePage() {
               ) : activeTab === 'sports' ? (
                 <span className="text-2xl">SPORTS</span>
               ) : (
-                <TrendingUp className="w-8 h-8 text-text-muted" />
+                <Trophy className="w-8 h-8 text-text-muted" />
               )}
             </div>
             <p className="text-text-secondary text-lg font-bold">
