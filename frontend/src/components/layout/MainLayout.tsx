@@ -35,7 +35,7 @@ function ConnectButton() {
 
   return (
     <WalletMultiButton
-      className="!bg-brand-600 hover:!bg-brand-700 !rounded-lg !font-semibold !text-sm !px-4 !py-2.5 !h-auto !transition-all"
+      className="!bg-brand-600 hover:!bg-brand-700 !rounded-lg !font-semibold !text-sm !px-4 !py-2.5 !h-auto !transition-all !whitespace-nowrap"
     >
       Connect Wallet
     </WalletMultiButton>
