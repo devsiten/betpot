@@ -143,7 +143,7 @@ export function MyBetsDropdown() {
                     {tickets.length > 0 && (
                         <div className="px-4 py-2 border-t border-border bg-background-secondary">
                             <Link
-                                to="/my-tickets"
+                                to="/dashboard"
                                 onClick={() => setIsOpen(false)}
                                 className="block w-full text-center text-xs text-brand-500 hover:text-brand-600 font-medium py-1"
                             >
